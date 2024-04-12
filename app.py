@@ -122,6 +122,26 @@ def register():
 
     return render_template('register.html')
 
+@app.route('/upload_material_page')
+@login_required
+def upload_material_page():
+    return render_template('add_material.html',session=session,
+                           profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
+                           )
+
+@app.route('/upload_material', methods=['POST'])
+@login_required
+def upload_material():
+    if request.files:
+        material = request.files['material_file']
+        if material.filename != '':
+            file_key = f"materials/{material.filename}.pdf"
+            s3.upload_fileobj(material, s3_bucket_name, file_key)
+
+    print(request.form)
+
+    return redirect(url_for('materials'))
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -149,15 +169,8 @@ def download():
     filename = request.args.get('filename')
     print("filename: ", filename)
     file_url = f"https://{s3_bucket_name}.s3.amazonaws.com/materials/{filename}"
-    # file_path = file_url.replace('/Users/esvinjoshua/Desktop/Projects/Python Projects/playground/HiveMind', '')
     return redirect(file_url)
 
-# @app.route('/posts')
-# @login_required
-# def posts():
-#     return render_template('posts.html',session=session,
-#                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
-#                            )
 
 @app.route('/create_post_page')
 @login_required

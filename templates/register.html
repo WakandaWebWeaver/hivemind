@@ -7,6 +7,8 @@
     <title>Register</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
     <link rel="stylesheet" href="/static/styles.css">
 
 </head>
@@ -89,6 +91,12 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+
+        <form action="?" method="POST">
+            <div class="g-recaptcha" data-sitekey="your_site_key"></div>
+            <br />
+            <input type="submit" value="Submit">
         </form>
     </div>
 
