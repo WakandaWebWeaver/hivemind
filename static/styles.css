@@ -1,0 +1,86 @@
+body {
+  background-color: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.landing-section {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.landing-text {
+  font-size: 80px;
+  position: relative;
+}
+
+.landing-text span {
+  display: inline-block;
+  transition: transform 0.5s;
+}
+
+.about-section,
+.about-developer-section,
+.cta-section {
+  height: 50vh;
+  padding: 50px 0;
+  text-align: center;
+}
+
+.navbar {
+  align-items: center;
+}
+
+#about-dev-text {
+  font-size: 20px;
+  padding: 10px;
+}
+
+#study-text {
+  color: #000;
+}
+
+#username {
+  color: #000;
+  font-size: 15px;
+  margin: auto;
+  padding: 20px;
+}
+
+#dev-pfp {
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+}
+
+#icons-holder {
+  padding: auto;
+}
+
+.cta-button {
+  margin: 10px;
+}
+
+.modal-content {
+  width: 80%;
+  max-width: auto;
+}
+
+.modal-dialog {
+  max-width: none !important;
+}
+
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">HiveMind</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <img src="{{ profile_picture_url }}" alt="Profile Picture"
+                            class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-username" id="username">{{ session.name }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="mb-4">Register</h2>
+        <form action="/register" method="POST">
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="userName">Pick a username</label>
+                <input type="text" class="form-control" id="userName" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="tel" class="form-control" id="phoneNumber" name="phone_number" minlength="10"
+                    maxlength="10" required>
+            </div>
+
+            <div class="form-group">
+                <label for="collegeRollNumber">College Roll Number</label>
+                <input type="text" class="form-control" id="collegeRollNumber" name="roll_number" minlength="10"
+                    maxlength="10" required>
+            </div>
+
+            <div class="form-group">
+                <label for="profilePic">Profile Picture</label>
+                <input type="file" class="form-control-file" id="profilePic" name="profile_picture" accept="image/*"
+                    data-toggle="modal" data-target="#editProfilePicModal">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+                <p class="text-muted">Password must be at least 8 characters long,
+                    contain at least one uppercase letter, one lowercase letter, one number, and one special character.
+                </p>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+
+    <div class="modal fade" id="editProfilePicModal" tabindex="-1" role="dialog"
+        aria-labelledby="editProfilePicModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProfilePicModalLabel">Edit Profile Picture</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img src="#" alt="Profile Picture" id="profilePicPreview">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="applyChangesBtn">Apply Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+    <script>
+        var cropper;
+
+        function handleFileInputChange(event) {
+            var files = event.target.files;
+            var reader = new FileReader();
+
+            reader.onload = function (event) {
+                var imageUrl = event.target.result;
+                var image = document.getElementById('profilePicPreview');
+
+                image.src = imageUrl;
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(image, {
+                    aspectRatio: 1,
+                    viewMode: 2,
+                });
+            };
+
+            if (files && files.length > 0) {
+                reader.readAsDataURL(files[0]);
+            }
+        }
+
+        document.getElementById('profilePic').addEventListener('change', handleFileInputChange);
+
+        document.getElementById('applyChangesBtn').addEventListener('click', function () {
+            if (cropper) {
+                var croppedImageData = cropper.getCroppedCanvas().toDataURL();
+                var originalImage = document.getElementById('profilePic');
+                originalImage.src = croppedImageData;
+                $('#editProfilePicModal').modal('hide');
+            }
+        });
+    </script>
+</body>
+
+</html>
