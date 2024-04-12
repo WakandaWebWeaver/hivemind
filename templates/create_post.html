@@ -10,7 +10,7 @@
 </head>
 
 <body>
-
+    {% if current_user.is_authenticated %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="#">HiveMind</a>
@@ -61,6 +61,12 @@
             <a href="{{ url_for('view_posts') }}" class="btn btn-success">View Posts</a>
         </form>
     </div>
+
+    {% else %}
+    <div class="container">
+        <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a> to login.</p>
+    </div>
+    {% endif %}
 
 </body>
 
