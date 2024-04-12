@@ -3,4 +3,4 @@ gunicorn
 Flask
 Flask-Login
 boto3
-dotenv
+python-dotenv
