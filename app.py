@@ -62,8 +62,10 @@ def login():
 
         user = user_collection.find_one({'username': username, 'password': password})
         blacklist = blacklist_collection.find_one({'username': username, 'password': password})
+
         if blacklist:
             return 'You have been blacklisted. Contact the admin for further information.'
+        
         if user:
             if user['username'] == username and user['password'] == password:
                 user_obj = User()

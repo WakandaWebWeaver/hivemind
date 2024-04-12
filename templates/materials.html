@@ -64,13 +64,8 @@
                         <h5 class="card-title" id="study-text">{{ material.title }}</h5>
                     </div>
                     <div class="card-footer">
-                        {% if current_user.is_authenticated %}
                         <a href="{{ url_for('download', filename=material.title) }}"
                             class="btn btn-success btn-block">Download</a>
-
-                        {% else %}
-                        <a href="{{ url_for('login') }}" class="btn btn-warn btn-block">Download</a>
-                        {% endif %}
                     </div>
                 </div>
             </div>
