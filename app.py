@@ -143,7 +143,6 @@ def materials():
 
 
 @app.route('/download', methods=['POST', 'GET'])
-@login_required
 def download():
     filename = request.args.get('filename')
     print("filename: ", filename)
