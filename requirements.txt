@@ -1,0 +1,5 @@
+pymongo
+gunicorn
+Flask
+Flask-Login
+boto3
