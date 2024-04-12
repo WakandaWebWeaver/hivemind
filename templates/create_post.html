@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Posts</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">HiveMind</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <img src="{{ profile_picture_url }}" alt="Profile Picture"
+                            class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-username">{{ session.name }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5" id="posts-container">
+        <h2 class="mb-4">Create Posts</h2>
+        <form action="/create_post" method="POST">
+            <div class="form-group">
+                <label for="post_title">Title</label>
+                <input type="text" class="form-control" id="post_title" name="post_title" required>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="post_text">What's on your mind?</label>
+                <textarea class="form-control" id="post_text" name="post_text" rows="3" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Post</button>
+            <a href="{{ url_for('view_posts') }}" class="btn btn-success">View Posts</a>
+        </form>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Posts</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">HiveMind</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <img src="{{ profile_picture_url }}" alt="Profile Picture"
+                            class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-username">{{ session.name }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('create_post_page') }}">Create Post</a>
+                    </li>
+
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="posts-container">
+        <div class="container mt-5">
+            <h2 class="mb-4">Posts</h2>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    {% for post in posts %}
+                    <div class="card" id="post-card">
+                        <p class="card-header">Posted by: <span id="post-author">{{ post['author'] }}</span><img
+                                src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                class="nav-profile-picture rounded-circle"
+                                style="margin-left: 10px;width: 40px; height: 40px;"></p>
+                        <p class="card-header">Title: <span id="post-title">{{ post['title'] }}</span></p>
+                        <div class="card-body">
+                            <p id="post-text"> {{ post['content'] }} </p>
+                        </div>
+                        <div class="card-footer">
+                            <p id="post-date">Posted on: {{ post['date'] }}</p>
+                            {% if session.name == post['author'] %}
+                            <form action="/delete_post" method="POST">
+                                <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                </div>
+                <!-- <div class="mb-4">
+                    > display comments if any
+                {% if comments %}
+                <h3>Comments</h3>
+                <ul>
+                    {% for comment in comments %}
+                    <li>{{ comment }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <form action="/comment" method="POST">
+                    <div class="form-group mt-3">
+                        <label for="comment">Comment</label>
+                        <input type="text" class="form-control" id="comment" name="comment" required>
+                        <button type="submit" class="btn btn-primary mt-3">Comment</button>
+                    </div>
+                </form>
+            </div> -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

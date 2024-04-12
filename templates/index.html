@@ -39,6 +39,12 @@
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('create_post_page') }}">Create Post</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                     </li>
                     {% else %}
@@ -113,7 +119,8 @@
             <h2 class="text-white">Get Started</h2>
             <div class="row justify-content-center">
                 <div class="col-md-4">
-                    <a href="#" class="btn btn-light btn-lg btn-block"><i class="fas fa-pencil-alt"></i> Make a Post</a>
+                    <a href="{{ url_for('create_post_page') }}" class="btn btn-light btn-lg btn-block"><i
+                            class="fas fa-pencil-alt"></i> Make a Post</a>
                 </div>
                 <div class="col-md-4">
                     <a href="#" class="btn btn-light btn-lg btn-block"><i class="fas fa-comments"></i> Join
