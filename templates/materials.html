@@ -27,7 +27,8 @@
                             class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
                     </li>
                     <li class="nav-item">
-                        <span class="nav-username" id="username">{{ session.name }}</span>
+                        <a class="nav-username username-link" href="/view_profile/{{ session.id }}">{{ session.name }}
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
@@ -51,11 +52,21 @@
         </div>
     </nav>
 
-
     <div class="container">
         <h1 class="text-center my-5">Study Materials</h1>
 
-        <div class="row">
+        <!-- Search bar -->
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="searchInput" placeholder="Search materials">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Material cards -->
+        <div class="row" id="materialCards">
             {% for material in materials %}
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
@@ -77,6 +88,32 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Function to filter materials based on search query
+        function filterMaterials() {
+            var input = document.getElementById('searchInput');
+            var filter = input.value.toUpperCase();
+            var materialCards = document.getElementById('materialCards');
+            var cards = materialCards.getElementsByClassName('card');
+
+            // Loop through all materials, hide those that don't match the search query
+            for (var i = 0; i < cards.length; i++) {
+                var title = cards[i].querySelector('.card-title');
+                if (title.innerText.toUpperCase().indexOf(filter) > -1) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+        }
+
+        // Add event listener to search button
+        document.getElementById('searchButton').addEventListener('click', filterMaterials);
+
+        // Add event listener to search input for live filtering
+        document.getElementById('searchInput').addEventListener('input', filterMaterials);
+    </script>
 
 </body>
 

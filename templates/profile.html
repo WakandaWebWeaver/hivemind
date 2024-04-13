@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.full_name }}'s Profile</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">HiveMind</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <img src="{{ profile_picture_url }}" alt="Profile Picture"
+                            class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('create_post_page') }}">Create Post</a>
+                    </li>
+
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            {% if user %}
+            <img src="{{ builder_url }}{{ user.profile_picture_s3_key }}" alt="Profile Picture" class="rounded-circle"
+                style="width: 250px; height: 250px;">
+            <div class="col-md-6">
+                <h2>{{ user.full_name }}</h2>
+                <hr>
+                <h4>Bio</h4>
+                <p>{{ user.bio }}</p>
+                <hr>
+                <!-- allow updating bio if profile belongs to logged in user -->
+                {% if user.username == current_user.id %}
+                <form action="{{ url_for('update_bio') }}" method="POST">
+                    <div class="form-group">
+                        <label for="bio">Update Bio</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <!-- Placeholder for user stats -->
+                <h2>User Stats</h2>
+                <hr>
+                <h5>Total posts made: {{ user.post_count }}</h5>
+
+            </div>
+            {% else %}
+            <p>User not found</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

@@ -26,7 +26,8 @@
                             class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
                     </li>
                     <li class="nav-item">
-                        <span class="nav-username">{{ session.name }}</span>
+                        <a class="nav-username username-link" href="/view_profile/{{ session.id }}">{{ session.name }}
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
@@ -50,10 +51,6 @@
     <div class="container mt-5" id="posts-container">
         <h2 class="mb-4">Upload Material</h2>
         <form action="" method="">
-            <div class="form-group">
-                <label for="material_title">Title</label>
-                <input type="text" class="form-control" id="material_title" name="material_title" required>
-            </div>
 
             <div class="form-group mb-4">
                 <label for="material_file">Upload a document</label>

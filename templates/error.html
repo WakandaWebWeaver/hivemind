@@ -10,7 +10,7 @@
     <meta name="keywords" content="student server, student collaboration, study materials, student resources">
     <meta name="author" content="Esvin Joshua">
 
-    <title>HiveMind - Student Server</title>
+    <title>Error Page</title>
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -75,75 +75,19 @@
             <span id="part1">Hive</span><span id="part2">Mind</span>
         </div>
         <p>Created by Esvin Joshua</p>
-    </section>
-
-    <!-- About Section -->
-    <section class="about-section" id="about">
         <div class="container">
-            <h2>About HiveMind</h2>
-            <p>HiveMind is a student server that allows students to collaborate and share resources with each other.
-                Students can make posts, join discussions, and review study materials.</p>
-            <div class="row" id="icons-holder">
-                <div class="col-md-4">
-                    <i class="fas fa-pencil-alt fa-3x"></i>
-                    <p>Make a Post</p>
-                </div>
-                <div class="col-md-4">
-                    <i class="fas fa-comments fa-3x"></i>
-                    <p>Join Discussions</p>
-                </div>
-                <div class="col-md-4">
-                    <i class="fas fa-file-alt fa-3x"></i>
-                    <p>Review Study Materials</p>
-                </div>
-
-
-            </div>
-    </section>
-
-    <!-- About Developer Section -->
-    <section class="about-developer-section bg-secondary">
-        <div class="container">
-            <h2>About the Developer</h2>
             <div class="row">
-                <div class="col-md-6">
-                    <img src="/static/imgs/profile.jpg" alt="Esvin Joshua" class="img-fluid rounded-circle"
-                        id="dev-pfp">
-                </div>
-                <div class="col-md-6" id="about-dev-text">
-                    <p>I am a software developer with a passion for creating web applications.
-                        I created HiveMind to help students collaborate and share resources with each other.
-                        I hope you enjoy using HiveMind as much as I enjoyed creating it.
-                    </p>
+                <div class="col-md-6" id="landing-text">
+                    <h2>Oops! Something went wrong.</h2>
+                    <p>It seems that an error occurred while processing your request. Please try again later.</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">Go back to Home</a>
+
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Call to Action Section -->
-    <section class="cta-section bg-dark">
-        <div class="container">
-            <h2 class="text-white">Get Started</h2>
-            <div class="row justify-content-center">
-                <div class="col-md-4">
-                    <a href="{{ url_for('create_post_page') }}" class="btn btn-light btn-lg btn-block"><i
-                            class="fas fa-pencil-alt"></i> Make a Post</a>
-                </div>
-                <div class="col-md-4">
-                    <a href="#" class="btn btn-light btn-lg btn-block"><i class="fas fa-comments"></i> Join
-                        Discussions</a>
-                </div>
-                <div class="col-md-4">
-                    <a href="{{ url_for('materials') }}" class="btn btn-light btn-lg btn-block"><i
-                            class="fas fa-file-alt"></i>
-                        Review Study
-                        Materials</a>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- JavaScript for landing text animation -->
     <script>
         window.addEventListener('scroll', function () {
             const scroll = window.scrollY;

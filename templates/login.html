@@ -35,7 +35,8 @@
                             class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
                     </li>
                     <li class="nav-item">
-                        <span class="nav-username" id="username">{{ session.name }}</span>
+                        <a class="nav-username username-link" href="/view_profile/{{ session.id }}">{{ session.name }}
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>

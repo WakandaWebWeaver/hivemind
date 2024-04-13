@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import datetime
-# profanity checker
+import json
 from better_profanity import profanity
 
 app = Flask(__name__)
@@ -54,6 +54,11 @@ def index():
                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
                            )
 
+# for any error, return the error.html
+@app.errorhandler(Exception)
+def page_not_found(e):
+    return render_template('error.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -72,6 +77,7 @@ def login():
                 user_obj.id = username
                 login_user(user_obj)
                 session['name'] = user['full_name']
+                session['id'] = user['username']
                 session['profile_picture'] = user['profile_picture_s3_key']
                 return redirect(url_for('materials'))
         else:
@@ -87,6 +93,16 @@ def register_page():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        forbidden_names = []
+
+        f = open("bad_usernames.json")
+        data = json.load(f)
+
+        for line in data["usernames"]:
+            print("line: ", line)
+            forbidden_names.append(line)
+
+
         full_name = request.form.get('full_name')
         phone_number = request.form.get('phone_number')
         roll_number = request.form.get('roll_number')
@@ -96,6 +112,9 @@ def register():
         user = user_collection.find_one({'username': username})
         if user:
             return 'User already exists'
+        
+        if username in forbidden_names:
+            return 'Username is not allowed'
 
         if 'profile_picture' in request.files:
             profile_picture = request.files['profile_picture']
@@ -203,13 +222,59 @@ def create_post():
         'title': title,
         'content': content,
         'author': author,
+        'username': session['name'],
         'profile_picture': profile_picture,
         'date': date,
         'post_id': post_id
 
     }
 
+    user = user_collection.find_one({'full_name': author})
+    user['post_count'] = user.get('post_count', 0) + 1
+    user_collection.update_one({'full_name': author}, {'$set': user})
+
+    user['posts'] = user.get('posts', [])
+    user['posts'].append(post_id)
+    user_collection.update_one({'full_name': author}, {'$set': user})
+
+
     posts_collection.insert_one(post_data)
+
+    return redirect(url_for('view_posts'))
+
+
+@app.route('/comment', methods=['POST'])
+@login_required
+def comment():
+    post_id = request.form.get('post_id')
+    comment = request.form.get('comment')
+    author = session['name']
+    date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
+
+    post = posts_collection.find_one({'post_id': int(post_id)})
+
+    if profanity.contains_profanity(comment):
+        blacklist_collection.insert_one({'post_id': post_id,
+                                        'comment': comment,
+                                        'author': author,
+                                        'date': date,
+                                        'reason for blacklist': 'Profanity is not allowed'
+                                    })
+        return 'Profanity is not allowed'
+
+    if post:
+        if 'comments' in post:
+            post['comments'].append({
+                'comment': comment,
+                'author': author
+
+            })
+        else:
+            post['comments'] = [{
+                'comment': comment,
+                'author': author
+            }]
+        posts_collection.update_one({'post_id': int(post_id)}, {'$set': post})
 
     return redirect(url_for('view_posts'))
 
@@ -219,20 +284,57 @@ def create_post():
 def view_posts():
     posts = posts_collection.find()
 
-    return render_template('posts.html', posts=posts,
+    posts = list(posts_collection.find())
+
+    comments = []
+    for post in posts:
+        if 'comments' in post:
+            for comment in post['comments']:
+                comments.append({
+                    'comment': comment['comment'],
+                    'author': comment['author']
+                })
+
+    sorted_posts = sorted(posts, key=lambda x: x['post_id'], reverse=True)
+
+    return render_template('posts.html', posts=sorted_posts, 
                            session=session,
+                           comments=comments,
+                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
+                           profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
+    )
+
+@app.route('/view_profile/<username>', methods=['GET'])
+def view_profile(username):
+    user = user_collection.find_one({'username': username})
+    print("user: ", user)
+    return render_template('profile.html', user=user, session=session,
                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
                            )
 
+@app.route('/update_bio', methods=['POST'])
+@login_required
+def update_bio():
+    bio = request.form.get('bio')
+    username = session['id']
+    user = user_collection.find_one({'username': username})
+    user['bio'] = bio
+    user_collection.update_one({'username': username}, {'$set': user})
+    return redirect(url_for('view_profile', username=username))
+
 @app.route('/delete_post', methods=['POST'])
 @login_required
 def delete_post():
-    print(request.form)
     post_id = request.form.get('post_id')
-    posts_collection.delete_one({'post_id': post_id})
-    return redirect(url_for('view_posts'))
+    posts = posts_collection.find()
 
+    for post in posts:
+        # check if currrent username is the author of the post
+        if post['author'] == session['name']:
+            if post['post_id'] == int(post_id):
+                posts_collection.delete_one({'post_id': int(post_id)})
+                return redirect(url_for('view_posts'))
 
 if __name__ == '__main__':
     app.run(debug=True)

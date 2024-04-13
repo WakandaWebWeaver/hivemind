@@ -28,7 +28,8 @@
                             class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
                     </li>
                     <li class="nav-item">
-                        <span class="nav-username">{{ session.name }}</span>
+                        <a class="nav-username username-link" href="/view_profile/{{ session.id }}">{{ session.name }}
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
@@ -55,21 +56,23 @@
 
     <div id="posts-container">
         <div class="container mt-5">
-            <h2 class="mb-4">Posts</h2>
+            <h2 class="mb-4">Posts (Latest first)</h2>
             <div class="row">
+                {% for post in posts %}
                 <div class="col-md-6 mb-4">
-                    {% for post in posts %}
                     <div class="card" id="post-card">
-                        <p class="card-header">Posted by: <span id="post-author">{{ post['author'] }}</span><img
-                                src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                class="nav-profile-picture rounded-circle"
-                                style="margin-left: 10px;width: 40px; height: 40px;"></p>
-                        <p class="card-header">Title: <span id="post-title">{{ post['title'] }}</span></p>
+                        <div class="card-header">
+                            <a class="username-link" href="/view_profile/{{ post['username'] }}">{{ post['author']
+                                }}</a>
+                            <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                class="nav-profile-picture rounded-circle ml-2" style="width: 40px; height: 40px;">
+                        </div>
                         <div class="card-body">
-                            <p id="post-text"> {{ post['content'] }} </p>
+                            <p class="card-title">Title: {{ post['title'] }}</p>
+                            <p class="card-text">{{ post['content'] }}</p>
                         </div>
                         <div class="card-footer">
-                            <p id="post-date">Posted on: {{ post['date'] }}</p>
+                            <p>Posted on: {{ post['date'] }}</p>
                             {% if session.name == post['author'] %}
                             <form action="/delete_post" method="POST">
                                 <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
@@ -77,28 +80,27 @@
                             </form>
                             {% endif %}
                         </div>
+                        <div class="comments-container {% if post['comments']|length > 4 %}scrollable{% endif %}">
+                            <h5>Comments</h5>
+                            <ul class="list-unstyled">
+                                {% for comment in post['comments'] %}
+                                <li>{{ comment['author'] }} said: {{ comment['comment'] }}</li>
+                                {% endfor %}
+                            </ul>
+                            <form action="/comment" method="POST">
+                                <div class="form-group mt-3">
+                                    <label for="comment">Add a Comment</label>
+                                    <input type="text" class="form-control" id="comment" name="comment" required>
+                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                    <button type="submit" class="btn btn-primary mt-3">Comment</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-
-                    {% endfor %}
                 </div>
-                <!-- <div class="mb-4">
-                    > display comments if any
-                {% if comments %}
-                <h3>Comments</h3>
-                <ul>
-                    {% for comment in comments %}
-                    <li>{{ comment }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-                <form action="/comment" method="POST">
-                    <div class="form-group mt-3">
-                        <label for="comment">Comment</label>
-                        <input type="text" class="form-control" id="comment" name="comment" required>
-                        <button type="submit" class="btn btn-primary mt-3">Comment</button>
-                    </div>
-                </form>
-            </div> -->
+                {% endfor %}
+
+
             </div>
         </div>
     </div>
