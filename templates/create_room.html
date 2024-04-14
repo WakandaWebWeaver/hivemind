@@ -51,6 +51,10 @@
                             <a class="dropdown-item" href="{{ url_for('discussions') }}">View Discussions</a>
                         </div>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('login') }}">Login</a>

@@ -55,11 +55,19 @@
                             <a class="dropdown-item" href="{{ url_for('discussions') }}">View Discussions</a>
                         </div>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('create_post_page') }}">Create Post</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                     </li>
 
                     {% else %}
@@ -92,11 +100,17 @@
                 <div class="col-md-6 mb-4">
                     <div class="card" id="post-card">
                         <div class="card-header">
+                            {% if post.anonymous %}
+                            <span class="post-author">Anonymous</span>
+                            <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                class="nav-profile-picture rounded-circle ml-2" style="width: 40px; height: 40px;">
+                            {% else %}
                             <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
                                 post['author']
                                 }}</a>
                             <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
                                 class="nav-profile-picture rounded-circle ml-2" style="width: 40px; height: 40px;">
+                            {% endif %}
                         </div>
                         <div class="card-body">
                             {% if post['title'] != "" %}

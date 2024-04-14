@@ -57,10 +57,10 @@ def index():
                            )
 
 # for any error, return the error.html
-# @app.errorhandler(Exception)
-# def page_not_found(e):
-#     print(e)
-#     return render_template('error.html')
+@app.errorhandler(Exception)
+def page_not_found(e):
+    print(e)
+    return render_template('error.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -540,8 +540,8 @@ def discussion_room(room_id):
     else:
         is_member = True
 
-    if room['owner'] == session['id']:
-        is_owner = True
+    # if room['owner'] == session['id']:
+    #     is_owner = True
 
     # Get the posts for the room
     posts = room['posts']
@@ -549,7 +549,7 @@ def discussion_room(room_id):
     return render_template('discussion_room.html',session=session,
                             builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/", posts=posts,
                                 profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,
-                            room=room, is_member=is_member, is_owner=is_owner)
+                            room=room, is_member=is_member)
     
 
 @app.route('/create_discussion_post', methods=['POST'])
