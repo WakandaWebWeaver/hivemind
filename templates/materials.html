@@ -14,7 +14,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="#">HiveMind</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -65,24 +65,131 @@
             </div>
         </div>
 
-        <!-- Material cards -->
-        <div class="row" id="materialCards">
-            {% for material in materials %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <i class="fas fa-file-alt fa-3x"></i>
-                        <h5 class="card-title" id="study-text">{{ material.title }}</h5>
+        <!-- Tabs to select year -->
+        <ul class="nav nav-tabs" id="yearTabs" style="margin: 10px;">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#all">All</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#year1">Year 1</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#year2">Year 2</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#year3">Year 3</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#year4">Year 4</a>
+            </li>
+            <!-- add a button at the end of bar -->
+            <li class="nav-item nav-item-end">
+                <a class="btn btn-primary" href="{{ url_for('upload_material_page') }}">Upload</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="all">
+                <div class="row" id="materialCards">
+                    {% for material in materials %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-file-alt fa-3x"></i>
+                                <h5 class="card-title" id="study-text">{{ material.title }}</h5>
+                                <h4 class="card-subtitle text-muted">Year: {{ material.year }}</h4>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('download', filename=material.title) }}"
+                                    class="btn btn-success btn-block">Download</a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-footer">
-                        <a href="{{ url_for('download', filename=material.title) }}"
-                            class="btn btn-success btn-block">Download</a>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
-        </div>
+            <div class="tab-pane fade" id="year1">
+                <div class="row" id="materialCards">
+                    {% for material in materials %}
+                    {% if material['year'] == 1 %} <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-file-alt fa-3x"></i>
+                                <h5 class="card-title" id="study-text">{{ material.title }}</h5>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('download', filename=material.title) }}"
+                                    class="btn btn-success btn-block">Download</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="year2">
+                <div class="row" id="materialCards">
+                    {% for material in materials %}
+                    {% if material['year'] == 2%}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-file-alt fa-3x"></i>
+                                <h5 class="card-title" id="study-text">{{ material.title }}</h5>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('download', filename=material.title) }}"
+                                    class="btn btn-success btn-block">Download</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
 
+            <div class="tab-pane fade" id="year3">
+                <div class="row" id="materialCards">
+                    {% for material in materials %}
+                    {% if material['year'] == 3 %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-file-alt fa-3x"></i>
+                                <h5 class="card-title" id="study-text">{{ material.title }}</h5>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('download', filename=material.title) }}"
+                                    class="btn btn-success btn-block">Download</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="year4">
+                <div class="row" id="materialCards">
+                    {% for material in materials %}
+                    {% if material['year'] == 4 %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-file-alt fa-3x"></i>
+                                <h5 class="card-title" id="study-text">{{ material.title }}</h5>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('download', filename=material.title) }}"
+                                    class="btn btn-success btn-block">Download</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

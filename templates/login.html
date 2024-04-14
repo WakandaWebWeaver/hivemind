@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link rel="stylesheet" href="/static/styles.css">
 
 </head>
@@ -22,7 +22,7 @@
     </form> -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="#">HiveMind</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -63,6 +63,12 @@
     <div class="container mt-5">
         <h2 class="mb-4">Login</h2>
         <form action="/login" method="POST">
+            <!--   onkeydown="if(event.keyCode === 13) { 
+                     alert( 
+                           'You have pressed Enter key, use submit button instead');  
+                           return false; 
+                         }" REMOVE COMMENT TO PREVENT ENTER KEY PRESS-->
+
             <div class="form-group">
                 <label for="user_id">User ID</label>
                 <input type="text" class="form-control" id="user_id" name="username" required>
@@ -73,11 +79,32 @@
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
 
-            <button type="submit" class="btn btn-primary mt-3">Login</button>
+
+            <div class="g-recaptcha" data-sitekey="{{ grec_sitekey }}" data-callback="enableSubmitButton"></div>
+
+            <button type="submit" id="submit-button" class="btn btn-primary" style="display: none;">Login</button>
 
         </form>
 
     </div>
+
+    <script>
+        function enableSubmitButton() {
+            var submitButton = document.getElementById("submit-button");
+            submitButton.disabled = false;
+            submitButton.style.display = "inline-block";
+        }
+
+        function preventEnterSubmit(event) {
+            if (event.key === "Enter") {
+                if (submitButton.disabled) {
+                    alert("Please complete the reCAPTCHA.");
+                }
+                event.preventDefault();
+                alert("Click the 'Login' button!");
+            }
+        }
+    </script>
 
 </body>
 

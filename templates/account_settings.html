@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user.full_name }}'s Profile</title>
+    <title>Account Settings</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/styles.css">
+
 </head>
 
 <body>
@@ -49,39 +50,47 @@
     </nav>
 
     <div class="container mt-5">
-        <div class="row">
-            {% if user %}
-            <img src="{{ builder_url }}{{ user.profile_picture_s3_key }}" alt="Profile Picture" class="rounded-circle"
-                style="width: 250px; height: 250px;">
-            <div class="col-md-6">
-                <h2>{{ user.full_name }}</h2>
-                <hr>
-                <h4>Bio</h4>
-                <p>{{ user.bio }}</p>
-                <hr>
-                <!-- allow updating bio if profile belongs to logged in user -->
-                {% if user.username == current_user.id %}
-                <div class="container">
-                    <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Update Profile</a>
-                </div>
-                {% endif %}
+        <h2>Account Settings</h2>
+        <form id="account-settings-form" action="/update_profile" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="profile-pic">Profile Picture</label>
+                <input type="file" class="form-control-file" id="profile-pic" name="profile_picture" accept="image/*">
             </div>
-            <div class="col-md-6">
-                <!-- Placeholder for user stats -->
-                <h2>User Stats</h2>
-                <hr>
-                <h5>Total posts made: {{ user.post_count }}</h5>
-
+            <div class="form-group">
+                <label for="bio">Bio</label>
+                <textarea class="form-control" id="bio" name="bio" rows="4"></textarea>
             </div>
-            {% else %}
-            <p>User not found</p>
-            {% endif %}
-        </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username">
+                <div id="username-feedback"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameInput = document.getElementById('username');
+            const usernameFeedback = document.getElementById('username-feedback');
+
+            usernameInput.addEventListener('input', async () => {
+                const username = usernameInput.value.trim();
+                if (username.length > 0) {
+                    const response = await fetch(`/check_username/${username}`);
+                    const data = await response.json();
+                    if (data.available) {
+                        usernameFeedback.innerHTML = 'Username is available.';
+                    } else {
+                        usernameFeedback.innerHTML = 'Username is taken.';
+                    }
+                } else {
+                    usernameFeedback.innerHTML = '';
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>

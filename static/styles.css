@@ -109,3 +109,17 @@ body {
 .cta-button {
   margin: 10px;
 }
+
+.card-subtitle {
+  color: #000;
+}
+
+.nav-item-end {
+  margin-left: auto;
+  justify-content: end;
+}
+
+.discussion-container {
+  margin: auto;
+  padding: 20px;
+}

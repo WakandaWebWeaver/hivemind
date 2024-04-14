@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Posts</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
@@ -15,7 +17,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="#">HiveMind</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -54,6 +56,18 @@
         </div>
     </nav>
 
+    <!-- Search bar -->
+    <div class="container" style="padding: 10px;">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="searchInput" placeholder="Search Posts">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="posts-container">
         <div class="container mt-5">
             <h2 class="mb-4">Posts (Latest first)</h2>
@@ -62,38 +76,51 @@
                 <div class="col-md-6 mb-4">
                     <div class="card" id="post-card">
                         <div class="card-header">
-                            <a class="username-link" href="/view_profile/{{ post['username'] }}">{{ post['author']
+                            <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
+                                post['author']
                                 }}</a>
                             <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
                                 class="nav-profile-picture rounded-circle ml-2" style="width: 40px; height: 40px;">
                         </div>
                         <div class="card-body">
+                            {% if post['title'] != "" %}
                             <p class="card-title">Title: {{ post['title'] }}</p>
+                            {% endif %}
                             <p class="card-text">{{ post['content'] }}</p>
                         </div>
                         <div class="card-footer">
                             <p>Posted on: {{ post['date'] }}</p>
-                            {% if session.name == post['author'] %}
+                            {% if session.name == post['author'] or session.id == post['username'] %}
                             <form action="/delete_post" method="POST">
                                 <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
                                 <button type="submit" class="btn btn-danger">Delete</button>
                             </form>
                             {% endif %}
                         </div>
-                        <div class="comments-container {% if post['comments']|length > 4 %}scrollable{% endif %}">
+                        <div class="comments-container">
                             <h5>Comments</h5>
                             <ul class="list-unstyled">
                                 {% for comment in post['comments'] %}
-                                <li>{{ comment['author'] }} said: {{ comment['comment'] }}</li>
+                                <li>{{ comment['author'] }} said: {{ comment['comment'] }}
+                                    {% if session.name == comment['author'] %}
+                                    <span>
+                                        <form action="/delete_comment" method="POST">
+                                            <input type="hidden" name="comment" value="{{ comment['comment'] }}">
+                                            <input type="hidden" name="comment_author" value="{{ comment['author'] }}">
+                                            <button type="submit" class="btn fas fa-trash-alt"></button>
+                                        </form>
+                                    </span>
+                                    {% endif %}
+                                </li>
+
                                 {% endfor %}
                             </ul>
+                        </div>
+                        <div class="card-footer">
                             <form action="/comment" method="POST">
-                                <div class="form-group mt-3">
-                                    <label for="comment">Add a Comment</label>
-                                    <input type="text" class="form-control" id="comment" name="comment" required>
-                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                    <button type="submit" class="btn btn-primary mt-3">Comment</button>
-                                </div>
+                                <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                <input type="text" name="comment" class="form-control" placeholder="Add a comment">
+                                <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
                             </form>
                         </div>
                     </div>
@@ -113,6 +140,47 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function filterPosts() {
+            var input = document.getElementById('searchInput');
+            var filter = input.value.toUpperCase();
+            var postCards = document.getElementById('posts-container');
+            var cards = postCards.getElementsByClassName('card');
+
+            for (var i = 0; i < cards.length; i++) {
+                var title = cards[i].querySelector('.card-title');
+                var content = cards[i].querySelector('.card-text');
+                var author = cards[i].querySelector('.post-author');
+                if (title.innerText.toUpperCase().indexOf(filter) > -1 || content.innerText.toUpperCase().indexOf(filter) > -1 || author.innerText.toUpperCase().indexOf(filter) > -1) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+        }
+
+        // Add event listener to search button
+        document.getElementById('searchButton').addEventListener('click', filterPosts);
+
+        // Add event listener to search input for live filtering
+        document.getElementById('searchInput').addEventListener('input', filterPosts);
+
+
+        // Turn the comments-container into a scrollable div if more than 3 comments
+        var commentsContainers = document.getElementsByClassName('comments-container');
+        for (var i = 0; i < commentsContainers.length; i++) {
+            var comments = commentsContainers[i].getElementsByTagName('li');
+            if (comments.length > 3) {
+                commentsContainers[i].style.height = '100px';
+                commentsContainers[i].style.overflowY = 'scroll';
+            }
+        }
+
+
+
+
+
+    </script>
 </body>
 
 </html>
