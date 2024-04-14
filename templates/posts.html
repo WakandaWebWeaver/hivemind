@@ -207,7 +207,14 @@
         }
 
 
-
+        // Make the card body scrollable if the content is too long
+        var cardBodies = document.getElementsByClassName('card-body');
+        for (var i = 0; i < cardBodies.length; i++) {
+            if (cardBodies[i].scrollHeight > 100) {
+                cardBodies[i].style.height = '100px';
+                cardBodies[i].style.overflowY = 'scroll';
+            }
+        }
 
 
     </script>
