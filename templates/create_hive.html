@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Posts</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    {% if current_user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <img src="{{ profile_picture_url }}" alt="Profile Picture"
+                            class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-username username-link" href="/view_profile/{{ session.id }}">{{ session.name }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Account
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('view_profile', username=session.id) }}">View
+                                Profile</a>
+                            <a class="dropdown-item" href="{{ url_for('update_profile') }}">Account Settings</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5" id="posts-container">
+        <h2 class="mb-4">Create A Hive</h2>
+        <form action="/create_hive" method="POST">
+            <div class="form-group">
+                <label for="room_name">Hive Name</label>
+                <input type="text" class="form-control" id="room_name" name="room_name">
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="room_description">Hive Description</label>
+                <textarea class="form-control" id="room_description" name="room_description" rows="3"
+                    required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Hive</button>
+        </form>
+    </div>
+
+    {% else %}
+    <div class="container">
+        <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a> to login.</p>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>

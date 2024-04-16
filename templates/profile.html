@@ -41,10 +41,10 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Discussions
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('discussions') }}">View Discussions</a>
+                            <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
                         </div>
                     </li>
 
@@ -54,9 +54,28 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('create_post_page') }}">Create Post</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Posts
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('view_posts') }}">View Posts</a>
+                            <a class="dropdown-item" href="{{ url_for('create_post_page') }}">Create Post</a>
+                        </div>
                     </li>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Notifications
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for notification in user.notifications %}
+                            <div class="alert alert-secondary" role="alert">
+                                {{ notification.message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
 
                     {% else %}
                     <li class="nav-item">
@@ -78,12 +97,16 @@
                 <hr>
                 <h4>Bio</h4>
                 <p>{{ user.bio }}</p>
+
                 <hr>
                 <!-- allow updating bio if profile belongs to logged in user -->
                 {% if user.username == current_user.id %}
                 <div class="container">
                     <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Update Profile</a>
                 </div>
+                {% else %}
+                <!-- <span class="btn btn-danger" href="{{ url_for('block_user', username=user.username) }}">Block
+                    User</span> -->
                 {% endif %}
             </div>
             <div class="col-md-6">
@@ -91,7 +114,6 @@
                 <h2>User Stats</h2>
                 <hr>
                 <h5>Total posts made: {{ user.post_count }}</h5>
-
             </div>
             {% else %}
             <p>User not found</p>

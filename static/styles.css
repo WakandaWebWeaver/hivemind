@@ -7,11 +7,35 @@ body {
 }
 
 .landing-section {
+  background-image: url("/static/imgs/landing.jpg");
+  /* Avoid scaling of the image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.navbar {
+  background-color: #9290c3;
+}
+
+.hive-card {
+  background-color: #f4eee0;
+}
+
+.room-container {
+  margin: 10px;
+  padding: 10px;
+}
+
+.room-inner-container {
+  /* margin: 10px; */
+  padding: 10px;
 }
 
 .landing-text {
@@ -78,12 +102,26 @@ body {
 }
 
 #post-card {
-  background-color: #fff;
+  background-color: #dde6ed;
   color: #000;
   margin: 10px;
   padding: 10px;
-  border-radius: 10%;
+  border-radius: 15%;
   display: flex;
+}
+
+.gradient-text {
+  font-size: 72px;
+  background: -webkit-linear-gradient(rgb(83, 92, 145), rgb(146, 144, 195));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: #333;
+  background-image: linear-gradient(to right, #ccc, #333, #ccc);
 }
 
 #post-container {

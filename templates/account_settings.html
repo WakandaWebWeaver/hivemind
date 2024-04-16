@@ -12,7 +12,7 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="create_hive navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -42,10 +42,10 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Discussions
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('discussions') }}">View Discussions</a>
+                            <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
                         </div>
                     </li>
 
@@ -55,8 +55,14 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('create_post_page') }}">Create Post</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Posts
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('view_posts') }}">View Posts</a>
+                            <a class="dropdown-item" href="{{ url_for('create_post_page') }}">Create Post</a>
+                        </div>
                     </li>
 
                     {% else %}

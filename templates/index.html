@@ -45,11 +45,15 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('create_post_page') }}">Create Post</a>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Posts
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('view_posts') }}">View Posts</a>
+                            <a class="dropdown-item" href="{{ url_for('create_post_page') }}">Create Post</a>
+                        </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -64,10 +68,10 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Discussions
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('discussions') }}">View Discussions</a>
+                            <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
                         </div>
                     </li>
 
@@ -92,7 +96,7 @@
     <!-- Landing Section -->
     <section class="landing-section">
         <div class="landing-text">
-            <span id="part1">Hive</span><span id="part2">Mind</span>
+            <span class="gradient-text" id="part1">Hive</span><span class="gradient-text" id="part2">Mind</span>
         </div>
         <p>Created by Esvin Joshua</p>
     </section>
@@ -102,7 +106,7 @@
         <div class="container">
             <h2>About HiveMind</h2>
             <p>HiveMind is a student server that allows students to collaborate and share resources with each other.
-                Students can make posts, join discussions, and review study materials.</p>
+                Students can make posts, join hives, and review study materials.</p>
             <div class="row" id="icons-holder">
                 <div class="col-md-4">
                     <i class="fas fa-pencil-alt fa-3x"></i>
@@ -110,7 +114,7 @@
                 </div>
                 <div class="col-md-4">
                     <i class="fas fa-comments fa-3x"></i>
-                    <p>Join Discussions</p>
+                    <p>Join Hives</p>
                 </div>
                 <div class="col-md-4">
                     <i class="fas fa-file-alt fa-3x"></i>
@@ -150,9 +154,9 @@
                             class="fas fa-pencil-alt"></i> Make a Post</a>
                 </div>
                 <div class="col-md-4">
-                    <a href="{{ url_for('discussions') }}" class="btn btn-light btn-lg btn-block cta-button"><i
+                    <a href="{{ url_for('hives') }}" class="btn btn-light btn-lg btn-block cta-button"><i
                             class="fas fa-comments"></i> Join
-                        Discussions</a>
+                        Hives</a>
                 </div>
                 <div class="col-md-4">
                     <a href="{{ url_for('materials') }}" class="btn btn-light btn-lg btn-block cta-button"><i

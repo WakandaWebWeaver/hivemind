@@ -105,7 +105,6 @@ def register():
         data = json.load(f)
 
         for line in data["usernames"]:
-            print("line: ", line)
             forbidden_names.append(line)
 
 
@@ -114,6 +113,7 @@ def register():
         roll_number = request.form.get('roll_number')
         password = request.form.get('password')
         username = request.form.get('username')
+        college_name = request.form.get('college_name')
 
         user = user_collection.find_one({'username': username})
         if user:
@@ -143,7 +143,8 @@ def register():
             'roll_number': roll_number,
             'profile_picture_s3_key': profile_picture_s3_key,
             'password': password, 
-            'username': username
+            'username': username,
+            'college_name': college_name,
         }
         user_collection.insert_one(user_data)
 
@@ -167,16 +168,12 @@ def upload_material():
         material = request.files['material_file']
         if material.filename != '':
             file_key = f"materials/{material.filename}.pdf"
-            # job = s3.upload_fileobj(material, s3_bucket_name, file_key)
-            # Upload with the 'year' metadata
             job = s3.upload_fileobj(material, s3_bucket_name, file_key, ExtraArgs={'Metadata': {'year': year}})
 
             if job:
                 return 'Material uploaded successfully'
             else:
                 return 'Material upload failed'
-
-    print(request.form)
 
     return redirect(url_for('materials'))
 
@@ -204,11 +201,53 @@ def materials():
 
 
 
+@app.route('/block_user', methods=['POST'])
+@login_required
+def block_user():
+    username_to_block = request.form.get('username')
+    current_user_id = session['id']
+    
+    current_user = user_collection.find_one({'username': current_user_id})
+    if current_user:
+        if 'blocked' not in current_user:
+            current_user['blocked'] = []
+        current_user['blocked'].append(username_to_block)
+        user_collection.update_one({'username': current_user_id}, {'$set': current_user})
+    
+    user_to_block = user_collection.find_one({'username': username_to_block})
+    if user_to_block:
+        if 'blocked_by' not in user_to_block:
+            user_to_block['blocked_by'] = []
+        user_to_block['blocked_by'].append(current_user_id)
+        user_collection.update_one({'username': username_to_block}, {'$set': user_to_block})
+    
+    return redirect(url_for('profile', username=username_to_block))
+
+@app.route('/unblock_user', methods=['POST'])
+@login_required
+def unblock_user():
+    username_to_unblock = request.form.get('username')
+    current_user_id = session['id']
+    
+    current_user = user_collection.find_one({'username': current_user_id})
+    if current_user and 'blocked' in current_user:
+        if username_to_unblock in current_user['blocked']:
+            current_user['blocked'].remove(username_to_unblock)
+            user_collection.update_one({'username': current_user_id}, {'$set': current_user})
+    
+    user_to_unblock = user_collection.find_one({'username': username_to_unblock})
+    if user_to_unblock and 'blocked_by' in user_to_unblock:
+        if current_user_id in user_to_unblock['blocked_by']:
+            user_to_unblock['blocked_by'].remove(current_user_id)
+            user_collection.update_one({'username': username_to_unblock}, {'$set': user_to_unblock})
+    
+    return redirect(url_for('profile', username=username_to_unblock))
+
+
 
 @app.route('/download', methods=['POST', 'GET'])
 def download():
     filename = request.args.get('filename')
-    print("filename: ", filename)
     file_url = f"https://{s3_bucket_name}.s3.amazonaws.com/materials/{filename}"
     return redirect(file_url)
 
@@ -311,28 +350,45 @@ def comment():
             post['comments'].append({
                 'comment': comment,
                 'author': author
-
             })
+
+            post_author = user_collection.find_one({'username': post['username']})
+            notification = {
+                'message': 'A comment has been made on your post by ' + session['name'],
+                'unread': True
+            }
+            post_author['notifications'] = post_author.get('notifications', [])
+            post_author['notifications'].append(notification)
+            user_collection.update_one({'username': post['username']}, {'$set': post_author})
+
         else:
             post['comments'] = [{
                 'comment': comment,
                 'author': author
             }]
+
+            post_author = user_collection.find_one({'username': post['username']})
+            notification = {
+                'message': 'A comment has been made on your post by ' + session['name'] + 'on your post: ' + post['title'],
+                'unread': True
+            }
+            post_author['notifications'] = post_author.get('notifications', [])
+            post_author['notifications'].append(notification)
+            user_collection.update_one({'username': post['username']}, {'$set': post_author})
         posts_collection.update_one({'post_id': int(post_id)}, {'$set': post})
 
     return redirect(url_for('view_posts'))
 
 
-@app.route('/discussion_post_comment', methods=['POST'])
+@app.route('/hive_post_comment', methods=['POST'])
 @login_required
-def discussion_post_comment():
+def hive_post_comment():
     post_id = request.form.get('post_id')
     comment = request.form.get('comment')
     author = session['id']
     date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
 
     room_id = request.form.get('room_id')
-    print("room_id: ", room_id)
     room = rooms_collection.find_one({'room_id': room_id})
     posts = room['posts']
 
@@ -345,16 +401,24 @@ def discussion_post_comment():
                 'date': date
             })
             rooms_collection.update_one({'room_id': room_id}, {'$set': room})
-            return redirect(url_for('discussion_room', room_id=room_id, session=session,
-                               builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
-                                 profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,))
+            post_author = user_collection.find_one({'username': post['username']})
+            notification = {
 
+                'message': 'A comment has been made on your post by ' + session['name'] + 'on your post: ' + post['date'],
+                'unread': True
+            }
+            post_author['notifications'] = post_author.get('notifications', [])
+            post_author['notifications'].append(notification)
+            user_collection.update_one({'username': post['username']}, {'$set': post_author})
+            return redirect(url_for('hive_room', room_id=room_id, session=session,
+                                   builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
+                                   profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,))
     return 'Post not found'
 
 
-@app.route('/delete_discussion_comment', methods=['POST'])
+@app.route('/delete_hive_comment', methods=['POST'])
 @login_required
-def delete_discussion_comment():
+def delete_hive_comment():
     post_id = request.form.get('post_id')
     comment = request.form.get('comment')
     author = request.form.get('comment_author')
@@ -368,7 +432,7 @@ def delete_discussion_comment():
                 if c['comment'] == comment and c['author'] == author:
                     post['comments'].remove(c)
                     rooms_collection.update_one({'room_id': room_id}, {'$set': room})
-                    return redirect(url_for('discussion_room', room_id=room_id, session=session,
+                    return redirect(url_for('hive_room', room_id=room_id, session=session,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,))
     return 'Comment not found'
@@ -409,7 +473,12 @@ def view_posts():
 @app.route('/view_profile/<username>', methods=['GET'])
 def view_profile(username):
     user = user_collection.find_one({'username': username})
-    print("user: ", user)
+
+    # if 'notifications' in user:
+    #     for notification in user['notifications']:
+    #         notification['unread'] = False
+    #     user_collection.update_one({'username': username}, {'$set': user})
+
     return render_template('profile.html', user=user, session=session,
                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
@@ -502,9 +571,9 @@ def delete_post():
                 posts_collection.delete_one({'post_id': int(post_id)})
                 return redirect(url_for('view_posts'))
             
-@app.route('/delete_discussion_post', methods=['POST'])
+@app.route('/delete_hive_post', methods=['POST'])
 @login_required
-def delete_discussion_post():
+def delete_hive_post():
     post_id = request.form.get('post_id')
     room_id = request.form.get('room_id')
     room = rooms_collection.find_one({'room_id': room_id})
@@ -515,22 +584,22 @@ def delete_discussion_post():
             if post['post_id'] == post_id:
                 posts.remove(post)
                 rooms_collection.update_one({'room_id': room_id}, {'$set': room})
-                return redirect(url_for('discussion_room', room_id=room_id, session=session,
+                return redirect(url_for('hive_room', room_id=room_id, session=session,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,))
     return 'Post not found'
 
 
-@app.route('/discussions')
-def discussions():
+@app.route('/hives')
+def hives():
     rooms = rooms_collection.find()
-    return render_template('discussions.html', rooms=rooms,session=session,
+    return render_template('hives.html', rooms=rooms,session=session,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,)
 
-@app.route('/discussions/<room_id>')
+@app.route('/hives/<room_id>')
 @login_required
-def discussion_room(room_id):
+def hive_room(room_id):
     room = rooms_collection.find_one({'room_id': room_id})
     application = applications_collection.find_one({'user_id': session['id']})
 
@@ -546,15 +615,15 @@ def discussion_room(room_id):
     # Get the posts for the room
     posts = room['posts']
 
-    return render_template('discussion_room.html',session=session,
+    return render_template('hive_room.html',session=session,
                             builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/", posts=posts,
                                 profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,
                             room=room, is_member=is_member)
     
 
-@app.route('/create_discussion_post', methods=['POST'])
+@app.route('/create_hive_post', methods=['POST'])
 @login_required
-def create_discussion_post():
+def create_hive_post():
     room_id = request.form.get('room_id')
     post = request.form.get('post_text')
     author = session['id']
@@ -573,13 +642,13 @@ def create_discussion_post():
             })
             rooms_collection.update_one({'room_id': room_id}, {'$set': room})
 
-            return redirect(url_for('discussion_room', room_id=room_id, session=session, room=room,
+            return redirect(url_for('hive_room', room_id=room_id, session=session, room=room,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None ))
         else:
             return 'You are not a member of this room'
     else:
-        return 'Room not found', 404
+        return 'Hive not found', 404
     
 
 @app.route('/apply', methods=['POST'])
@@ -607,13 +676,13 @@ def apply():
     }
     
     applications_collection.insert_one(application)
-    return redirect(url_for('discussion_room', room_id=room_id, session=session,
+    return redirect(url_for('hive_room', room_id=room_id, session=session,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,))
 
-@app.route('/create_room', methods=['POST'])
+@app.route('/create_hive', methods=['POST'])
 @login_required
-def create_room():
+def create_hive():
     room_name = request.form.get('room_name')
     room_id = room_name.lower() + str(rooms_collection.count_documents({}) + 1)
     room_description = request.form.get('room_description')
@@ -626,7 +695,7 @@ def create_room():
         'posts': []
     }
     rooms_collection.insert_one(room)
-    return redirect(url_for('discussions'))
+    return redirect(url_for('hives'))
 
 @app.route('/post_message', methods=['POST'])
 @login_required
@@ -644,19 +713,48 @@ def post_message():
                 'date': date
             })
             rooms_collection.update_one({'room_id': room_id}, {'$set': room})
-            return redirect(url_for('discussion_room', room_id=room_id,session=session,
+            return redirect(url_for('hive_room', room_id=room_id,session=session,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,))
         else:
             return 'You are not a member of this room'
     else:
-        return 'Room not found', 404
+        return 'Hive not found', 404
     
+
+@app.route('/send_direct_message', methods=['POST'])
+@login_required
+def send_direct_message():
+    message = request.form.get('direct_message')
+    sender = request.form.get('sender')
+    date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
+    recipient = request.form.get('recipient')
+
+    recipient = user_collection.find_one({'username': recipient})
+
+    recipient['direct_messages'] = recipient.get('direct_messages', [])
+
+    recipient['direct_messages'].append({
+        'message': message,
+        'sender': sender,
+        'date': date
+    })
+
+
+@app.route('/direct_messaging')
+@login_required
+def direct_messages():
+    return render_template('direct_messages.html',
+                           session=session,
+                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,
+                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
+                           )
+
 
 @app.route('/create_room_page')
 @login_required
 def create_room_page():
-    return render_template('create_room.html', session=session,
+    return render_template('create_hive.html', session=session,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,)
 

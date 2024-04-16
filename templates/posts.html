@@ -49,10 +49,10 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Discussions
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('discussions') }}">View Discussions</a>
+                            <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
                         </div>
                     </li>
 
@@ -131,6 +131,7 @@
                             <h5>Comments</h5>
                             <ul class="list-unstyled">
                                 {% for comment in post['comments'] %}
+                                {% if comment.comment != "" %}
                                 <li>{{ comment['author'] }} said: {{ comment['comment'] }}
                                     {% if session.name == comment['author'] %}
                                     <span>
@@ -141,8 +142,11 @@
                                         </form>
                                     </span>
                                     {% endif %}
+                                    <hr class="ruler">
                                 </li>
-
+                                {% else %}
+                                <li>No comments yet</li>
+                                {% endif %}
                                 {% endfor %}
                             </ul>
                         </div>
