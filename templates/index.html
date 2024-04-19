@@ -21,7 +21,7 @@
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -35,8 +35,8 @@
                         <img src="{{ profile_picture_url }}" alt="Profile Picture"
                             class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-username username-link" href="/view_profile/{{ session.id }}">{{ session.name }}
+                    <li class="nav-item nav-username">
+                        <a class="nav-username" href="/view_profile/{{ session.id }}">{{ session.name }}
                         </a>
                     </li>
                     <li class="nav-item">
@@ -46,14 +46,11 @@
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Posts
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('view_posts') }}">View Posts</a>
-                            <a class="dropdown-item" href="{{ url_for('create_post_page') }}">Create Post</a>
-                        </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -110,7 +107,7 @@
             <div class="row" id="icons-holder">
                 <div class="col-md-4">
                     <i class="fas fa-pencil-alt fa-3x"></i>
-                    <p>Make a Post</p>
+                    <p>View Posts</p>
                 </div>
                 <div class="col-md-4">
                     <i class="fas fa-comments fa-3x"></i>
@@ -130,14 +127,18 @@
         <div class="container">
             <h2>About the Developer</h2>
             <div class="row">
-                <div class="col-md-6">
-                    <img src="/static/imgs/profile.jpg" alt="Esvin Joshua" class="img-fluid rounded-circle"
-                        id="dev-pfp">
+                <div class="col-md-4">
+                    <!-- <img src="/static/imgs/profile.jpg" alt="Esvin Joshua"
+                        class="img-fluid rounded-circle dev-pfp-image" id="dev-pfp"> -->
+                    <h3 class="dev-name">Esvin Joshua</h3>
                 </div>
-                <div class="col-md-6" id="about-dev-text">
-                    <p>I am a software developer with a passion for creating web applications.
-                        I created HiveMind to help students collaborate and share resources with each other.
-                        I hope you enjoy using HiveMind as much as I enjoyed creating it.
+
+                <div class="col-md-4" id="about-dev-text">
+                    <p>Hey there! I'm Esvin Joshua, a full-stack web developer. I created HiveMind as a project to
+                        showcase my skills in web development. HiveMind is a student server that allows students to
+                        collaborate and share resources with each other. Students can make posts, join hives, and diss
+                        the teachers you don't like. Have fun using this platform, and as with everything, don't be rude
+                        to others. Have fun!
                     </p>
                 </div>
             </div>
@@ -150,8 +151,8 @@
             <h2 class="text-white">Get Started</h2>
             <div class="row justify-content-center">
                 <div class="col-md-4">
-                    <a href="{{ url_for('create_post_page') }}" class="btn btn-light btn-lg btn-block cta-button"><i
-                            class="fas fa-pencil-alt"></i> Make a Post</a>
+                    <a href="{{ url_for('view_posts') }}" class="btn btn-light btn-lg btn-block cta-button"><i
+                            class="fas fa-pencil-alt"></i> View Posts</a>
                 </div>
                 <div class="col-md-4">
                     <a href="{{ url_for('hives') }}" class="btn btn-light btn-lg btn-block cta-button"><i

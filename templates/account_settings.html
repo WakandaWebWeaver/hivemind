@@ -12,7 +12,7 @@
 
 <body>
 
-    <nav class="create_hive navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -55,16 +55,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Posts
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('view_posts') }}">View Posts</a>
-                            <a class="dropdown-item" href="{{ url_for('create_post_page') }}">Create Post</a>
-                        </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
                     </li>
-
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('login') }}">Login</a>
@@ -115,6 +108,19 @@
                 }
             });
         });
+
+        // if any of the fields are empty, just navigate to previous page
+        document.getElementById('account-settings-form').addEventListener('submit', (event) => {
+            const profilePic = document.getElementById('profile-pic').value;
+            const bio = document.getElementById('bio').value;
+            const username = document.getElementById('username').value;
+
+            if (!profilePic && !bio && !username) {
+                event.preventDefault();
+                window.history.back();
+            }
+        });
+
     </script>
 
 </body>

@@ -21,7 +21,7 @@
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -35,8 +35,8 @@
                         <img src="{{ profile_picture_url }}" alt="Profile Picture"
                             class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-username username-link" href="/view_profile/{{ session.id }}">{{ session.name }}
+                    <li class="nav-item nav-username">
+                        <a class="nav-username" href="/view_profile/{{ session.id }}">{{ session.name }}
                         </a>
                     </li>
                     <li class="nav-item">
@@ -46,14 +46,8 @@
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Posts
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('view_posts') }}">View Posts</a>
-                            <a class="dropdown-item" href="{{ url_for('create_post_page') }}">Create Post</a>
-                        </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -93,6 +87,19 @@
 
     <!-- Hives Section -->
     <section class="discussion-rooms-section">
+
+        <div class="container" style="padding: 10px;">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search Hives">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
         <div class="container discussion-container">
             <h2>Hives</h2>
             <a href="{{ url_for('create_room_page') }}" class="btn btn-primary mb-4">Create Hive</a>
@@ -113,6 +120,31 @@
             </div>
         </div>
     </section>
+
+    <script>
+
+        function filterHives() {
+            const searchInput = document.getElementById('searchInput');
+            const searchValue = searchInput.value.toUpperCase();
+            const hives = document.getElementsByClassName('hive-card');
+
+            for (let i = 0; i < hives.length; i++) {
+                const hive = hives[i];
+                const hiveText = hive.querySelector('#study-text').textContent.toUpperCase();
+
+                if (hiveText.includes(searchValue)) {
+                    hive.style.display = '';
+                } else {
+                    hive.style.display = 'none';
+                }
+            }
+        }
+
+        document.getElementById('searchButton').addEventListener('click', filterHives);
+
+        document.getElementById('searchInput').addEventListener('input', filterHives);
+
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

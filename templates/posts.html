@@ -15,7 +15,7 @@
 
     {% if current_user.is_authenticated %}
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -29,8 +29,8 @@
                         <img src="{{ profile_picture_url }}" alt="Profile Picture"
                             class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-username username-link" href="/view_profile/{{ session.id }}">{{ session.name }}
+                    <li class="nav-item nav-username">
+                        <a class="nav-username" href="/view_profile/{{ session.id }}">{{ session.name }}
                         </a>
                     </li>
                     <li class="nav-item">
@@ -62,9 +62,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('create_post_page') }}">Create Post</a>
-                    </li>
 
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
@@ -90,11 +87,15 @@
                 </button>
             </div>
         </div>
+        <span class="text-muted">Search by author, title, or content. Anonymous posts do not support searching.</span>
     </div>
 
     <div id="posts-container">
         <div class="container mt-5">
             <h2 class="mb-4">Posts (Latest first)</h2>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
+                Create Post
+            </button>
             <div class="row">
                 {% for post in posts %}
                 <div class="col-md-6 mb-4">
@@ -119,7 +120,7 @@
                             <p class="card-text">{{ post['content'] }}</p>
                         </div>
                         <div class="card-footer">
-                            <p>Posted on: {{ post['date'] }}</p>
+                            <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
                             {% if session.name == post['author'] or session.id == post['username'] %}
                             <form action="/delete_post" method="POST">
                                 <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
@@ -166,6 +167,43 @@
         </div>
     </div>
 
+    <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
+        aria-hidden="true" style="color: black;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createPostForm" action="{{ url_for('create_post') }}" method="POST">
+                        <div class="form-group">
+                            <label for="postTitle">Title</label>
+                            <input type="text" class="form-control" id="postTitle" name="post_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="postContent">Content</label>
+                            <textarea class="form-control" id="postContent" name="post_text" rows="3"
+                                required></textarea>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
+                            <label class="form-check label" for="anonymousCheck">Post Anonymously</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" form="createPostForm" id="submitPostButton" class="btn btn-primary">Create
+                        Post</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     {% else %}
     <div class="container">
         <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a> to login.</p>
@@ -175,32 +213,60 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        function filterPosts() {
-            var input = document.getElementById('searchInput');
-            var filter = input.value.toUpperCase();
-            var postCards = document.getElementById('posts-container');
-            var cards = postCards.getElementsByClassName('card');
 
-            for (var i = 0; i < cards.length; i++) {
-                var title = cards[i].querySelector('.card-title');
-                var content = cards[i].querySelector('.card-text');
-                var author = cards[i].querySelector('.post-author');
-                if (title.innerText.toUpperCase().indexOf(filter) > -1 || content.innerText.toUpperCase().indexOf(filter) > -1 || author.innerText.toUpperCase().indexOf(filter) > -1) {
-                    cards[i].style.display = "";
-                } else {
-                    cards[i].style.display = "none";
+
+        document.getElementById('searchButton').addEventListener('click', filterPosts);
+
+        document.getElementById('searchInput').addEventListener('input', filterPosts);
+
+
+        function filterPosts() {
+            var searchInput = document.getElementById('searchInput').value.toLowerCase();
+            var posts = document.getElementsByClassName('card');
+            for (var i = 0; i < posts.length; i++) {
+                var author = posts[i].getElementsByClassName('post-author')[0];
+                var title = posts[i].getElementsByClassName('card-title')[0];
+                var content = posts[i].getElementsByClassName('card-text')[0];
+                if (title && content && author) {
+                    var authorText = author.innerText.toLowerCase();
+                    var titleText = title.innerText.toLowerCase();
+                    var contentText = content.innerText.toLowerCase();
+                    if (titleText.includes(searchInput) || contentText.includes(searchInput) || authorText.includes(searchInput)) {
+                        posts[i].style.display = 'block';
+                    } else {
+                        posts[i].style.display = 'none';
+                    }
+                } else if (title && content) {
+                    var titleText = title.innerText.toLowerCase();
+                    var contentText = content.innerText.toLowerCase();
+                    if (titleText.includes(searchInput) || contentText.includes(searchInput)) {
+                        posts[i].style.display = 'block';
+                    } else {
+                        posts[i].style.display = 'none';
+                    }
+                } else if (title) {
+                    var titleText = title.innerText.toLowerCase();
+                    if (titleText.includes(searchInput)) {
+                        posts[i].style.display = 'block';
+                    } else {
+                        posts[i].style.display = 'none';
+                    }
+                } else if (content) {
+                    var contentText = content.innerText.toLowerCase();
+                    if (contentText.includes(searchInput)) {
+                        posts[i].style.display = 'block';
+                    } else {
+                        posts[i].style.display = 'none';
+                    }
                 }
             }
         }
 
-        // Add event listener to search button
         document.getElementById('searchButton').addEventListener('click', filterPosts);
 
-        // Add event listener to search input for live filtering
         document.getElementById('searchInput').addEventListener('input', filterPosts);
 
 
-        // Turn the comments-container into a scrollable div if more than 3 comments
         var commentsContainers = document.getElementsByClassName('comments-container');
         for (var i = 0; i < commentsContainers.length; i++) {
             var comments = commentsContainers[i].getElementsByTagName('li');
@@ -211,7 +277,6 @@
         }
 
 
-        // Make the card body scrollable if the content is too long
         var cardBodies = document.getElementsByClassName('card-body');
         for (var i = 0; i < cardBodies.length; i++) {
             if (cardBodies[i].scrollHeight > 100) {
@@ -219,8 +284,6 @@
                 cardBodies[i].style.overflowY = 'scroll';
             }
         }
-
-
     </script>
 </body>
 

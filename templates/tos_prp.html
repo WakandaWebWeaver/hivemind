@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service and Privacy Policy</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/styles.css"> <!-- Assuming you have a custom styles.css file -->
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 10px;">
+        <div class="container row">
+            <h2>Welcome to HiveMind!</h2>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h3>Terms of Service</h3>
+        <hr>
+
+        <div class="container mt-5">
+            <div id="tos-content">
+
+                <div class="container row">
+
+                    <p>By accessing and using this website, you agree to comply with and be bound by the following terms
+                        and
+                        conditions of use, which together with our Privacy Policy govern HiveMind's relationship with
+                        you in
+                        relation to this website.</p>
+
+                    <p>The use of this website is subject to the following terms of service:</p>
+
+                    <ol>
+                        <li>
+                            <p>Users are expected to use this site while being mindful of the presence of other users.
+                                Disruptive
+                                behavior or actions that cause inconvenience to others are not permitted.</p>
+                        </li>
+                        <li>
+                            <p>Basic online etiquette is expected to be maintained. Users must refrain from engaging in
+                                abusive,
+                                offensive, or harassing behavior towards others.</p>
+                        </li>
+                        <li>
+                            <p>Users are solely responsible for the content they post on the site. Any content that
+                                violates
+                                the
+                                rights of others, including intellectual property rights, is strictly prohibited.</p>
+                        </li>
+                        <li>
+                            <p>Unauthorized use of this website may give rise to a claim for damages and/or be a
+                                criminal
+                                offense.
+                            </p>
+                        </li>
+                        <li>
+                            <p>From time to time, this website may also include links to other websites. These links are
+                                provided
+                                for your convenience to provide further information. They do not signify that I endorse
+                                the
+                                website(s). I have no responsibility for the content of the linked website(s).</p>
+                        </li>
+                    </ol>
+
+                    <p>By using this website, you signify your acceptance of these terms and conditions. If you do not
+                        agree
+                        to
+                        these terms, please do not use our website. Your continued use of the website following the
+                        posting
+                        of
+                        changes to this policy will be deemed your acceptance of those changes.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container mt-5">
+        <h3>Privacy Policy</h3>
+        <hr>
+        <div class="container mt-5">
+            <div id="privacy-policy-content">
+                <p>This privacy policy sets out how HiveMind collects, uses, protects, and discloses any information
+                    that users
+                    provide when using the website. HiveMind is committed to ensuring the privacy and security of your
+                    personal
+                    information.</p>
+
+                <h4>Information We Collect</h4>
+                <p>When you register on HiveMind, we may collect the following information:</p>
+                <ul>
+                    <li>Name</li>
+                    <li>Email address</li>
+                    <li>Roll number (for accountability purposes)</li>
+                    <li>Profile picture</li>
+                    <li>Any additional information you choose to provide in your profile</li>
+                </ul>
+
+                <h4>How We Use the Information</h4>
+                <p>We require your roll number to keep you accountable for your activity on the website. Your
+                    name,
+                    email
+                    address, and other information provided are used to:</p>
+                <ul>
+                    <li>Personalize your experience on HiveMind</li>
+                    <li>Improve our website and services</li>
+                    <li>Send you important notifications and updates</li>
+                    <li>Contact you for feedback or surveys</li>
+                </ul>
+
+                <h4>Disclosure of Information</h4>
+                <p>HiveMind does not sell, trade, or otherwise transfer your personally identifiable
+                    information to
+                    outside
+                    parties
+                    without your consent. However, we may disclose your information when required by law or
+                    to enforce
+                    our site
+                    policies.</p>
+
+                <h4>Third-party Links</h4>
+                <p>HiveMind may contain links to third-party websites. These sites have their own
+                    privacy policies, and
+                    we have
+                    no responsibility or liability for their content or activities.</p>
+
+                <h4>Changes to This Privacy Policy</h4>
+                <p>HiveMind reserve the right to update or change our privacy policy at any time. Any changes
+                    will be posted
+                    on this
+                    page, and you will be notified by email if there are significant changes.</p>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <span class="text-muted">© 2024 HiveMind. All rights reserved.</span>
+        </div>
+    </footer>
+
+</body>
+
+</html>

@@ -70,10 +70,10 @@ def login():
             password = request.form['password']
 
             user = user_collection.find_one({'username': username, 'password': password})
-            blacklist = blacklist_collection.find_one({'username': username, 'password': password})
+            blacklist = blacklist_collection.find_one({'username': username})
 
             if blacklist:
-                return 'You have been blacklisted. Contact the admin for further information.'
+                return render_template('blacklist.html', blacklist=blacklist)
             
             if user:
                 if user['username'] == username and user['password'] == password:
@@ -252,12 +252,10 @@ def download():
     return redirect(file_url)
 
 
-@app.route('/create_post_page')
-@login_required
-def create_post_page():
-    return render_template('create_post.html',session=session,
-                           profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
-                           )
+
+@app.route('/tos_prp')
+def tos_prp():
+    return render_template('tos_prp.html')
 
 @app.route('/create_post', methods=['POST'])
 @login_required
@@ -266,16 +264,20 @@ def create_post():
     content = request.form.get('post_text')
     author = session['name']
     post_id = posts_collection.count_documents({}) + 1
-    date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
+    date = datetime.date.today().strftime("%d/%m/%Y")
+    time = datetime.datetime.now().strftime("%H:%M")
+
     profile_picture = session['profile_picture']
 
     if profanity.contains_profanity(content) or profanity.contains_profanity(title):
         blacklist_collection.insert_one({'title': title,
                                         'content': content,
                                         'author': author,
+                                        'username': session['id'],
                                         'profile_picture': profile_picture,
                                         'date': date,
-                                        'reason for blacklist': 'Profanity is not allowed'
+                                        'time': time,
+                                        'reason': 'Profanity while making a post.'
                                     })
         return 'Profanity is not allowed'
     
@@ -473,11 +475,6 @@ def view_posts():
 @app.route('/view_profile/<username>', methods=['GET'])
 def view_profile(username):
     user = user_collection.find_one({'username': username})
-
-    # if 'notifications' in user:
-    #     for notification in user['notifications']:
-    #         notification['unread'] = False
-    #     user_collection.update_one({'username': username}, {'$set': user})
 
     return render_template('profile.html', user=user, session=session,
                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",

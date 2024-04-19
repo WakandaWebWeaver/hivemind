@@ -8,20 +8,30 @@ body {
 
 .landing-section {
   background-image: url("/static/imgs/landing.jpg");
-  /* Avoid scaling of the image */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
-  height: 100vh;
+  height: 90vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.navbar {
-  background-color: #9290c3;
+.vertical-hr {
+  border-left: 1px solid #fff;
+  height: 200px;
+  width: 1px;
+  /* margin: 0 20px; */
+}
+
+.about-developer-section {
+  height: 100vh;
+  background-color: #f4eee0;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .hive-card {
@@ -34,7 +44,6 @@ body {
 }
 
 .room-inner-container {
-  /* margin: 10px; */
   padding: 10px;
 }
 
@@ -55,7 +64,6 @@ body {
 }
 
 .about-section,
-.about-developer-section,
 .cta-section {
   height: 100vh;
   padding: 50px 0;
@@ -68,18 +76,24 @@ body {
 
 #about-dev-text {
   font-size: 20px;
-  padding: 10px;
 }
 
 #study-text {
   color: #000;
 }
 
+.notifications {
+  /* make the width fixed irrelevant of whether its in a navbar or not */
+  width: 300px;
+}
+
 .nav-username {
-  color: #000;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  align-items: center;
   font-size: 15px;
   margin: auto;
-  padding: 20px;
+  padding: 0 5px;
 }
 
 #post-text {
@@ -134,8 +148,9 @@ hr {
   justify-content: center;
 }
 
-#dev-pfp {
+.dev-pfp-image {
   border-radius: 100%;
+  margin: 5px;
   width: 200px;
   height: 200px;
 }
