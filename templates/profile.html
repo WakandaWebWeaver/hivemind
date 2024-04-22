@@ -103,8 +103,10 @@
     <div class="container mt-5">
         <div class="row">
             {% if user %}
-            <img src="{{ builder_url }}{{ user.profile_picture_s3_key }}" alt="Profile Picture" class="rounded-circle"
-                style="width: 250px; height: 250px;">
+            <div class="profile-picture-div">
+                <img src="{{ builder_url }}{{ user.profile_picture_s3_key }}" alt="Profile Picture"
+                    class="rounded-circle profile-picture">
+            </div>
             <div class="col-md-6">
                 <h2>{{ user.full_name }}</h2>
                 <hr>

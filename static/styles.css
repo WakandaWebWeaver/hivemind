@@ -6,6 +6,30 @@ body {
   padding: 0;
 }
 
+.profile-picture-div {
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
+}
+
+.profile-picture-div img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-pfp {
+  width: 40px;
+  height: 40px;
+  border-radius: 100%;
+}
+
+.post-pfp img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .landing-section {
   background-image: url("/static/imgs/landing.jpg");
   background-size: cover;

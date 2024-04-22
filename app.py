@@ -123,16 +123,17 @@ def register():
         if username in forbidden_names:
             return 'Username is not allowed'
 
-        if 'profile_picture' in request.files:
+
+        if request.files:
             profile_picture = request.files['profile_picture']
             if profile_picture.filename != '':
-                file_key = f"Profile pictures/{username.lower()}"
+                file_key = f"Profile pictures/{username.lower()}.jpeg"
                 job = s3.upload_fileobj(profile_picture, s3_bucket_name, file_key)
 
                 if job:
                     print('Profile picture uploaded successfully')
 
-                profile_picture_s3_key = f"Profile pictures/{username}"
+                profile_picture_s3_key = file_key
             else:
                 profile_picture_s3_key = "Profile pictures/avatar_default.jpeg"
         else:
@@ -150,6 +151,7 @@ def register():
         user_collection.insert_one(user_data)
 
         return redirect(url_for('login'))
+    
     return render_template('register.html')
 
 @app.route('/upload_material_page')
@@ -497,7 +499,6 @@ def mark_notification_as_read():
             notification['unread'] = False
             user_collection.update_one({'username': username}, {'$set': user})
 
-    
     # Return 200 status code
     return redirect(url_for('view_profile', username=username))
 
@@ -512,31 +513,49 @@ def update_profile():
         bio = request.form.get('bio')
         username = request.form.get('username')
 
-        if bio == '':
-            bio = None
-        elif username == '':
-            username = session['id']    
+        if bio != '':
+            user['bio'] = bio
+
+        if username != '':
+            posts = posts_collection.find()
+            for post in posts:
+                if post['author'] == name:
+                    post['author'] = username
+                    posts_collection.update_one({'post_id': post['post_id']}, {'$set': post})
+
+            user['username'] =  username
+        else:
+            username = session['id']
+
+
+        name = session['name']
 
 
         if request.files:
             profile_picture = request.files['profile_picture']
             if profile_picture.filename != '':
-                file_key = f"Profile pictures/{username.lower()}"
+                file_key = f"Profile pictures/{name.strip().lower()}.jpeg"
                 job = s3.upload_fileobj(profile_picture, s3_bucket_name, file_key)
 
                 if job:
                     print('Profile picture uploaded successfully')
 
-                profile_picture_s3_key = f"Profile pictures/{username}"
+                profile_picture_s3_key = file_key
                 session['profile_picture'] = profile_picture_s3_key
+
+                posts = posts_collection.find()
+                for post in posts:
+                    if post['author'] == session['name']:
+                        post['profile_picture'] = profile_picture_s3_key
+                        posts_collection.update_one({'post_id': post['post_id']}, {'$set': post})
+
             else:
                 profile_picture_s3_key = session['profile_picture']
 
         user = user_collection.find_one({'full_name': name})
 
-        user['username'] = username
-        user['bio'] = bio
         user['profile_picture_s3_key'] = profile_picture_s3_key
+
         user_collection.update_one({'full_name': name}, {'$set': user})
 
         return redirect(url_for('view_profile', username=username))

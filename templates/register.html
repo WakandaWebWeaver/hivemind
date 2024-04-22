@@ -78,7 +78,7 @@
 
     <div class="container mt-5">
         <h2 class="mb-4">Register</h2>
-        <form id="register-form" action="/register" method="POST">
+        <form id="register-form" action="/register" method="POST" enctype="multipart/form-data">
             <div class="form-step active" id="step-1">
                 <div class="form-group">
                     <label for="full_name">Full Name</label>
@@ -106,7 +106,7 @@
                 </div>
                 <div class="form-group">
                     <label for="profilePic">Profile Picture</label>
-                    <input type="file" class="form-control-file" id="profilePic" name="profile_picture"
+                    <input type="file" class="form-control-file" id="profile-pic" name="profile_picture"
                         accept="image/*">
                 </div>
                 <div class="form-group">
@@ -129,13 +129,14 @@
                 <div class="g-recaptcha" data-sitekey="{{ grec_sitekey }}" data-callback="enableSubmitButton"></div>
                 <button type="button" class="btn btn-secondary prev-step">Previous</button>
                 <button type="submit" id="submit-button" class="btn btn-primary">Register</button>
-
-                <p class="mt-4">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
-                <p class="mt-4">By registering, you agree to our <a href="{{ url_for('tos_prp') }}">Terms of Service and
-                        Privacy
-                        Policy</a>.</p>
             </div>
         </form>
+        <p class="mt-4">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+        <p class="mt-4">By registering, you agree to our
+            <a href="{{ url_for('tos_prp') }}">Terms of Service and
+                Privacy
+                Policy</a>.
+        </p>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

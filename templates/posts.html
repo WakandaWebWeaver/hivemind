@@ -99,14 +99,18 @@
                         <div class="card-header">
                             {% if post.anonymous %}
                             <span class="post-author">Anonymous</span>
-                            <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                class="nav-profile-picture rounded-circle ml-2" style="width: 40px; height: 40px;">
+                            <div class="post-pfp">
+                                <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                    class="nav-profile-picture rounded-circle ml-2">
+                            </div>
                             {% else %}
                             <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
                                 post['author']
                                 }}</a>
-                            <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                class="nav-profile-picture rounded-circle ml-2" style="width: 40px; height: 40px;">
+                            <div class="post-pfp">
+                                <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                    class="nav-profile-picture rounded-circle ml-2">
+                            </div>
                             {% endif %}
                         </div>
                         <div class="card-body">
