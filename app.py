@@ -86,7 +86,7 @@ def login():
                     session['profile_picture'] = user['profile_picture_s3_key']
                     session['default_profile_picture'] = 'Profile pictures/avatar_default.jpeg'
     
-                    return redirect(url_for('materials'))
+                    return redirect(url_for('index'))
         except Exception as e:
             print(e)
         
