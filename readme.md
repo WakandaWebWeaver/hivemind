@@ -62,3 +62,12 @@ List the features of your project.
 - View/Download Study Materials
 - Upload Study Materials
 - Search for Study Materials
+
+## Additional Features
+
+Here are some of the special features:
+
+- reCaptcha
+- User authentication
+- User account creation
+- Profanity filter

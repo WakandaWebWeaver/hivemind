@@ -57,10 +57,11 @@ def index():
                            )
 
 # for any error, return the error.html
-@app.errorhandler(Exception)
-def page_not_found(e):
-    print(e)
-    return render_template('error.html')
+# @app.errorhandler(Exception)
+# def page_not_found(e):
+#     print(e)
+#     error_message = str(e)[:500]  
+#     return render_template('error.html', error = error_message)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -112,7 +113,7 @@ def register():
         phone_number = request.form.get('phone_number')
         roll_number = request.form.get('roll_number')
         password = request.form.get('password')
-        username = request.form.get('username')
+        username = request.form.get('username').strip()
         college_name = request.form.get('college_name')
 
         user = user_collection.find_one({'username': username})
@@ -149,7 +150,6 @@ def register():
         user_collection.insert_one(user_data)
 
         return redirect(url_for('login'))
-
     return render_template('register.html')
 
 @app.route('/upload_material_page')
@@ -357,7 +357,8 @@ def comment():
             post_author = user_collection.find_one({'username': post['username']})
             notification = {
                 'message': 'A comment has been made on your post by ' + session['name'],
-                'unread': True
+                'unread': True,
+                'id': str(post_id) + 'comment' + str(len(post['comments']))
             }
             post_author['notifications'] = post_author.get('notifications', [])
             post_author['notifications'].append(notification)
@@ -372,7 +373,8 @@ def comment():
             post_author = user_collection.find_one({'username': post['username']})
             notification = {
                 'message': 'A comment has been made on your post by ' + session['name'] + 'on your post: ' + post['title'],
-                'unread': True
+                'unread': True,
+                'id': str(post_id) + 'comment' + str(len(post['comments']))
             }
             post_author['notifications'] = post_author.get('notifications', [])
             post_author['notifications'].append(notification)
@@ -407,7 +409,8 @@ def hive_post_comment():
             notification = {
 
                 'message': 'A comment has been made on your post by ' + session['name'] + 'on your post: ' + post['date'],
-                'unread': True
+                'unread': True,
+                'id': str(post_id) + 'comment' + str(len(post['comments']))
             }
             post_author['notifications'] = post_author.get('notifications', [])
             post_author['notifications'].append(notification)
@@ -480,6 +483,24 @@ def view_profile(username):
                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
                            )
+
+
+@app.route('/mark_notification_as_read', methods=['POST'])
+@login_required
+def mark_notification_as_read():
+    notification_index = request.form.get('notification_id')
+    username = session['id']
+    user = user_collection.find_one({'username': username})
+
+    for notification in user['notifications']:
+        if notification['id'] == notification_index:
+            notification['unread'] = False
+            user_collection.update_one({'username': username}, {'$set': user})
+
+    
+    # Return 200 status code
+    return redirect(url_for('view_profile', username=username))
+
 
 
 @app.route('/update_profile', methods=['POST', 'GET'])

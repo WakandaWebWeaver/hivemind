@@ -49,9 +49,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
-                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -123,27 +120,27 @@
     </section>
 
     <!-- About Developer Section -->
-    <section class="about-developer-section bg-secondary">
+    <!-- <section class="about-developer-section bg-secondary">
         <div class="container">
             <h2>About the Developer</h2>
             <div class="row">
                 <div class="col-md-4">
-                    <!-- <img src="/static/imgs/profile.jpg" alt="Esvin Joshua"
-                        class="img-fluid rounded-circle dev-pfp-image" id="dev-pfp"> -->
-                    <h3 class="dev-name">Esvin Joshua</h3>
-                </div>
+                    <img src="/static/imgs/profile.jpg" alt="Esvin Joshua"
+                        class="img-fluid rounded-circle dev-pfp-image" id="dev-pfp"> 
+    <h3 class="dev-name">Esvin Joshua</h3>
+    </div>
 
-                <div class="col-md-4" id="about-dev-text">
-                    <p>Hey there! I'm Esvin Joshua, a full-stack web developer. I created HiveMind as a project to
-                        showcase my skills in web development. HiveMind is a student server that allows students to
-                        collaborate and share resources with each other. Students can make posts, join hives, and diss
-                        the teachers you don't like. Have fun using this platform, and as with everything, don't be rude
-                        to others. Have fun!
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div class="col-md-4" id="about-dev-text">
+        <p>Hey there! I'm Esvin Joshua, a full-stack web developer. I created HiveMind as a project to
+            showcase my skills in web development. HiveMind is a student server that allows students to
+            collaborate and share resources with each other. Students can make posts, join hives, and diss
+            the teachers you don't like. Have fun using this platform, and as with everything, don't be rude
+            to others. Have fun!
+        </p>
+    </div>
+    </div>
+    </div>
+    </section> -->
 
     <!-- Call to Action Section -->
     <section class="cta-section bg-dark">
@@ -190,12 +187,8 @@
                 part1.style.transform = `translateX(${scroll / screenWidth * 150}px)`;
                 part2.style.transform = `translateX(-${scroll / screenWidth * 150}px)`;
             }
-
-
-
         });
 
-        // Make the dev-pfp slightly bigger on hover
         const devPfp = document.getElementById('dev-pfp');
         devPfp.addEventListener('mouseover', function () {
             devPfp.style.transform = 'scale(1.1)';
