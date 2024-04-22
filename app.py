@@ -450,6 +450,9 @@ def delete_hive_comment():
 @app.route('/posts')
 @login_required
 def view_posts():
+    if session.get('id') is None:
+        return redirect(url_for('login'))
+    
     posts = posts_collection.find()
 
     posts = list(posts_collection.find())
@@ -579,6 +582,10 @@ def check_username(username):
 @app.route('/update_bio', methods=['POST'])
 @login_required
 def update_bio():
+    if session.get('id') is None:
+        return redirect(url_for('login'))
+    
+    
     bio = request.form.get('bio')
     username = session['id']
     user = user_collection.find_one({'username': username})
