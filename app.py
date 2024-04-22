@@ -511,6 +511,9 @@ def mark_notification_as_read():
 @login_required
 def update_profile():
     if request.method == 'POST':
+
+        user = user_collection.find_one({'full_name': session['name']})
+
         name = session['name']
 
         bio = request.form.get('bio')
@@ -522,7 +525,7 @@ def update_profile():
         if username != '':
             posts = posts_collection.find()
             for post in posts:
-                if post['author'] == name:
+                if post['author'] == name and post['anonymous'] == False:
                     post['author'] = username
                     posts_collection.update_one({'post_id': post['post_id']}, {'$set': post})
 
@@ -555,8 +558,6 @@ def update_profile():
             else:
                 profile_picture_s3_key = session['profile_picture']
 
-        user = user_collection.find_one({'full_name': name})
-
         user['profile_picture_s3_key'] = profile_picture_s3_key
 
         user_collection.update_one({'full_name': name}, {'$set': user})
@@ -585,7 +586,7 @@ def update_bio():
     if session.get('id') is None:
         return redirect(url_for('login'))
     
-    
+
     bio = request.form.get('bio')
     username = session['id']
     user = user_collection.find_one({'username': username})
