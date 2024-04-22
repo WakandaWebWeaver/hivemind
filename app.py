@@ -57,11 +57,11 @@ def index():
                            )
 
 # for any error, return the error.html
-# @app.errorhandler(Exception)
-# def page_not_found(e):
-#     print(e)
-#     error_message = str(e)[:500]  
-#     return render_template('error.html', error = error_message)
+@app.errorhandler(Exception)
+def page_not_found(e):
+    print(e)
+    error_message = str(e)[:500]  
+    return render_template('error.html', error = error_message)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
