@@ -372,7 +372,7 @@ def comment():
 
             post_author = user_collection.find_one({'username': post['username']})
             notification = {
-                'message': 'A comment has been made on your post by ' + session['name'] + 'on your post: ' + post['title'],
+                'message': 'A comment has been made on your post by ' + session['name'],
                 'unread': True,
                 'id': str(post_id) + 'comment' + str(len(post['comments']))
             }
