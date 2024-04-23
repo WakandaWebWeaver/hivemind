@@ -281,7 +281,8 @@ def create_post():
                                         'time': time,
                                         'reason': 'Profanity while making a post.'
                                     })
-        return 'Profanity is not allowed'
+        logout_user()
+        return redirect(url_for('login'))
     
     anonymous = False
     if 'anonymous' in request.form:
@@ -344,8 +345,9 @@ def comment():
         blacklist_collection.insert_one({'post_id': post_id,
                                         'comment': comment,
                                         'author': author,
+                                        'username': session['id'],
                                         'date': date,
-                                        'reason for blacklist': 'Profanity is not allowed'
+                                        'reason': 'Profanity while making comment'
                                     })
         return 'Profanity is not allowed'
 
@@ -536,11 +538,10 @@ def update_profile():
 
         name = session['name']
 
-
         if request.files:
             profile_picture = request.files['profile_picture']
             if profile_picture.filename != '':
-                file_key = f"Profile pictures/{name.strip().lower()}.jpeg"
+                file_key = f"Profile pictures/{username.lower()}.jpeg"
                 job = s3.upload_fileobj(profile_picture, s3_bucket_name, file_key)
 
                 if job:
@@ -551,7 +552,7 @@ def update_profile():
 
                 posts = posts_collection.find()
                 for post in posts:
-                    if post['author'] == session['name']:
+                    if post['author'] == session['name'] and post['anonymous'] == False:
                         post['profile_picture'] = profile_picture_s3_key
                         posts_collection.update_one({'post_id': post['post_id']}, {'$set': post})
 
@@ -570,29 +571,26 @@ def update_profile():
 
 @app.route('/check_username/<username>', methods=['GET'])
 def check_username(username):
-    username = request.form.get('username')
     user = user_collection.find_one({'username': username})
 
+    forbidden_names = []
+
+    f = open("bad_usernames.json")
+    data = json.load(f)
+
+    for line in data["usernames"]:
+        forbidden_names.append(line)
+
     if user:
-        available = False
+            available = False
     else:
-        available = True
+        if username in forbidden_names:
+            available = False
+        else:
+            available = True
 
     return jsonify({'available': available})
 
-@app.route('/update_bio', methods=['POST'])
-@login_required
-def update_bio():
-    if session.get('id') is None:
-        return redirect(url_for('login'))
-    
-
-    bio = request.form.get('bio')
-    username = session['id']
-    user = user_collection.find_one({'username': username})
-    user['bio'] = bio
-    user_collection.update_one({'username': username}, {'$set': user})
-    return redirect(url_for('view_profile', username=username))
 
 @app.route('/delete_post', methods=['POST'])
 @login_required
@@ -654,10 +652,6 @@ def hive_room(room_id):
     else:
         is_member = True
 
-    # if room['owner'] == session['id']:
-    #     is_owner = True
-
-    # Get the posts for the room
     posts = room['posts']
 
     return render_template('hive_room.html',session=session,
@@ -775,6 +769,16 @@ def send_direct_message():
     date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
     recipient = request.form.get('recipient')
 
+    if profanity.contains_profanity(message):
+        blacklist_collection.insert_one({'message': message,
+                                        'sender': sender,
+                                        'recipient': recipient,
+                                        'date': date,
+                                        'reason': 'Profanity in direct message'
+                                    })
+        logout_user()
+        return redirect(url_for('login'))
+
     recipient = user_collection.find_one({'username': recipient})
 
     recipient['direct_messages'] = recipient.get('direct_messages', [])
@@ -789,7 +793,7 @@ def send_direct_message():
 @app.route('/direct_messaging')
 @login_required
 def direct_messages():
-    return render_template('direct_messages.html',
+    return render_template('error.html',
                            session=session,
                             profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,
                             builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",

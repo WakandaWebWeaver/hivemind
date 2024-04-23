@@ -2,8 +2,9 @@
 
 ## Description
 
-HiveMind is a project that aims to create a platform for students to share their thoughts and ideas with others. Students can create posts, comment on posts, view/download and also upload study materials.
-The project is built using Flask.
+HiveMind is a platform that allows students to share study materials, ask questions, and discuss topics with their peers. The platform is designed to be user-friendly and easy to navigate, with features such as a profanity filter. Users can create posts, comment on posts, view/download study materials, upload study materials, and search for study materials.
+
+> Originally to be college specific, I will change the scope to be more general.
 
 ## Table of Contents
 
@@ -54,8 +55,6 @@ As for interacting with the AWS CS, this process is a little extensive.
 > Info on AWS, [AWS S3 Setup Guide](https://aws.amazon.com/s3/getting-started/)
 
 ## Features
-
-List the features of your project.
 
 - Create Posts
 - Comment on Posts

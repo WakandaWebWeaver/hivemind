@@ -49,6 +49,8 @@
             <div class="row">
                 <div class="col-lg-6">
                     <h2>You have been blacklisted on {{ blacklist.date }}.</h2>
+                    <p>Name: {{ blacklist.author }}</p>
+                    <p>Username: {{ blacklist.username }}</p>
                     <p>Reason for blacklist: {{ blacklist.reason }}</p>
                     <!-- <p>Profanity content: {{ blacklist.content }}</p> -->
                     <!-- <p>For more information, please contact the administrator.</p> -->

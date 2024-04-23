@@ -173,7 +173,7 @@
             const usernameFeedback = document.getElementById('username-feedback');
 
             usernameInput.addEventListener('input', async () => {
-                const username = usernameInput.value.trim();
+                const username = usernameInput.value;
                 if (username.length > 0) {
                     const response = await fetch(`/check_username/${username}`);
                     const data = await response.json();
@@ -187,22 +187,6 @@
                 }
             });
         });
-
-        async function uploadProfilePic() {
-            const materialFile = document.getElementById('material_file').files[0];
-
-            const formData = new FormData();
-            formData.append('material_file', materialFile);
-
-            const response = await fetch('/upload_material', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            alert(data.message);
-        }
 
     </script>
 </body>
