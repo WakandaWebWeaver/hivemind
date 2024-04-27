@@ -23,9 +23,12 @@
                 <ul class="navbar-nav ml-auto">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <img src="{{ profile_picture_url }}" alt="Profile Picture"
-                            class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
+                        <div class="profile-picture-div-navbar"> <img src="{{ profile_picture_url }}"
+                                alt="Profile Picture" class="nav-profile-picture rounded-circle"
+                                style="width: 40px; height: 40px;">
+                        </div>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
@@ -83,6 +86,10 @@
                 <label for="username">Username</label>
                 <input type="text" class="form-control" id="username" name="username">
                 <div id="username-feedback"></div>
+            </div>
+            <div class="form-group">
+                <label for="FullName">Name</label>
+                <input type="text" class="form-control" id="name" name="name">
             </div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>

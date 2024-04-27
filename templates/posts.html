@@ -26,9 +26,12 @@
                 <ul class="navbar-nav ml-auto">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <img src="{{ profile_picture_url }}" alt="Profile Picture"
-                            class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
+                        <div class="profile-picture-div-navbar"> <img src="{{ profile_picture_url }}"
+                                alt="Profile Picture" class="nav-profile-picture rounded-circle"
+                                style="width: 40px; height: 40px;">
+                        </div>
                     </li>
+
                     <li class="nav-item nav-username">
                         <a class="nav-username" href="/view_profile/{{ session.id }}">{{ session.name }}
                         </a>
@@ -178,7 +181,7 @@
                 <div class="modal-body">
                     <form id="createPostForm" action="{{ url_for('create_post') }}" method="POST">
                         <div class="form-group">
-                            <label for="postTitle">Title</label>
+                            <label for="postTitle">Title (Optional) </label>
                             <input type="text" class="form-control" id="postTitle" name="post_title">
                         </div>
                         <div class="form-group">

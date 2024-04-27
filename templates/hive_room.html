@@ -11,8 +11,6 @@
     <meta name="author" content="Esvin Joshua">
 
     <title>HiveMind - Student Server</title>
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/styles.css">
@@ -32,9 +30,12 @@
                 <ul class="navbar-nav ml-auto">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <img src="{{ profile_picture_url }}" alt="Profile Picture"
-                            class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
+                        <div class="profile-picture-div-navbar"> <img src="{{ profile_picture_url }}"
+                                alt="Profile Picture" class="nav-profile-picture rounded-circle"
+                                style="width: 40px; height: 40px;">
+                        </div>
                     </li>
+
                     <li class="nav-item nav-username">
                         <a class="nav-username" href="/view_profile/{{ session.id }}">{{ session.name }}
                         </a>
@@ -169,16 +170,26 @@
                                         </div>
                                     </div>
                                     {% endfor %}
-
-
                                 </div>
                             </div>
                         </div>
                     </div>
                     {% else %}
+                    {% if applied %}
                     <div class="alert alert-warning" role="alert">
                         Your application is pending approval. Please wait to join the discussion.
                     </div>
+                    {% endif %}
+                    {% if not applied %}
+                    <!-- Show application form -->
+                    <form action="{{ url_for('apply', room_id=room.room_id) }}" method="POST">
+                        <div class="form-group">
+                            <label for="reason">Reason for Joining:</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Apply to Join</button>
+                    </form>
+                    {% endif %}
                     {% endif %}
                     {% else %}
                     <!-- Show application form -->

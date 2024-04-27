@@ -388,6 +388,12 @@ def comment():
     return redirect(url_for('view_posts'))
 
 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard')
+
+
 @app.route('/hive_post_comment', methods=['POST'])
 @login_required
 def hive_post_comment():
@@ -516,7 +522,13 @@ def update_profile():
 
         user = user_collection.find_one({'full_name': session['name']})
 
-        name = session['name']
+        name = request.form.get('name')
+
+        if name != None:
+            user['full_name'] = name
+            session['name'] = name
+        else:
+            name = session['name']
 
         bio = request.form.get('bio')
         username = request.form.get('username')
@@ -535,8 +547,6 @@ def update_profile():
         else:
             username = session['id']
 
-
-        name = session['name']
 
         if request.files:
             profile_picture = request.files['profile_picture']
@@ -648,16 +658,26 @@ def hive_room(room_id):
 
     if application:
         if application['status'] == 'pending':
+            applied = True
             is_member = False
     else:
-        is_member = True
+        if room['members']:
+            if session['id'] in room['members']:
+                applied = False
+                is_member = True
+            else:
+                applied = False
+                is_member = False
+        else:
+            applied = False
+            is_member = False
 
     posts = room['posts']
 
     return render_template('hive_room.html',session=session,
                             builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/", posts=posts,
                                 profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,
-                            room=room, is_member=is_member)
+                            room=room, is_member=is_member, applied=applied)
     
 
 @app.route('/create_hive_post', methods=['POST'])
@@ -715,9 +735,9 @@ def apply():
     }
     
     applications_collection.insert_one(application)
-    return redirect(url_for('hive_room', room_id=room_id, session=session,
+    return redirect(url_for('hive_room', room_id=room_id), session=session,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
-                                 profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,))
+                                 profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,)
 
 @app.route('/create_hive', methods=['POST'])
 @login_required
