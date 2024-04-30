@@ -112,12 +112,12 @@
             </div>
             <div class="col-md-6">
                 <h2>{{ user.full_name }}</h2>
+                <span class="text-muted">{{ user.college_name }}</span>
                 <hr>
                 <h4>Bio</h4>
                 <p>{{ user.bio }}</p>
 
                 <hr>
-                <!-- allow updating bio if profile belongs to logged in user -->
                 {% if user.username == current_user.id %}
                 <div class="container" style="padding: 10px;">
                     <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Update

@@ -36,6 +36,9 @@ posts_collection = db['posts']
 blacklist_collection = db['blacklist']
 rooms_collection = db['rooms']
 applications_collection = db['applications']
+colleges_collection = db['colleges']
+
+errors_collection = db['errors']
 
 
 # User class for Flask-Login
@@ -59,9 +62,14 @@ def index():
 # for any error, return the error.html
 @app.errorhandler(Exception)
 def page_not_found(e):
-    print(e)
-    error_message = str(e)[:500]  
-    return render_template('error.html', error = error_message)
+    error = {
+        'error': str(e),
+        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+        'trigger url': request.url,
+        'method': request.method,
+        'ip': request.remote_addr
+    }
+    return render_template('error.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -85,6 +93,14 @@ def login():
                     session['id'] = user['username']
                     session['profile_picture'] = user['profile_picture_s3_key']
                     session['default_profile_picture'] = 'Profile pictures/avatar_default.jpeg'
+                    session['college_name'] = user['college_name']
+
+                    print(session['profile_picture'])
+                    print(session['default_profile_picture'])
+                    print(session['college_name'])
+                    print(session['name'])
+                    print(session['id'])
+
     
                     return redirect(url_for('index'))
         except Exception as e:
@@ -100,6 +116,15 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        college = colleges_collection.find_one({'college_name': request.form.get('college_name').lower()})
+
+        if college:
+            pass
+        else:
+            colleges_collection.insert_one({'college_name': request.form.get('college_name').lower()}, {'$set': {'college_name': request.form.get('college_name').lower()}})
+
+
+
         forbidden_names = []
 
         f = open("bad_usernames.json")
@@ -114,16 +139,17 @@ def register():
         roll_number = request.form.get('roll_number')
         password = request.form.get('password')
         username = request.form.get('username').strip()
-        college_name = request.form.get('college_name')
+        college_name = request.form.get('college_name').lower()
+        country_code = request.form.get('country_code')
 
         user = user_collection.find_one({'username': username})
+
         if user:
             return 'User already exists'
         
         if username in forbidden_names:
             return 'Username is not allowed'
-
-
+        
         if request.files:
             profile_picture = request.files['profile_picture']
             if profile_picture.filename != '':
@@ -141,7 +167,7 @@ def register():
 
         user_data = {
             'full_name': full_name,
-            'phone_number': phone_number,
+            'phone_number': country_code + ' ' + phone_number,
             'roll_number': roll_number,
             'profile_picture_s3_key': profile_picture_s3_key,
             'password': password, 
@@ -279,7 +305,8 @@ def create_post():
                                         'profile_picture': profile_picture,
                                         'date': date,
                                         'time': time,
-                                        'reason': 'Profanity while making a post.'
+                                        'reason': 'Profanity while making a post.',
+                                        'college_name': session['college_name']
                                     })
         logout_user()
         return redirect(url_for('login'))
@@ -296,8 +323,8 @@ def create_post():
         'profile_picture': profile_picture if not anonymous else 'Profile pictures/avatar_default.jpeg',
         'date': date,
         'post_id': post_id,
-        'anonymous': anonymous
-
+        'anonymous': anonymous,
+        'college_name': session['college_name']
     }
 
     user = user_collection.find_one({'full_name': author})
@@ -347,7 +374,8 @@ def comment():
                                         'author': author,
                                         'username': session['id'],
                                         'date': date,
-                                        'reason': 'Profanity while making comment'
+                                        'reason': 'Profanity while making comment',
+                                        'college_name': session['college_name']
                                     })
         return 'Profanity is not allowed'
 
@@ -355,7 +383,7 @@ def comment():
         if 'comments' in post:
             post['comments'].append({
                 'comment': comment,
-                'author': author
+                'author': author,
             })
 
             post_author = user_collection.find_one({'username': post['username']})
@@ -412,7 +440,8 @@ def hive_post_comment():
             post['comments'].append({
                 'comment': comment,
                 'author': author,
-                'date': date
+                'date': date,
+                'college_name': session['college_name']
             })
             rooms_collection.update_one({'room_id': room_id}, {'$set': room})
             post_author = user_collection.find_one({'username': post['username']})
@@ -464,14 +493,14 @@ def view_posts():
     posts = posts_collection.find()
 
     posts = list(posts_collection.find())
+    user_posts = []
+    comments = []
 
     for post in posts:
         if post['anonymous']:
             post['author'] = 'Anonymous'
-
-
-    comments = []
-    for post in posts:
+        if post['college_name'] == session['college_name']:
+            user_posts.append(post)
         if 'comments' in post:
             for comment in post['comments']:
                 comments.append({
@@ -479,7 +508,7 @@ def view_posts():
                     'author': comment['author']
                 })
 
-    sorted_posts = sorted(posts, key=lambda x: x['post_id'], reverse=True)
+    sorted_posts = sorted(user_posts, key=lambda x: x['post_id'], reverse=True)
 
     return render_template('posts.html', posts=sorted_posts, 
                            session=session,
@@ -510,7 +539,6 @@ def mark_notification_as_read():
             notification['unread'] = False
             user_collection.update_one({'username': username}, {'$set': user})
 
-    # Return 200 status code
     return redirect(url_for('view_profile', username=username))
 
 
@@ -579,6 +607,19 @@ def update_profile():
                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
                            )
 
+
+@app.route('/check_college/<college_name>', methods=['GET'])
+def check_college(college_name):
+    college = colleges_collection.find_one({'college': college_name.lower()})
+
+    if college:
+        available = True
+    else:
+        available = False
+
+    return jsonify({'available': available})
+                                 
+
 @app.route('/check_username/<username>', methods=['GET'])
 def check_username(username):
     user = user_collection.find_one({'username': username})
@@ -646,6 +687,13 @@ def delete_hive_post():
 @app.route('/hives')
 def hives():
     rooms = rooms_collection.find()
+
+    rooms = list(rooms)
+
+    for room in rooms:
+        if room['college_name'] != session['college_name']:
+            rooms.remove(room)
+
     return render_template('hives.html', rooms=rooms,session=session,
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,)
@@ -751,7 +799,8 @@ def create_hive():
         'description': room_description,
         'members': [session['id']],
         'applicants': [],
-        'posts': []
+        'posts': [],
+        'college_name': session['college_name']
     }
     rooms_collection.insert_one(room)
     return redirect(url_for('hives'))
