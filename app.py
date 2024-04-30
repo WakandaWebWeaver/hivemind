@@ -69,6 +69,7 @@ def page_not_found(e):
         'method': request.method,
         'ip': request.remote_addr
     }
+    errors_collection.insert_one(error)
     return render_template('error.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -196,7 +197,7 @@ def upload_material():
         material = request.files['material_file']
         if material.filename != '':
             file_key = f"materials/{material.filename}.pdf"
-            job = s3.upload_fileobj(material, s3_bucket_name, file_key, ExtraArgs={'Metadata': {'year': year}})
+            job = s3.upload_fileobj(material, s3_bucket_name, file_key, ExtraArgs={'Metadata': {'year': year, 'college': session['college_name']}})
 
             if job:
                 return 'Material uploaded successfully'
@@ -222,7 +223,9 @@ def materials():
             # Get metadata from S3 object
             metadata_response = s3.head_object(Bucket=s3_bucket_name, Key=key)
             year = metadata_response['ResponseMetadata']['HTTPHeaders']['x-amz-meta-year']
-            materials.append({'title': title, 'year': int(year)})
+            college_name = metadata_response['ResponseMetadata']['HTTPHeaders']['x-amz-meta-college']
+            if college_name == session['college_name']:
+                materials.append({'title': title, 'year': int(year)})
 
     return render_template('materials.html', materials=materials, session=session,
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None)
