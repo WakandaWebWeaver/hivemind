@@ -3,7 +3,7 @@ import requests
 from better_profanity import profanity
 
 
-reader = easyocr.Reader(['en'])
+reader = easyocr.Reader(['en'], detector='dbnet18')
 
 def scan_web_url_image(url):
   try:
