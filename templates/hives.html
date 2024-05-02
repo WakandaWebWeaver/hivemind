@@ -11,16 +11,12 @@
     <meta name="author" content="Esvin Joshua">
 
     <title>HiveMind - Hives</title>
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
 <body>
-
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
@@ -85,9 +81,7 @@
         </div>
     </nav>
 
-    <!-- Hives Section -->
     <section class="discussion-rooms-section">
-
         <div class="container" style="padding: 10px;">
             <div class="input-group mb-3">
                 <input type="text" class="form-control" id="searchInput" placeholder="Search Hives">
@@ -98,7 +92,6 @@
                 </div>
             </div>
         </div>
-
 
         <div class="container discussion-container">
             <h2>Hives</h2>
@@ -112,7 +105,11 @@
                             <p class="card-subtitle">{{ room.description }}</p>
                         </div>
                         <div class="card-footer">
+                            {% if user.verified %}
                             <a href="/hives/{{ room.room_id }}" class="btn btn-primary">Join</a>
+                            {% else %}
+                            <a href="/verify_id_page" class="btn btn-primary">Verify Account</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

@@ -181,26 +181,16 @@
                     </div>
                     {% endif %}
                     {% if not applied %}
-                    <!-- Show application form -->
                     <form action="{{ url_for('apply', room_id=room.room_id) }}" method="POST">
                         <div class="form-group">
                             <label for="reason">Reason for Joining:</label>
                             <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
                         </div>
+                        <input type="hidden" name="room_id" value="{{ room.room_id }}">
                         <button type="submit" class="btn btn-primary">Apply to Join</button>
                     </form>
                     {% endif %}
                     {% endif %}
-                    {% else %}
-                    <!-- Show application form -->
-                    <form action="{{ url_for('apply', room_id=room.id) }}" method="POST"></form>
-                    <div class="form-group">
-                        <label for="reason">Reason for Joining:</label>
-                        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Apply to Join</button>
-                    </form>
-                    </form>
                     {% endif %}
                 </div>
             </div>

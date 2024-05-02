@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <title>Verify ID</title>
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/styles.css">
 
 </head>
@@ -63,83 +61,56 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                     </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
-                    </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <h2 class="mb-4">Login</h2>
-        <form action="/login" method="POST">
-            <!--   onkeydown="if(event.keyCode === 13) { 
-                     alert( 
-                           'You have pressed Enter key, use submit button instead');  
-                           return false; 
-                         }" REMOVE COMMENT TO PREVENT ENTER KEY PRESS-->
-
-            <div class="form-group">
-                <label for="user_id">User ID</label>
-                <input type="text" class="form-control" id="user_id" name="username" required>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h1>Verify ID</h1>
+                <form id="verify-card" method="POST" enctype="multipart/form-data">
+                    <input type="file" class="form-control-file" id="id-card" name="id_card" accept="image/*" required>
+                    <button type="submit" class="btn btn-primary" style="margin: 5px;">Verify</button>
+                </form>
+                <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+                <div id="verification-feedback"></div>
             </div>
-
-            <div class="form-group mt-3">
-                <label for="password">Password</label>
-                <div class="input-group">
-                    <input type="password" class="form-control" id="password" name="password" required>
-                    <div class="input-group-append" style="padding-bottom: 10px;">
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword"
-                            onclick="ToggleVisibility()">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="g-recaptcha" data-sitekey="{{ grec_sitekey }}" data-callback="enableSubmitButton"></div>
-
-                <button type="submit" id="submit-button" class="btn btn-primary" style="display: none;">Login</button>
-
-        </form>
-
+        </div>
     </div>
-
-    <script>
-        function enableSubmitButton() {
-            var submitButton = document.getElementById("submit-button");
-            submitButton.disabled = false;
-            submitButton.style.display = "inline-block";
-        }
-
-        function preventEnterSubmit(event) {
-            if (event.key === "Enter") {
-                if (submitButton.disabled) {
-                    alert("Please complete the reCAPTCHA.");
-                }
-                event.preventDefault();
-                alert("Click the 'Login' button!");
-            }
-        }
-
-        function ToggleVisibility() {
-            var password = document.getElementById("password");
-            var togglePassword = document.getElementById("togglePassword");
-            if (password.type === "password") {
-                password.type = "text";
-                togglePassword.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            } else {
-                password.type = "password";
-                togglePassword.innerHTML = '<i class="fas fa-eye"></i>';
-            }
-        }
-    </script>
-
 </body>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
+<script>
+    document.getElementById('verify-card').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const errorMessageDiv = document.getElementById('error-message');
+        const verificationFeedback = document.getElementById('verification-feedback');
+        var form_data = new FormData();
+
+        form_data.append('id_card', document.getElementById('id-card').files[0]);
+        verificationFeedback.innerText = 'Verifying ID Card...';
+
+        fetch('/verify_id_card', {
+            method: 'POST',
+            body: form_data
+        }).then(response => response.json())
+            .then(data => {
+                if (data.verified) {
+                    alert('ID Card verified successfully');
+                    window.location.href = '{{ url_for("index") }}';
+                } else {
+                    errorMessageDiv.innerText = data.message;
+                    errorMessageDiv.style.display = 'block';
+                }
+            });
+    });
+</script>
 
 </html>

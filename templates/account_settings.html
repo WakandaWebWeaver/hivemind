@@ -73,23 +73,33 @@
 
     <div class="container mt-5">
         <h2>Account Settings</h2>
+
         <form id="account-settings-form" action="/update_profile" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="profile-pic">Profile Picture</label>
                 <input type="file" class="form-control-file" id="profile-pic" name="profile_picture" accept="image/*">
             </div>
             <div class="form-group">
-                <label for="bio">Bio</label>
-                <textarea class="form-control" id="bio" name="bio" rows="4"></textarea>
+                <label for="bio">Bio (Last changed {{ user.bio_changed }} days ago)</label>
+                <textarea class="form-control" id="bio" name="bio" rows="4" placeholder="put something fun"></textarea>
             </div>
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" id="username" name="username">
+                <label for="username">Username (Last changed {{ user.username_changed }} days ago)</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="not case sensitive">
                 <div id="username-feedback"></div>
             </div>
             <div class="form-group">
                 <label for="FullName">Name</label>
-                <input type="text" class="form-control" id="name" name="name">
+                <input type="text" class="form-control" id="name" name="name"
+                    placeholder="you can change your name once every 7 days">
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="year">
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
             </div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
@@ -116,7 +126,6 @@
             });
         });
 
-        // if any of the fields are empty, just navigate to previous page
         document.getElementById('account-settings-form').addEventListener('submit', (event) => {
             const profilePic = document.getElementById('profile-pic').value;
             const bio = document.getElementById('bio').value;

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user.full_name }}'s Profile</title>
+    <title>{{ user.full_name }} on HiveMind</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
 
@@ -77,6 +77,10 @@
                                     <input type="hidden" name="notification_id" value="{{ notification.id }}">
                                     <button type="submit"><i class="fa-regular fa-bell"></i></button>
                                 </form>
+                                <form action="{{ url_for('delete_notification') }}" method="post">
+                                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                                    <button type="submit"><i class="fa-regular fa-trash"></i></button>
+                                </form>
                                 <span class="text-muted">Unread</span>
                             </div>
                             {% else %}
@@ -86,7 +90,11 @@
                                     <input type="hidden" name="notification_id" value="{{ notification.id }}">
                                     <button type="submit"><i class="fa-regular fa-bell"></i></button>
                                 </form>
-                                <span class="text-muted">Read</span>
+                                <form action="{{ url_for('delete_notification') }}" method="post">
+                                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                                    <button type="submit"><i class="fa-regular fa-trash"></i></button>
+                                </form>
+                                <span class="text-muted">read</span>
                             </div>
                             {% endif %}
                             {% endfor %}
@@ -111,8 +119,11 @@
                     class="rounded-circle profile-picture">
             </div>
             <div class="col-md-6">
-                <h2>{{ user.full_name }} || <span class="text-muted">{{ user.username }}</span></h2>
-                <span class="text-muted">{{ user.college_name }}</span>
+                <h2>{{ user.username }} | {% if user.verified %}<i class="fas fa-circle-check check"></i>{% endif %}
+                </h2>
+                <h5 class="text-muted">{{ user.full_name }}</h5>
+                <h5 class="text-muted">College: {{ user.college_name }}</h5>
+                <h5 class="text-muted">Year: {{ user.year }}</h5>
                 <hr>
                 <h4>Bio</h4>
                 <p>{{ user.bio }}</p>
@@ -131,6 +142,14 @@
                 <h2>User Stats</h2>
                 <hr>
                 <h5>Total posts made: {{ user.post_count }}</h5>
+                <hr>
+                <h3>Badges</h3>
+                <ul class="list-group">
+                    {% for badge in user.badges %}
+                    <li class="list-item">{{ badge }}</li>
+                    {% endfor %}
+                </ul>
+
             </div>
             {% else %}
             <p>User not found</p>

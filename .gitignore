@@ -7,3 +7,5 @@ static/imgs/.DS_Store
 .DS_Store
 .DS_Store
 .DS_Store
+templates/temp.html
+/__pycache__

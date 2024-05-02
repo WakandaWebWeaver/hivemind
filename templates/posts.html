@@ -90,15 +90,20 @@
     </div>
 
     <div id="posts-container">
-        <div class="container mt-5">
+        <div class="container">
             <h2 class="mb-4">Posts (Latest first)</h2>
             <h5 class="text-muted">{{ session.college_name }}</h5>
+            {% if user.verified %}
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
                 Create Post
             </button>
-            <div class="row">
+            {% else %}
+            <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
+                    href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
+            {% endif %}
+            <div class="container">
                 {% for post in posts %}
-                <div class="col-md-6 mb-4">
+                <div class="container col-8">
                     <div class="card" id="post-card">
                         <div class="card-header row" style="margin-left: 10px;">
                             {% if post.anonymous %}
@@ -110,7 +115,7 @@
                             {% else %}
                             <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
                                 post['author']
-                                }}</a>
+                                }} {% if user.verified %}<i class="fas fa-circle-check"></i>{% endif %}</h5></a>
                             <div class="post-pfp">
                                 <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
                                     class="nav-profile-picture rounded-circle ml-2">
@@ -119,9 +124,14 @@
                         </div>
                         <div class="card-body">
                             {% if post['title'] != "" %}
-                            <p class="card-title">Title: {{ post['title'] }}</p>
+                            <p class="card-title">{{ post['title'] }}</p>
                             {% endif %}
                             <p class="card-text">{{ post['content'] }}</p>
+                            {% if post['contains_image'] %}
+                            <div class="post-image-container">
+                                <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid">
+                            </div>
+                            {% endif %}
                         </div>
                         <div class="card-footer">
                             <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
@@ -180,15 +190,21 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="createPostForm" action="{{ url_for('create_post') }}" method="POST">
+                    <form id="createPostForm" action="{{ url_for('create_post') }}" method="POST"
+                        enctype="multipart/form-data">
                         <div class="form-group">
-                            <label for="postTitle">Title (Optional) </label>
-                            <input type="text" class="form-control" id="postTitle" name="post_title">
+                            <label for="postTitle">Title</label>
+                            <input type="text" class="form-control" id="postTitle" name="post_title"
+                                placeholder="optional">
                         </div>
                         <div class="form-group">
                             <label for="postContent">Content</label>
-                            <textarea class="form-control" id="postContent" name="post_text" rows="3"
-                                required></textarea>
+                            <textarea class="form-control" id="postContent" name="post_text" rows="3" required
+                                placeholder="{{ content_placeholder }}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="postImage">Got an image?</label>
+                            <input type="file" class="form-control-file" id="postImage" name="post_image">
                         </div>
                         <div class="form-check mb-2">
                             <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
@@ -279,13 +295,13 @@
         }
 
 
-        var cardBodies = document.getElementsByClassName('card-body');
-        for (var i = 0; i < cardBodies.length; i++) {
-            if (cardBodies[i].scrollHeight > 100) {
-                cardBodies[i].style.height = '100px';
-                cardBodies[i].style.overflowY = 'scroll';
-            }
-        }
+        // var cardBodies = document.getElementsByClassName('card-body');
+        // for (var i = 0; i < cardBodies.length; i++) {
+        //     if (cardBodies[i].scrollHeight > 100) {
+        //         cardBodies[i].style.height = '100px';
+        //         cardBodies[i].style.overflowY = 'scroll';
+        //     }
+        // }
     </script>
 </body>
 
