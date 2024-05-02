@@ -62,23 +62,23 @@ def index():
                            )
 
 # for any error, return the error.html
-# @app.errorhandler(Exception)
-# def page_not_found(e):
-#     if errors_collection.count_documents({}) > 30:
-#         errors_collection.drop()
+@app.errorhandler(Exception)
+def page_not_found(e):
+    if errors_collection.count_documents({}) > 30:
+        errors_collection.drop()
 
-#     error = {
-#         'error': str(e),
-#         'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-#         'trigger url': request.url,
-#         'method': request.method,        
-#         'complete request': f'{request.method} {request.url}',
-#         'client': request.headers.get('User-Agent'),
-#         'headers': dict(request.headers),
-#         'ip': request.remote_addr
-#     }
-#     errors_collection.insert_one(error)
-#     return render_template('error.html')
+    error = {
+        'error': str(e),
+        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+        'trigger url': request.url,
+        'method': request.method,        
+        'complete request': f'{request.method} {request.url}',
+        'client': request.headers.get('User-Agent'),
+        'headers': dict(request.headers),
+        'ip': request.remote_addr
+    }
+    errors_collection.insert_one(error)
+    return render_template('error.html')
 
 content_placeholders = [
     "time travel is real",
