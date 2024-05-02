@@ -802,7 +802,7 @@ def hives():
         if room['college_name'] != session['college_name']:
             rooms.remove(room)
 
-    return render_template('hives.html', rooms=rooms,session=session,
+    return render_template('hives.html', rooms=rooms,session=session, user = user_collection.find_one({'username': session['id']}),
                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                                  profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,)
 
