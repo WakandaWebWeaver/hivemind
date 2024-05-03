@@ -11,6 +11,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/momentum.js"></script>
+
 </head>
 
 <body>
@@ -89,7 +91,6 @@
                     required>
             </div>
 
-            <!-- dropdown menu to select year -->
             <div class="form-group mb-4">
                 <label for="year">Year</label>
                 <select class="form-control" id="year" name="year">
@@ -101,8 +102,9 @@
             </div>
 
             <button type="button" class="btn btn-primary" onclick="uploadMaterial()">Upload Material</button>
+            <l-momentum size="40" speed="1.1" color="white" class="loading-spinner" style="display: none;"></l-momentum>
         </form>
-        <div class="alert alert-success mt-4" role="alert" id="alert" style="display: none;"></div>
+        <div class="alert mt-4" role="alert" id="alert" style="display: none;"></div>
     </div>
 
     {% else %}
@@ -116,11 +118,20 @@
             const materialTitle = document.getElementById('material_title').value;
             const materialFile = document.getElementById('material_file').files[0];
             const year = document.getElementById('year').value;
+            const loadingSpinner = document.querySelector('.loading-spinner');
 
             const formData = new FormData();
             formData.append('material_title', materialTitle);
             formData.append('material_file', materialFile);
             formData.append('year', year);
+
+            if (!materialTitle || !materialFile) {
+                document.getElementById('alert').style.display = 'block';
+                document.getElementById('alert').innerHTML = 'Please fill in all fields.';
+                return;
+            }
+
+            loadingSpinner.style.display = 'inline-block';
 
             const response = await fetch('/upload_material', {
                 method: 'POST',
@@ -132,12 +143,19 @@
             document.getElementById('alert').style.display = 'block';
             document.getElementById('alert').innerHTML = "Uploading, Please wait.";
 
-            if (data.success) {
-                document.getElementById('alert').style.display = 'block';
-                document.getElementById('alert').innerHTML = 'Material uploaded successfully.';
+            if (data.profanity) {
+                loadingSpinner.style.display = 'none';
+                document.getElementById('alert').classList.add('alert-danger');
+                document.getElementById('alert').innerHTML = "Profanity detected in the material title. You have been blacklisted for violating our community guidelines.";
+                window.location.href("{{ url_for('index') }}")
+            } else if (data.success) {
+                loadingSpinner.style.display = 'none';
+                document.getElementById('alert').classList.add('alert-success');
+                document.getElementById('alert').innerHTML = "Material uploaded successfully.";
             } else {
-                document.getElementById('alert').style.display = 'block';
-                document.getElementById('alert').innerHTML = 'Failed to upload material.';
+                loadingSpinner.style.display = 'none';
+                document.getElementById('alert').classList.add('alert-warning');
+                document.getElementById('alert').innerHTML = "An error occurred. Please try again.";
             }
         }
     </script>

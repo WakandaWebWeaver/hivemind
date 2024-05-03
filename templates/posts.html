@@ -7,6 +7,7 @@
     <title>Text Posts</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/momentum.js"></script>
 
     <link rel="stylesheet" href="/static/styles.css">
 </head>
@@ -114,7 +115,7 @@
                             </div>
                             {% else %}
                             <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
-                                post['author']
+                                post['username']
                                 }} {% if user.verified %}<i class="fas fa-circle-check"></i>{% endif %}</h5></a>
                             <div class="post-pfp">
                                 <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
@@ -190,8 +191,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="createPostForm" action="{{ url_for('create_post') }}" method="POST"
-                        enctype="multipart/form-data">
+                    <form id="createPostForm" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="postTitle">Title</label>
                             <input type="text" class="form-control" id="postTitle" name="post_title"
@@ -204,19 +204,22 @@
                         </div>
                         <div class="form-group">
                             <label for="postImage">Got an image?</label>
-                            <input type="file" class="form-control-file" id="postImage" name="post_image">
+                            <input type="file" class="form-control-file" id="postImage" name="post_image"
+                                accept="image/*" max-size="20971520">
                         </div>
-                        <div class="form-check mb-2">
-                            <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
-                            <label class="form-check label" for="anonymousCheck">Post Anonymously</label>
-                        </div>
-                    </form>
+                </div>
+                <div class="form-check mb-2" style="margin-left: 5px;">
+                    <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
+                    <label class="form-check label" for="anonymousCheck">Post Anonymously</label>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" form="createPostForm" id="submitPostButton" class="btn btn-primary">Create
+                    <button id="submitPostButton" class="btn btn-primary">Create
                         Post</button>
+                    <l-momentum size="40" speed="1.1" color="black" class="loading-spinner"
+                        style="display: none;"></l-momentum>
                 </div>
+                </form>
             </div>
         </div>
     </div>
@@ -295,6 +298,36 @@
         }
 
 
+        document.getElementById('createPostForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var form = document.getElementById('createPostForm');
+            var formData = new FormData(form);
+            var submitButton = document.getElementById('submitPostButton');
+            var loadingSpinner = document.querySelector('.loading-spinner');
+            var anonymousCheck = document.getElementById('anonymousCheck');
+
+            if (anonymousCheck.checked) {
+                formData.append('anonymous', True);
+            }
+
+            submitButton.disabled = true;
+            submitButton.innerText = 'Creating Post...';
+            loadingSpinner.style.display = 'inline-block';
+
+            fetch('/create_post', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.profanity) {
+                        alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
+                        window.location.href = "{{ url_for('index') }}";
+                    } else {
+                        window.location.href = data.redirect;
+                    }
+                });
+        });
         // var cardBodies = document.getElementsByClassName('card-body');
         // for (var i = 0; i < cardBodies.length; i++) {
         //     if (cardBodies[i].scrollHeight > 100) {

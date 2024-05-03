@@ -146,6 +146,9 @@ body {
   text-decoration-line: none;
 }
 
+.loading-spinner {
+}
+
 .scrollable {
   max-height: 200px; /* Adjust the maximum height as needed */
   overflow-y: auto;

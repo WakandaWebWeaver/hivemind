@@ -7,6 +7,8 @@
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/styles.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/dotWave.js"></script>
+
 
 </head>
 
@@ -67,19 +69,24 @@
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container mt-5">
+        <h1>Verify ID</h1>
+        <p>Upload a picture of your ID card to verify your identity</p>
         <div class="row">
             <div class="col-md-6 offset-md-3">
-                <h1>Verify ID</h1>
                 <form id="verify-card" method="POST" enctype="multipart/form-data">
                     <input type="file" class="form-control-file" id="id-card" name="id_card" accept="image/*" required>
                     <button type="submit" class="btn btn-primary" style="margin: 5px;">Verify</button>
+
+                    <l-dot-wave size="47" speed="1" color="white" class="loading-spinner"
+                        style="display: none;"></l-dot-wave>
                 </form>
                 <div id="error-message" class="alert alert-danger" style="display: none;"></div>
                 <div id="verification-feedback"></div>
             </div>
         </div>
     </div>
+
 </body>
 
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -92,10 +99,12 @@
 
         const errorMessageDiv = document.getElementById('error-message');
         const verificationFeedback = document.getElementById('verification-feedback');
+        const loadingSpinner = document.querySelector('.loading-spinner');
         var form_data = new FormData();
 
         form_data.append('id_card', document.getElementById('id-card').files[0]);
         verificationFeedback.innerText = 'Verifying ID Card...';
+        loadingSpinner.style.display = 'inline-block';
 
         fetch('/verify_id_card', {
             method: 'POST',
@@ -103,6 +112,8 @@
         }).then(response => response.json())
             .then(data => {
                 if (data.verified) {
+                    verificationFeedback.innerText = 'ID Card verified successfully';
+                    loadingSpinner.style.display = 'none';
                     alert('ID Card verified successfully');
                     window.location.href = '{{ url_for("index") }}';
                 } else {
