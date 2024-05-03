@@ -5,5 +5,4 @@ Flask-Login
 boto3
 python-dotenv
 better_profanity
-easyocr
 requests
