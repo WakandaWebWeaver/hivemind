@@ -43,7 +43,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
+                        <a class="nav-link" href="{{ url_for('posts') }}">View Posts</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -98,7 +98,7 @@
                     {% if user.verified %}
                     <p>Your account is verified! You can use the entire site.</p>
                     {% else %}
-                    <p>Your account is not verified. <a href="{{ url_for('verify_id_page') }}">Verify now</a></p>
+                    <p>Your account is not verified. <a href="{{ url_for('verify_id') }}">Verify now</a></p>
                     {% endif %}
                 </div>
             </div>
