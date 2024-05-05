@@ -119,12 +119,12 @@ body {
   width: 300px;
 }
 
-a {
+.a-special-case {
   color: inherit;
   text-decoration: none;
 }
 
-a:hover {
+.a-special-case:hover {
   color: inherit;
   text-decoration: none;
 }

@@ -38,8 +38,8 @@
                         </div>
                     </li>
 
-                    <li class="nav-item nav-username">
-                        <a class="nav-username" href="/view_profile/{{ session.id }}">{{ session.name }}
+                    <li class="nav-item nav-username a-special-case">
+                        <a class="nav-username a-special-case" href="/view_profile/{{ session.id }}">{{ session.name }}
                         </a>
                     </li>
                     <li class="nav-item">
@@ -149,13 +149,14 @@
                 <div class="col-md-6">
                     <h3>Developed by Esvin Joshua</h3>
                     <h4>Connect</h4>
-                    <a href="https://www.linkedin.com/in/esvin-joshua-a84215291/" target="_blank">
+                    <a class="a-special-case" href="https://www.linkedin.com/in/esvin-joshua-a84215291/"
+                        target="_blank">
                         <i class="fa-brands fa-linkedin fa-3x"></i>
                     </a>
-                    <a href="https://www.github.com/WakandaWebWeaver" target="_blank">
+                    <a class="a-special-case" href="https://www.github.com/WakandaWebWeaver" target="_blank">
                         <i class="fa-brands fa-github fa-3x"></i>
                     </a>
-                    <a href="https://www.instagram.com/__esvinj_._" target="_blank">
+                    <a class="a-special-case" href="https://www.instagram.com/__esvinj_._" target="_blank">
                         <i class="fa-brands fa-instagram fa-3x"></i>
                     </a>
                 </div>
@@ -171,9 +172,6 @@
             const scroll = window.scrollY;
             const part1 = document.getElementById('part1');
             const part2 = document.getElementById('part2');
-
-            // part1.style.transform = `translateX(${scroll / 2}px)`;
-            // part2.style.transform = `translateX(-${scroll / 2}px)`;
 
             var screenWidth = window.innerWidth;
             if (screenWidth < 768) {

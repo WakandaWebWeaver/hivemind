@@ -113,15 +113,22 @@
             usernameInput.addEventListener('input', async () => {
                 const username = usernameInput.value.trim();
                 if (username.length > 0) {
-                    const response = await fetch(`/check_username/${username}`);
-                    const data = await response.json();
-                    if (data.available) {
-                        usernameFeedback.innerHTML = 'Username is available.';
+                    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                        usernameFeedback.innerHTML = 'Username should only consist of letters, numbers, and underscores';
+                        usernameInput.classList.add('is-invalid');
                     } else {
-                        usernameFeedback.innerHTML = 'Username is taken.';
+                        usernameInput.classList.remove('is-invalid');
+                        const response = await fetch(`/check_username/${username}`);
+                        const data = await response.json();
+                        if (data.available) {
+                            usernameFeedback.innerHTML = 'Username is available.';
+                        } else {
+                            usernameFeedback.innerHTML = 'Username is taken.';
+                        }
                     }
                 } else {
                     usernameFeedback.innerHTML = '';
+                    usernameInput.classList.remove('is-invalid');
                 }
             });
         });
