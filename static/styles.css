@@ -43,11 +43,7 @@ body {
 }
 
 .landing-section {
-  background-image: url("/static/imgs/landing.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
+  background-color: #000;
   height: 90vh;
   display: flex;
   flex-direction: column;
