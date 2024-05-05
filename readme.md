@@ -4,8 +4,6 @@
 
 HiveMind is a platform that allows students to share study materials, ask questions, and discuss topics with their peers. The platform is designed to be user-friendly and easy to navigate, with features such as a profanity filter. Users can create posts, comment on posts, view/download study materials, upload study materials, and search for study materials.
 
-> Originally to be college specific, I will change the scope to be more general.
-
 ## Table of Contents
 
 - [Installation](#installation)
