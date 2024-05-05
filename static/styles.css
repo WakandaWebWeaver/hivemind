@@ -137,8 +137,6 @@ a:hover {
 
 .nav-username {
   color: rgba(255, 255, 255, 0.5);
-  text-decoration: none;
-  color: inherit;
   align-items: center;
   font-size: 15px;
   margin: auto;
