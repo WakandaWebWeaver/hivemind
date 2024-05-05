@@ -607,16 +607,16 @@
                         const response = await fetch(`/check_username/${username}`);
                         const data = await response.json();
                         if (data.available) {
-                            usernameCheckLoader.style.display = 'none';
                             usernameFeedback.innerHTML = 'Username is available.';
-                        } else {
                             usernameCheckLoader.style.display = 'none';
+                        } else {
                             usernameFeedback.innerHTML = 'Username is taken.';
+                            usernameCheckLoader.style.display = 'none';
                         }
                     }
                 } else {
                     usernameCheckLoader.style.display = 'none';
-                    usernameFeedback.innerHTML = '';
+                    usernameFeedback.innerHTML = 'Pick something more than 0 characters long.';
                     usernameInput.classList.remove('is-invalid');
                 }
             });
