@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Settings</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/waveform.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
 
 </head>
@@ -86,6 +87,8 @@
             <div class="form-group">
                 <label for="username">Username (Last changed {{ user.username_changed }} days ago)</label>
                 <input type="text" class="form-control" id="username" name="username" placeholder="not case sensitive">
+                <l-waveform size="35" stroke="3.5" speed="1" color="white" id="username-check-loader"
+                    style="display: none;"></l-waveform>
                 <div id="username-feedback"></div>
             </div>
             <div class="form-group">
@@ -109,11 +112,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             const usernameInput = document.getElementById('username');
             const usernameFeedback = document.getElementById('username-feedback');
+            const usernameCheckLoader = document.getElementById('username-check-loader');
 
             usernameInput.addEventListener('input', async () => {
+                usernameCheckLoader.style.display = 'block';
                 const username = usernameInput.value.trim();
                 if (username.length > 0) {
                     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                        usernameCheckLoader.style.display = 'none';
                         usernameFeedback.innerHTML = 'Username should only consist of letters, numbers, and underscores';
                         usernameInput.classList.add('is-invalid');
                     } else {
@@ -122,8 +128,12 @@
                         const data = await response.json();
                         if (data.available) {
                             usernameFeedback.innerHTML = 'Username is available.';
+                            usernameCheckLoader.style.display = 'none';
+                            usernameInput.classList.add('is-valid');
                         } else {
                             usernameFeedback.innerHTML = 'Username is taken.';
+                            usernameCheckLoader.style.display = 'none';
+                            usernameInput.classList.add('is-invalid');
                         }
                     }
                 } else {

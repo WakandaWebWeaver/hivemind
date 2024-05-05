@@ -595,6 +595,7 @@
             const usernameCheckLoader = document.getElementById('username-check-loader');
 
             usernameInput.addEventListener('input', async () => {
+                usernameFeedback.innerHTML = '';
                 usernameCheckLoader.style.display = 'block';
                 const username = usernameInput.value.trim();
                 if (username.length > 0) {
@@ -609,9 +610,11 @@
                         if (data.available) {
                             usernameFeedback.innerHTML = 'Username is available.';
                             usernameCheckLoader.style.display = 'none';
+                            usernameInput.classList.add('is-valid');
                         } else {
                             usernameFeedback.innerHTML = 'Username is taken.';
                             usernameCheckLoader.style.display = 'none';
+                            usernameInput.classList.add('is-invalid');
                         }
                     }
                 } else {
