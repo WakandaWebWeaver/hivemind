@@ -43,8 +43,11 @@ body {
 }
 
 .landing-section {
-  background-color: #000;
-  /* background: -webkit-linear-gradient(rgb(83, 23, 145), rgb(146, 45, 195)); */
+  background-image: url("/static/imgs/landing.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
   height: 90vh;
   display: flex;
   flex-direction: column;
@@ -137,8 +140,17 @@ body {
   color: #000;
 }
 
+/* disable the username-link turning blue on hover */
+.username-link:hover {
+  color: #000;
+  text-decoration-line: none;
+}
+
+.loading-spinner {
+}
+
 .scrollable {
-  max-height: 200px;
+  max-height: 200px; /* Adjust the maximum height as needed */
   overflow-y: auto;
 }
 

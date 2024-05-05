@@ -200,49 +200,46 @@ def register():
     
     return render_template('register.html')
 
-@app.route('/upload_material', methods=['GET', 'POST'])
+@app.route('/upload_material_page')
 @login_required
-def upload_material():
-    if request.method == 'POST':
-        try:
-            if request.files:
-                year = request.form.get('year')
-                material = request.files['material_file']
-
-                if material.filename != '':
-                    file_key = f"materials/{material.filename}.pdf"
-                    job = s3.upload_fileobj(material, s3_bucket_name, file_key, ExtraArgs={'Metadata': {'year': year, 'college': session['college_name']}})
-
-                    if scan.check_image_for_profanity(file_key):
-                        blacklist_collection.insert_one({'title': material.filename,
-                                                        'author': session['name'],
-                                                        'username': session['id'],
-                                                        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-                                                        'reason': 'Profanity in material',
-                                                        'college_name': session['college_name']
-                                                    })
-                        s3.delete_object(Bucket=s3_bucket_name, Key=file_key)
-                        logout_user()
-                        return {'profanity': True}
-                    else:
-                        return 'Material upload failed'
-                    
-            return redirect(url_for('materials'))
-        
-        except Exception as e:
-            print(e)
-            return 'Material upload failed'
-        
+def upload_material_page():
     return render_template('add_material.html',session=session, grec_sitekey=grec_sitekey,
                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
                            )
+
+@app.route('/upload_material', methods=['POST'])
+@login_required
+def upload_material():
+    if request.files:
+        year = request.form.get('year')
+        material = request.files['material_file']
+
+        if material.filename != '':
+            file_key = f"materials/{material.filename}.pdf"
+            job = s3.upload_fileobj(material, s3_bucket_name, file_key, ExtraArgs={'Metadata': {'year': year, 'college': session['college_name']}})
+
+            if scan.check_image_for_profanity(file_key):
+                blacklist_collection.insert_one({'title': material.filename,
+                                                'author': session['name'],
+                                                'username': session['id'],
+                                                'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+                                                'reason': 'Profanity in material',
+                                                'college_name': session['college_name']
+                                            })
+                s3.delete_object(Bucket=s3_bucket_name, Key=file_key)
+                logout_user()
+                return {'profanity': True}
+            
+            else:
+                return 'Material upload failed'
+
+    return redirect(url_for('materials'))
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
-
 
 @app.route('/materials')
 def materials():
@@ -260,6 +257,7 @@ def materials():
 
     return render_template('materials.html', materials=materials, session=session,
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None)
+
 
 
 @app.route('/block_user', methods=['POST'])
@@ -283,7 +281,6 @@ def block_user():
         user_collection.update_one({'username': username_to_block}, {'$set': user_to_block})
     
     return redirect(url_for('profile', username=username_to_block))
-
 
 @app.route('/unblock_user', methods=['POST'])
 @login_required
@@ -319,6 +316,87 @@ def download():
 def tos_prp():
     return render_template('tos_prp.html')
 
+@app.route('/create_post', methods=['POST', 'GET'])
+@login_required
+def create_post():
+    title = request.form.get('post_title')
+    content = request.form.get('post_text')
+    post_picture = request.files['post_image']
+    author = session['name']
+    user = user_collection.find_one({'full_name': author})
+    post_id = posts_collection.count_documents({}) + 1
+    date = datetime.date.today().strftime("%d/%m/%y")
+    time = datetime.datetime.now().strftime("%H:%M")
+    profile_picture = session['profile_picture']
+    post_image_s3_key = ''
+    contains_image = False
+
+    if user['verified'] == False:
+        return redirect(url_for('verify_id_page'))
+
+    print('Post picture:', post_picture)
+    
+    if post_picture:
+        contains_image = True
+        post_image = request.files['post_image']
+        if post_image.filename != '':
+            file_key = f"Post images/{post_id}.jpeg"
+            job = s3.upload_fileobj(post_image, s3_bucket_name, file_key)
+            if job:
+                print('Post image uploaded successfully')
+
+            post_image_s3_key = file_key
+
+
+        if profanity.contains_profanity(content) or profanity.contains_profanity(title) or scan.check_image_for_profanity(post_image_s3_key):
+            blacklist_collection.insert_one({'title': title,
+                                            'content': content,
+                                            'author': author,
+                                            'username': session['id'],
+                                            'profile_picture': profile_picture,
+                                            'date': date,
+                                            'time': time,
+                                            'post_id': post_id,
+                                            'contains_image': contains_image,
+                                            'post_image': post_image_s3_key if contains_image else None,
+                                            'reason': 'Profanity while making a post.',
+                                            'college_name': session['college_name']
+                                        })
+            s3.delete_object(Bucket=s3_bucket_name, Key=post_image_s3_key)
+
+            logout_user()
+            return {'profanity': True}
+    
+    anonymous = False
+    if 'anonymous' in request.form:
+        anonymous = True
+
+    post_data = {
+        'title': title,
+        'content': content,
+        'author': author,
+        'username': session['id'],
+        'profile_picture': profile_picture if not anonymous else 'Profile pictures/avatar_default.jpeg',
+        'date': date,
+        'post_id': post_id,
+        'contains_image': contains_image,
+        'post_image': post_image_s3_key,
+        'anonymous': anonymous,
+        'college_name': session['college_name']
+    }
+
+    user['post_count'] = user.get('post_count', 0) + 1
+    user_collection.update_one({'full_name': author}, {'$set': user})
+
+    user['posts'] = user.get('posts', [])
+    user['posts'].append(post_id)
+    user_collection.update_one({'full_name': author}, {'$set': user})
+
+
+    posts_collection.insert_one(post_data)
+
+    return {'success': True}
+
 
 @app.route('/delete_comment', methods=['POST'])
 @login_required
@@ -335,7 +413,7 @@ def delete_comment():
                     posts_collection.update_one({'post_id': post['post_id']}, {'$set': post})
 
 
-    return redirect(url_for('posts'))
+    return redirect(url_for('view_posts'))
 
 @app.route('/hive_comment', methods=['POST'])
 @login_required
@@ -432,7 +510,7 @@ def comment():
             user_collection.update_one({'username': post['username']}, {'$set': post_author})
         posts_collection.update_one({'post_id': int(post_id)}, {'$set': post})
 
-    return redirect(url_for('posts'))
+    return redirect(url_for('view_posts'))
 
 
 @app.route('/dashboard')
@@ -526,97 +604,23 @@ def delete_hive_comment():
     return 'Comment not found'
 
 
-@app.route('/posts', methods=['GET', 'POST']    )
+@app.route('/posts')
 @login_required
-def posts():
-    if request.method == 'POST':
-        title = request.form.get('post_title')
-        content = request.form.get('post_text')
-        author = session['name']
-        user = user_collection.find_one({'full_name': author})
-        post_id = posts_collection.count_documents({}) + 1
-        date = datetime.date.today().strftime("%d/%m/%y")
-        time = datetime.datetime.now().strftime("%H:%M")
-
-        if user['verified'] == False:
-            return redirect(url_for('verify_id'))
-        
-        if request.files:
-            contains_image = True
-            post_image = request.files['post_image']
-            if post_image.filename != '':
-                file_key = f"Post images/{post_id}.jpeg"
-                job = s3.upload_fileobj(post_image, s3_bucket_name, file_key)
-                if job:
-                    print('Post image uploaded successfully')
-
-                post_image_s3_key = file_key
-
-        profile_picture = session['profile_picture']
-
-        if profanity.contains_profanity(content) or profanity.contains_profanity(title) or scan.check_image_for_profanity(post_image_s3_key):
-            blacklist_collection.insert_one({'title': title,
-                                            'content': content,
-                                            'author': author,
-                                            'username': session['id'],
-                                            'profile_picture': profile_picture,
-                                            'date': date,
-                                            'time': time,
-                                            'post_id': post_id,
-                                            'contains_image': contains_image,
-                                            'post_image': post_image_s3_key if contains_image else None,
-                                            'reason': 'Profanity while making a post.',
-                                            'college_name': session['college_name']
-                                        })
-            s3.delete_object(Bucket=s3_bucket_name, Key=post_image_s3_key)
-
-            logout_user()
-            return {'profanity': True}
-        
-        anonymous = False
-        if 'anonymous' in request.form:
-            anonymous = True
-
-        post_data = {
-            'title': title,
-            'content': content,
-            'author': author,
-            'username': session['id'],
-            'profile_picture': profile_picture if not anonymous else 'Profile pictures/avatar_default.jpeg',
-            'date': date,
-            'post_id': post_id,
-            'contains_image': contains_image,
-            'post_image': post_image_s3_key if contains_image else None,
-            'anonymous': anonymous,
-            'college_name': session['college_name']
-        }
-
-        user['post_count'] = user.get('post_count', 0) + 1
-        user_collection.update_one({'full_name': author}, {'$set': user})
-
-        user['posts'] = user.get('posts', [])
-        user['posts'].append(post_id)
-        user_collection.update_one({'full_name': author}, {'$set': user})
-
-
-        posts_collection.insert_one(post_data)
-
-        return redirect(url_for('posts',
-                                session=session,
-                                profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,
-                                builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/"))
-    
+def view_posts():
     if session.get('id') is None:
         return redirect(url_for('login'))
     
-    posts = list(posts_collection.find().sort('post_id', -1))
+    posts = posts_collection.find()
 
+    posts = list(posts_collection.find())
     user_posts = []
     comments = []
 
     for post in posts:
+        if post['anonymous']:
+            post['author'] = 'Anonymous'
         if post['college_name'] == session['college_name']:
-                user_posts.append(post)
+            user_posts.append(post)
         if 'comments' in post:
             for comment in post['comments']:
                 comments.append({
@@ -624,7 +628,10 @@ def posts():
                     'author': comment['author']
                 })
 
-    return render_template('posts.html', posts=posts, 
+    # Sort posts by post_id
+    sorted_posts = sorted(user_posts, key=lambda x: x['post_id'], reverse=True)
+
+    return render_template('posts.html', posts=sorted_posts, 
                            session=session,
                            comments=comments,
                            user=user_collection.find_one({'username': session['id']}),
@@ -635,33 +642,9 @@ def posts():
 
 
 
-@app.route('/verify_id', methods=['POST', 'GET'])
+@app.route('/verify_id_page')
 @login_required
-def verify_id():
-    if request.method == 'POST':
-        try:
-            id_card = request.files['id_card']
-            college_name = session['college_name']
-            name = session['name']
-
-            file_key = f"ID cards/{name}.jpeg"
-            job = s3.upload_fileobj(id_card, s3_bucket_name, file_key)
-
-            result = scan.find_matching_text(college_name, name, file_key)
-
-            if result:
-                user = user_collection.find_one({'username': session['id']})
-                user['verified'] = True
-                session['verified'] = True
-                user_collection.update_one({'username': session['id']}, {'$set': user})
-                return {'verified': True}
-            else:
-                return {'verified': False}
-
-        except Exception as e:
-            print(e)
-            return {'verified':'Could not verify ID card'}
-
+def verify_id_page():
     return render_template('verify_id.html',
                             session=session,
                             profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None,
@@ -669,6 +652,31 @@ def verify_id():
                             user = user_collection.find_one({'username': session['id']})
                            )
 
+
+@app.route('/verify_id_card', methods=['POST'])
+def verify_id_card():
+    try:
+        id_card = request.files['id_card']
+        college_name = session['college_name']
+        name = session['name']
+
+        file_key = f"ID cards/{name}.jpeg"
+        job = s3.upload_fileobj(id_card, s3_bucket_name, file_key)
+
+        result = scan.find_matching_text(college_name, name, file_key)
+
+        if result:
+            user = user_collection.find_one({'username': session['id']})
+            user['verified'] = True
+            session['verified'] = True
+            user_collection.update_one({'username': session['id']}, {'$set': user})
+            return {'verified': True}
+        else:
+            return {'verified': False}
+
+    except Exception as e:
+        print(e)
+        return {'verified':'Could not verify ID card'}
     
 
 @app.route('/temp')
@@ -815,19 +823,40 @@ def check_username(username):
 def delete_post():
     post_id = request.form.get('post_id')
     post = posts_collection.find_one({'post_id': int(post_id)})
-    user = user_collection.find_one({'username': session['id']})
+    users = user_collection.find_one({'full_name': session['name']})
 
-    if user['full_name'] == session['name'] == post['author']:
+    if post:
         if post['contains_image']:
             s3.delete_object(Bucket=s3_bucket_name, Key=post['post_image'])
-        if post['post_id'] == int(post_id):
+        if post['author'] == session['name']:
             posts_collection.delete_one({'post_id': int(post_id)})
-            return redirect(url_for('posts'))
-        user['post_count'] = user.get('post_count', 0) - 1
-        user['posts'].remove(int(post_id))
-        user_collection.update_one({'full_name': session['name']}, {'$set': user})
+            users['post_count'] = users.get('post_count', 0) - 1
+            user_collection.update_one({'full_name': session['name']}, {'$set': users})
+            users['posts'] = users.get('posts', [])
+            users['posts'].remove(int(post_id))
+            user_collection.update_one({'full_name': session['name']}, {'$set': users})
+            return redirect(url_for('view_posts'))
+        else:
+            return 'You are not the author of this post'
+        
 
-        return redirect(url_for('posts'))
+
+
+    # for user in users:
+    #     if user['full_name'] == session['name']:
+    #         user['post_count'] = user.get('post_count', 0) - 1
+    #         user_collection.update_one({'full_name': session['name']}, {'$set': user})
+    #         user['posts'] = user.get('posts', [])
+    #         user['posts'].remove(int(post_id))
+    #         user_collection.update_one({'full_name': session['name']}, {'$set': user})
+
+    # for post in posts:
+    #     if post['author'] == session['name']:
+    #         if post['post_id'] == int(post_id):
+    #             posts_collection.delete_one({'post_id': int(post_id)})
+    #             return redirect(url_for('view_posts'))
+    #         if post['contains_image']:
+    #             s3.delete_object(Bucket=s3_bucket_name, Key=post['post_image'])
             
 @app.route('/delete_hive_post', methods=['POST'])
 @login_required
@@ -837,9 +866,13 @@ def delete_hive_post():
     room = rooms_collection.find_one({'room_id': room_id})
     posts = room['posts']
 
+    print('Post ID:', post_id)
+    print(posts)
+
     for post in posts:
-        if post['author'] == session['id']:
+        if post['author'] == session['name']:
             if post['post_id'] == post_id:
+                print(post)
                 posts.remove(post)
                 rooms_collection.update_one({'room_id': room_id}, {'$set': room})
                 return redirect(url_for('hive_room', room_id=room_id, session=session,
@@ -897,11 +930,16 @@ def hive_room(room_id):
 def create_hive_post():
     room_id = request.form.get('room_id')
     post = request.form.get('post_text')
-    author = session['id']
+    author = session['name']
+    username = session['id']
     date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
-    post_id = author+str(rooms_collection.count_documents({}))
+    post_id = author+str(rooms_collection.count_documents({}))+'1'
+    hive_post_image = request.files['post_image']
+    contains_image = False
+    post_image_s3_key = ''
+    print(request.form)
 
-    if request.files:
+    if hive_post_image:
         contains_image = True
         post_image = request.files['post_image']
         if post_image.filename != '':
@@ -912,39 +950,40 @@ def create_hive_post():
 
             post_image_s3_key = file_key
 
-    if profanity.contains_profanity(post) or scan.check_image_for_profanity(post_image_s3_key):
-        blacklist_collection.insert_one({'post_id': post_id,
-                                        'content': post,
-                                        'author': author,
-                                        'username': session['id'],
-                                        'date': date,
-                                        'reason': 'Profanity while making post',
-                                        'college_name': session['college_name']
-                                    })
-        s3.delete_object(Bucket=s3_bucket_name, Key=post_image_s3_key)
+        if profanity.contains_profanity(post) or scan.check_image_for_profanity(post_image_s3_key):
+            blacklist_collection.insert_one({'post_id': post_id,
+                                            'content': post,
+                                            'author': author,
+                                            'username': username,
+                                            'date': date,
+                                            'reason': 'Profanity while making post',
+                                            'college_name': session['college_name']
+                                        })
+            s3.delete_object(Bucket=s3_bucket_name, Key=post_image_s3_key)
 
-        logout_user()
-        return {'profanity': True}
-
+            logout_user()
+            return {'profanity': True}
+        
     room = rooms_collection.find_one({'room_id': room_id})
     if room:
-        if author in room['members']:
+        if username in room['members']:
             room['posts'].append({
                 'author': author,
+                'username': username,
                 'content': post,
                 'post_id': post_id,
                 'profile_picture': session['profile_picture'],
-                'date': date
+                'date': date,
+                'contains_image': contains_image,
+                'post_image': post_image_s3_key
             })
             rooms_collection.update_one({'room_id': room_id}, {'$set': room})
 
-            return redirect(url_for('hive_room', room_id=room_id, session=session, room=room,
-                               builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
-                                 profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None ))
+            return {'success': True}
         else:
-            return 'You are not a member of this room'
+            return {'success': False, 'message': 'You are not a member of this room'}
     else:
-        return 'Hive not found', 404
+        return {'success': False, 'message': f'Hive not found{room_id}'}
     
 
 @app.route('/apply', methods=['POST'])

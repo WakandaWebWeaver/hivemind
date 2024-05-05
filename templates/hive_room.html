@@ -46,7 +46,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('posts') }}">View Posts</a>
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -109,81 +109,86 @@
                 </button>
                 {% else %}
                 <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
-                        href="{{ url_for('verify_id') }}">Verify Now.</a> </span>
+                        href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
                 {% endif %}
-                <div class="container">
-                    {% for post in posts %}
-                    <div class="container col-8">
-                        <div class="card" id="post-card">
-                            <div class="card-header row" style="margin-left: 10px;">
-                                {% if post.anonymous %}
-                                <span class="post-author">Anonymous</span>
-                                <div class="post-pfp">
-                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                        class="nav-profile-picture rounded-circle ml-2">
-                                </div>
-                                {% else %}
-                                <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
-                                    post['username']
-                                    }} {% if user.verified %}<i class="fas fa-circle-check"></i>{% endif %}</h5></a>
-                                <div class="post-pfp">
-                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                        class="nav-profile-picture rounded-circle ml-2">
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-body">
-                                {% if post['title'] != "" %}
-                                <p class="card-title">{{ post['title'] }}</p>
-                                {% endif %}
-                                <p class="card-text">{{ post['content'] }}</p>
-                                {% if post['contains_image'] %}
-                                <div class="post-image-container">
-                                    <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid">
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-footer">
-                                <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
-                                {% if session.name == post['author'] or session.id == post['username'] %}
-                                <form action="/delete_hive_post" method="POST">
-                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </form>
-                                {% endif %}
-                            </div>
-                            <div class="comments-container">
-                                <h5>Comments</h5>
-                                <ul class="list-unstyled">
-                                    {% for comment in post['comments'] %}
-                                    {% if comment.comment != "" %}
-                                    <li>{{ comment['author'] }} said: {{ comment['comment'] }}
-                                        {% if session.name == comment['author'] %}
-                                        <span>
-                                            <form action="/delete_hive_comment" method="POST">
-                                                <input type="hidden" name="comment" value="{{ comment['comment'] }}">
-                                                <input type="hidden" name="comment_author"
-                                                    value="{{ comment['author'] }}">
-                                                <button type="submit" class="btn fas fa-trash-alt"></button>
-                                            </form>
-                                        </span>
-                                        {% endif %}
-                                        <hr class="ruler">
-                                    </li>
+                <div id="posts-container row">
+                    <div class="container col-md-6">
+                        {% for post in posts %}
+                        <div class="container">
+                            <div class="card" id="post-card">
+                                <div class="card-header row" style="margin-left: 10px;">
+                                    {% if post.anonymous %}
+                                    <span class="post-author">Anonymous</span>
+                                    <div class="post-pfp">
+                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                            class="nav-profile-picture rounded-circle ml-2">
+                                    </div>
+                                    {% else %}
+                                    <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
+                                        post['username']
+                                        }} {% if user.verified %}<i class="fas fa-circle-check"></i>{% endif %}</h5></a>
+                                    <div class="post-pfp">
+                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                            class="nav-profile-picture rounded-circle ml-2">
+                                    </div>
                                     {% endif %}
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            <div class="card-footer">
-                                <form action="/hive_post_comment" method="POST">
-                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                    <input type="text" name="comment" class="form-control" placeholder="Add a comment">
-                                    <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
-                                </form>
+                                </div>
+                                <div class="card-body">
+                                    {% if post['title'] != "" %}
+                                    <p class="card-title">{{ post['title'] }}</p>
+                                    {% endif %}
+                                    <p class="card-text">{{ post['content'] }}</p>
+                                    {% if post['contains_image'] %}
+                                    <div class="post-image-container">
+                                        <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid">
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer">
+                                    <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
+                                    {% if session.name == post['author'] or session.id == post['username'] %}
+                                    <form action="/delete_hive_post" method="POST">
+                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                        <input type="hidden" name="room_id" value="{{ room.room_id }}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                                <div class="comments-container">
+                                    <h5>Comments</h5>
+                                    <ul class="list-unstyled">
+                                        {% for comment in post['comments'] %}
+                                        {% if comment.comment != "" %}
+                                        <li>{{ comment['author'] }} said: {{ comment['comment'] }}
+                                            {% if session.name == comment['author'] %}
+                                            <span>
+                                                <form action="/delete_hive_comment" method="POST">
+                                                    <input type="hidden" name="comment"
+                                                        value="{{ comment['comment'] }}">
+                                                    <input type="hidden" name="comment_author"
+                                                        value="{{ comment['author'] }}">
+                                                    <button type="submit" class="btn fas fa-trash-alt"></button>
+                                                </form>
+                                            </span>
+                                            {% endif %}
+                                            <hr class="ruler">
+                                        </li>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="card-footer">
+                                    <form action="/hive_post_comment" method="POST">
+                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                        <input type="text" name="comment" class="form-control"
+                                            placeholder="Add a comment">
+                                        <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -219,6 +224,9 @@
                     </div>
                     <div class="modal-body">
                         <form id="createPostForm" enctype="multipart/form-data">
+                            <input type="hidden" name="room_id" value="{{ room.room_id }}">
+                            <input type="hidden" name="username" value="{{ session.id }}">
+                            <input type="hidden" name="author" value="{{ session.name }}">
                             <div class="form-group">
                                 <label for="postTitle">Title</label>
                                 <input type="text" class="form-control" id="postTitle" name="post_title"
@@ -269,10 +277,17 @@
             }).then(response => response.json())
                 .then(data => {
                     if (data.profanity) {
+                        submitButton.innerText = 'L :(';
+                        loadingSpinner.style.display = 'none';
                         alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
                         window.location.href = "{{ url_for('index') }}";
+                    } else if (data.success) {
+                        submitButton.innerText = 'Success!';
+                        window.location.reload();
                     } else {
-                        window.location.href = data.redirect;
+                        submitButton.innerText = 'Create Post';
+                        loadingSpinner.style.display = 'none';
+                        alert('An error occurred while creating the post. Message: ' + data.message);
                     }
                 });
         });

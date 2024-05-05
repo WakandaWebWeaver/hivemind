@@ -43,7 +43,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('posts') }}">View Posts</a>
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -108,7 +108,7 @@
                             {% if user.verified %}
                             <a href="/hives/{{ room.room_id }}" class="btn btn-primary">Join</a>
                             {% else %}
-                            <a href="/verify_id" class="btn btn-primary">Verify Account</a>
+                            <a href="/verify_id_page" class="btn btn-primary">Verify Account</a>
                             {% endif %}
                         </div>
                     </div>

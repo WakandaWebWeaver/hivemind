@@ -100,7 +100,7 @@
             </button>
             {% else %}
             <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
-                    href="{{ url_for('verify_id') }}">Verify Now.</a> </span>
+                    href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
             {% endif %}
             <div id="posts-container row">
                 <div class="container col-md-6">
@@ -177,166 +177,169 @@
                     </div>
                     {% endfor %}
                 </div>
+
             </div>
         </div>
+    </div>
 
-        <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
-            aria-hidden="true" style="color: black;">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="createPostForm" enctype="multipart/form-data">
-                            <div class="form-group">
-                                <label for="postTitle">Title</label>
-                                <input type="text" class="form-control" id="postTitle" name="post_title"
-                                    placeholder="optional">
-                            </div>
-                            <div class="form-group">
-                                <label for="postContent">Content</label>
-                                <textarea class="form-control" id="postContent" name="post_text" rows="3" required
-                                    placeholder="{{ content_placeholder }}"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="postImage">Got an image?</label>
-                                <input type="file" class="form-control-file" id="postImage" name="post_image"
-                                    accept="image/*" max-size="20971520">
-                            </div>
-                    </div>
-                    <div class="form-check mb-2" style="margin-left: 5px;">
-                        <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
-                        <label class="form-check label" for="anonymousCheck">Post Anonymously</label>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button id="submitPostButton" class="btn btn-primary">Create
-                            Post</button>
-                        <l-momentum size="40" speed="1.1" color="black" class="loading-spinner"
-                            style="display: none;"></l-momentum>
-                    </div>
-                    </form>
+    <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
+        aria-hidden="true" style="color: black;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
+                <div class="modal-body">
+                    <form id="createPostForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="postTitle">Title</label>
+                            <input type="text" class="form-control" id="postTitle" name="post_title"
+                                placeholder="optional">
+                        </div>
+                        <div class="form-group">
+                            <label for="postContent">Content</label>
+                            <textarea class="form-control" id="postContent" name="post_text" rows="3" required
+                                placeholder="{{ content_placeholder }}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="postImage">Got an image?</label>
+                            <input type="file" class="form-control-file" id="postImage" name="post_image"
+                                accept="image/*" max-size="20971520">
+                        </div>
+                </div>
+                <div class="form-check mb-2" style="margin-left: 5px;">
+                    <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
+                    <label class="form-check label" for="anonymousCheck">Post Anonymously</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="submitPostButton" class="btn btn-primary">Create
+                        Post</button>
+                    <l-momentum size="40" speed="1.1" color="black" class="loading-spinner"
+                        style="display: none;"></l-momentum>
+                </div>
+                </form>
             </div>
         </div>
+    </div>
 
 
-        {% else %}
-        <div class="container">
-            <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a>
-                to login.</p>
-        </div>
-        {% endif %}
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <script>
+    {% else %}
+    <div class="container">
+        <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a> to login.</p>
+    </div>
+    {% endif %}
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
 
 
-            document.getElementById('searchButton').addEventListener('click', filterPosts);
+        document.getElementById('searchButton').addEventListener('click', filterPosts);
 
-            document.getElementById('searchInput').addEventListener('input', filterPosts);
+        document.getElementById('searchInput').addEventListener('input', filterPosts);
 
 
-            function filterPosts() {
-                var searchInput = document.getElementById('searchInput').value.toLowerCase();
-                var posts = document.getElementsByClassName('card');
-                for (var i = 0; i < posts.length; i++) {
-                    var author = posts[i].getElementsByClassName('post-author')[0];
-                    var title = posts[i].getElementsByClassName('card-title')[0];
-                    var content = posts[i].getElementsByClassName('card-text')[0];
-                    if (title && content && author) {
-                        var authorText = author.innerText.toLowerCase();
-                        var titleText = title.innerText.toLowerCase();
-                        var contentText = content.innerText.toLowerCase();
-                        if (titleText.includes(searchInput) || contentText.includes(searchInput) || authorText.includes(searchInput)) {
-                            posts[i].style.display = 'block';
-                        } else {
-                            posts[i].style.display = 'none';
-                        }
-                    } else if (title && content) {
-                        var titleText = title.innerText.toLowerCase();
-                        var contentText = content.innerText.toLowerCase();
-                        if (titleText.includes(searchInput) || contentText.includes(searchInput)) {
-                            posts[i].style.display = 'block';
-                        } else {
-                            posts[i].style.display = 'none';
-                        }
-                    } else if (title) {
-                        var titleText = title.innerText.toLowerCase();
-                        if (titleText.includes(searchInput)) {
-                            posts[i].style.display = 'block';
-                        } else {
-                            posts[i].style.display = 'none';
-                        }
-                    } else if (content) {
-                        var contentText = content.innerText.toLowerCase();
-                        if (contentText.includes(searchInput)) {
-                            posts[i].style.display = 'block';
-                        } else {
-                            posts[i].style.display = 'none';
-                        }
+        function filterPosts() {
+            var searchInput = document.getElementById('searchInput').value.toLowerCase();
+            var posts = document.getElementsByClassName('card');
+            for (var i = 0; i < posts.length; i++) {
+                var author = posts[i].getElementsByClassName('post-author')[0];
+                var title = posts[i].getElementsByClassName('card-title')[0];
+                var content = posts[i].getElementsByClassName('card-text')[0];
+                if (title && content && author) {
+                    var authorText = author.innerText.toLowerCase();
+                    var titleText = title.innerText.toLowerCase();
+                    var contentText = content.innerText.toLowerCase();
+                    if (titleText.includes(searchInput) || contentText.includes(searchInput) || authorText.includes(searchInput)) {
+                        posts[i].style.display = 'block';
+                    } else {
+                        posts[i].style.display = 'none';
+                    }
+                } else if (title && content) {
+                    var titleText = title.innerText.toLowerCase();
+                    var contentText = content.innerText.toLowerCase();
+                    if (titleText.includes(searchInput) || contentText.includes(searchInput)) {
+                        posts[i].style.display = 'block';
+                    } else {
+                        posts[i].style.display = 'none';
+                    }
+                } else if (title) {
+                    var titleText = title.innerText.toLowerCase();
+                    if (titleText.includes(searchInput)) {
+                        posts[i].style.display = 'block';
+                    } else {
+                        posts[i].style.display = 'none';
+                    }
+                } else if (content) {
+                    var contentText = content.innerText.toLowerCase();
+                    if (contentText.includes(searchInput)) {
+                        posts[i].style.display = 'block';
+                    } else {
+                        posts[i].style.display = 'none';
                     }
                 }
             }
+        }
 
-            document.getElementById('searchButton').addEventListener('click', filterPosts);
+        document.getElementById('searchButton').addEventListener('click', filterPosts);
 
-            document.getElementById('searchInput').addEventListener('input', filterPosts);
+        document.getElementById('searchInput').addEventListener('input', filterPosts);
 
 
-            var commentsContainers = document.getElementsByClassName('comments-container');
-            for (var i = 0; i < commentsContainers.length; i++) {
-                var comments = commentsContainers[i].getElementsByTagName('li');
-                if (comments.length > 3) {
-                    commentsContainers[i].style.height = '100px';
-                    commentsContainers[i].style.overflowY = 'scroll';
-                }
+        var commentsContainers = document.getElementsByClassName('comments-container');
+        for (var i = 0; i < commentsContainers.length; i++) {
+            var comments = commentsContainers[i].getElementsByTagName('li');
+            if (comments.length > 3) {
+                commentsContainers[i].style.height = '100px';
+                commentsContainers[i].style.overflowY = 'scroll';
             }
+        }
 
 
-            document.getElementById('createPostForm').addEventListener('submit', function (e) {
-                e.preventDefault();
+        document.getElementById('createPostForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-                var form = document.getElementById('createPostForm');
-                var formData = new FormData(form);
-                var submitButton = document.getElementById('submitPostButton');
-                var loadingSpinner = document.querySelector('.loading-spinner');
-                var anonymousCheck = document.getElementById('anonymousCheck');
+            var form = document.getElementById('createPostForm');
+            var formData = new FormData(form);
+            var submitButton = document.getElementById('submitPostButton');
+            var loadingSpinner = document.querySelector('.loading-spinner');
+            var anonymousCheck = document.getElementById('anonymousCheck');
 
-                if (anonymousCheck.checked) {
-                    formData.append('anonymous', True);
-                }
+            submitButton.disabled = true;
+            submitButton.innerText = 'Creating Post...';
+            loadingSpinner.style.display = 'inline-block';
 
-                submitButton.disabled = true;
-                submitButton.innerText = 'Creating Post...';
-                loadingSpinner.style.display = 'inline-block';
-
-                fetch('/posts', {
-                    method: 'POST',
-                    body: formData
-                }).then(response => response.json())
-                    .then(data => {
-                        if (data.profanity) {
-                            alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
-                            window.location.href = "{{ url_for('index') }}";
-                        } else {
-                            window.location.href = data.redirect;
-                        }
-                    });
-            });
-            // var cardBodies = document.getElementsByClassName('card-body');
-            // for (var i = 0; i < cardBodies.length; i++) {
-            //     if (cardBodies[i].scrollHeight > 100) {
-            //         cardBodies[i].style.height = '100px';
-            //         cardBodies[i].style.overflowY = 'scroll';
-            //     }
-            // }
-        </script>
+            fetch('/create_post', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.profanity) {
+                        submitButton.innerText = 'L :(';
+                        loadingSpinner.style.display = 'none';
+                        alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
+                        window.location.href = "{{ url_for('index') }}";
+                    } else if (data.success) {
+                        window.location.reload();
+                    } else {
+                        submitButton.innerText = 'Create Post';
+                        loadingSpinner.style.display = 'none';
+                        alert('An error occurred while creating the post. Please try again.');
+                    }
+                });
+        });
+        // var cardBodies = document.getElementsByClassName('card-body');
+        // for (var i = 0; i < cardBodies.length; i++) {
+        //     if (cardBodies[i].scrollHeight > 100) {
+        //         cardBodies[i].style.height = '100px';
+        //         cardBodies[i].style.overflowY = 'scroll';
+        //     }
+        // }
+    </script>
 </body>
 
 </html>

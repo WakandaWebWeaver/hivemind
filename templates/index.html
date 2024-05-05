@@ -11,12 +11,16 @@
     <meta name="author" content="Esvin Joshua">
 
     <title>HiveMind - Student Server</title>
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
 <body>
+
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
@@ -46,7 +50,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('posts') }}">View Posts</a>
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -84,6 +88,8 @@
         </div>
     </nav>
 
+
+
     <!-- Landing Section -->
     <section class="landing-section">
         <div class="landing-text">
@@ -91,8 +97,8 @@
         </div>
         <p>Created by Esvin Joshua</p>
     </section>
-    <hr>
 
+    <!-- About Section -->
     <section class="about-section" id="about">
         <div class="container">
             <h2>About HiveMind</h2>
@@ -115,13 +121,37 @@
 
             </div>
     </section>
-    <hr>
+
+    <!-- About Developer Section -->
+    <!-- <section class="about-developer-section bg-secondary">
+        <div class="container">
+            <h2>About the Developer</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="/static/imgs/profile.jpg" alt="Esvin Joshua"
+                        class="img-fluid rounded-circle dev-pfp-image" id="dev-pfp"> 
+    <h3 class="dev-name">Esvin Joshua</h3>
+    </div>
+
+    <div class="col-md-4" id="about-dev-text">
+        <p>Hey there! I'm Esvin Joshua, a full-stack web developer. I created HiveMind as a project to
+            showcase my skills in web development. HiveMind is a student server that allows students to
+            collaborate and share resources with each other. Students can make posts, join hives, and diss
+            the teachers you don't like. Have fun using this platform, and as with everything, don't be rude
+            to others. Have fun!
+        </p>
+    </div>
+    </div>
+    </div>
+    </section> -->
+
+    <!-- Call to Action Section -->
     <section class="cta-section bg-dark">
         <div class="container">
             <h2 class="text-white">Get Started</h2>
             <div class="row justify-content-center">
                 <div class="col-md-4">
-                    <a href="{{ url_for('posts') }}" class="btn btn-light btn-lg btn-block cta-button"><i
+                    <a href="{{ url_for('view_posts') }}" class="btn btn-light btn-lg btn-block cta-button"><i
                             class="fas fa-pencil-alt"></i> View Posts</a>
                 </div>
                 <div class="col-md-4">
