@@ -202,22 +202,6 @@ body {
   align-items: center;
 }
 
-.add-comment-section {
-  margin: 10px;
-  padding: 10px;
-  width: 500px;
-}
-
-.comments-container {
-  width: 500px;
-}
-
-.comment-icon {
-  src: url("/static/imgs/comment.svg");
-  height: 20px;
-  width: 20px;
-}
-
 .gradient-text {
   font-size: 72px;
   background: -webkit-linear-gradient(rgb(83, 92, 145), rgb(146, 144, 195));

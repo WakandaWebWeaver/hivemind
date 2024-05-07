@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Church App">
+    <title>Dev Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/lineWobble.js"></script>
+    <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+    {% if session.name == 'Esvin Joshua' %}
+    <div class="container">
+        <h1 style="padding: 5px;">Dev Page</h1>
+        <hr />
+        <div class="container">
+            <h2>Hi ESVIN!</h2>
+            <h5 id="current-time">The time is: </h5>
+            <h5>The time of your entry is: {{ currenttime }}</h5>
+            <hr />
+            <h5>You are in: {{ current_dir }}</h5>
+            <hr />
+            <h5>The files in this directory are:</h5>
+            <ol>
+                {% for file in files %}
+                <li>{{ file }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+
+        <hr />
+
+        <div class="container">
+            <h2>Users</h2>
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Verified</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in user_info %}
+                    <tr>
+                        <td>{{ user['full_name'] }}</td>
+                        <td>{{ user['username'] }}</td>
+                        <td>{{ user['verified'] }}</td>
+                        <td>
+                            <div class="verification-container">
+                                <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                    id="user-action-loader" style="display: none;"></l-line-wobble>
+                                {% if not user['verified'] %}
+                                <button class="btn btn-primary"
+                                    onclick="userAction('verify', '{{ user.username }}')">Verify</button>
+                                {% else %}
+                                <button class="btn btn-danger"
+                                    onclick="userAction('unverify', '{{ user.username }}')">Unverify</button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <hr />
+
+        <div class="container">
+            <h2>S3 Info</h2>
+            <h5>Bucket: {{ bucket_name }}</h5>
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Folder</th>
+                        <th scope="col">Key</th>
+                        <th scope="col">Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in s3_files %}
+                    <tr>
+                        <td>{{ file['Key'].split('/')[0] }}</td>
+                        <td>{{ file['Key'].split('/')[1] }}</td>
+                        <td>{{ file['Size'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+        </div>
+        <hr />
+
+
+        <script>
+            async function checkEndpoint(endpoint) {
+                if (endpoint === '/logout') {
+                    alert('ESVIN, DO NOT CLICK -Esvin');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        alert(`Endpoint ${endpoint} contacted successfully!. Method used: POST`);
+                    } else {
+                        const getResponse = await fetch(endpoint, {
+                            method: 'GET'
+                        });
+
+                        if (getResponse.ok) {
+                            alert(`Endpoint ${endpoint} contacted successfully. Method used: GET`);
+                        } else {
+                            const errorMessage = await getResponse.text();
+                            alert(`Endpoint ${endpoint} returned an error message after retry: ${errorMessage}`);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Endpoint ${endpoint} failed to contact!`, error);
+                    alert(`Error contacting ${endpoint}`);
+                }
+            }
+
+            function updateCurrentTime() {
+                var currentTimeElement = document.getElementById('current-time');
+                var currentTime = new Date().toLocaleTimeString();
+                currentTimeElement.innerText = 'The time is: ' + currentTime;
+            }
+
+            setInterval(updateCurrentTime, 1000);
+
+            updateCurrentTime();
+
+            function userAction(action, username) {
+                const userActionLoader = document.getElementById('user-action-loader');
+                userActionLoader.style.display = 'block';
+
+                fetch(`/admin/${action}/${username}`, {
+                    method: 'POST'
+                }).then(response => response.json())
+                    .then(data => {
+                        userActionLoader.style.display = 'none';
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert('Failed to perform action ${action} on user ${username}!');
+                        }
+                    });
+            }
+
+        </script>
+        {% else %}
+        <div class="container">
+            <h1>Access Denied</h1>
+            <p>You are not Developer! Go Away!</p>
+        </div>
+        {% endif %}
+        <hr />
+</body>
+
+</html>
