@@ -92,18 +92,18 @@
 
     <!-- Landing Section -->
     <section class="landing-section">
-        <div class="landing-text">
-            <span id="part1">Hive</span><span id="part2">Mind</span>
-        </div>
-        <p>Created by Esvin Joshua</p>
         <div class="container">
             <div class="row">
                 <div class="col-md-6" id="landing-text">
-                    <h2>Something went wrong.</h2>
-                    <p>The server encountered an error. Check your URL and try again, or, wait for a while until an
-                        update is pushed.</p>
+                    <h2>Something's Wrong</h2>
+                    <p>The server encountered an error.
+                        If you entered a URL, please check to make sure it's correct.
+                        If you clicked a link, please go back and try again.
+                    </p>
                     <a href="{{ url_for('index') }}" class="btn btn-primary">Go back to Home</a>
-
+                </div>
+                <div class="col-md-6">
+                    <img src="/static/imgs/computer-broken.png" alt="Error Image" class="img-fluid">
                 </div>
             </div>
         </div>

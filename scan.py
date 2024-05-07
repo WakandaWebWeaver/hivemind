@@ -19,6 +19,8 @@ def clean_text(text):
         item = re.sub(r'\x1b\[\d+m', '', item)
         cleaned_text.append(item)
 
+    cleaned_text = ' '.join(cleaned_text)
+
     return cleaned_text
 
 def scan_web_url_image(url):
@@ -38,18 +40,16 @@ def scan_web_url_image(url):
     text = clean_text(text)
     return text
 
-def find_matching_text(college_name, name, s3_image_url):
+def find_matching_text(college_name, name, ht_number, s3_image_url):
     try:
         result = scan_web_url_image(s3_image_url)
-        for text in result:
-            if college_name.lower() and name.lower() in str(text).lower():
-                return True
-            else:
-                continue
-
-        return False
-              
+        result = result.lower()
+        if result.__contains__(college_name.lower()) and result.__contains__(name.lower()) and result.__contains__(ht_number.lower()):
+            return True
+        else:
+            return False              
     except Exception as e:
+        print(f"Error: Could not find matching text: {e}")
         return False
 
 def check_image_for_profanity(s3_image_url):

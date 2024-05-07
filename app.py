@@ -61,24 +61,23 @@ def index():
                            profile_picture_url= f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get('profile_picture') else None
                            )
 
-# for any error, return the error.html
-# @app.errorhandler(Exception)
-# def page_not_found(e):
-#     if errors_collection.count_documents({}) > 30:
-#         errors_collection.drop()
+@app.errorhandler(Exception)
+def error_page(e):
+    if errors_collection.count_documents({}) > 30:
+        errors_collection.drop()
 
-#     error = {
-#         'error': str(e),
-#         'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-#         'trigger url': request.url,
-#         'method': request.method,        
-#         'complete request': f'{request.method} {request.url}',
-#         'client': request.headers.get('User-Agent'),
-#         'headers': dict(request.headers),
-#         'ip': request.remote_addr
-#     }
-#     errors_collection.insert_one(error)
-#     return render_template('error.html')
+    error = {
+        'error': str(e),
+        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+        'trigger url': request.url,
+        'method': request.method,        
+        'complete request': f'{request.method} {request.url}',
+        'client': request.headers.get('User-Agent'),
+        'headers': dict(request.headers),
+        'ip': request.remote_addr
+    }
+    errors_collection.insert_one(error)
+    return render_template('error.html')
 
 content_placeholders = [
     "time travel is real",
@@ -111,6 +110,7 @@ def login():
                     session['profile_picture'] = user['profile_picture_s3_key']
                     session['default_profile_picture'] = 'Profile pictures/avatar_default.jpeg'
                     session['college_name'] = user['college_name']
+                    session['ht_number'] = user['roll_number']
     
                     return redirect(url_for('dashboard',
                                             session=session,
@@ -119,7 +119,7 @@ def login():
                                             user = user_collection.find_one({'username': session['id']})                
                                             ))
         except Exception as e:
-            print(e)
+            return render_template('error.html')
         
         else:
             return 'Invalid username or password'
@@ -132,7 +132,6 @@ def login():
 def register():
     if request.method == 'POST':
         college = colleges_collection.find_one({'college_name': request.form.get('college_name').lower()})
-
         if college:
             pass
         else:
@@ -334,7 +333,6 @@ def create_post():
     if user['verified'] == False:
         return redirect(url_for('verify_id_page'))
 
-    print('Post picture:', post_picture)
     
     if post_picture:
         contains_image = True
@@ -614,26 +612,17 @@ def view_posts():
 
     posts = list(posts_collection.find())
     user_posts = []
-    comments = []
 
     for post in posts:
         if post['anonymous']:
             post['author'] = 'Anonymous'
         if post['college_name'] == session['college_name']:
             user_posts.append(post)
-        if 'comments' in post:
-            for comment in post['comments']:
-                comments.append({
-                    'comment': comment['comment'],
-                    'author': comment['author']
-                })
 
-    # Sort posts by post_id
     sorted_posts = sorted(user_posts, key=lambda x: x['post_id'], reverse=True)
 
     return render_template('posts.html', posts=sorted_posts, 
                            session=session,
-                           comments=comments,
                            user=user_collection.find_one({'username': session['id']}),
                             builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                             content_placeholder = random.choice(content_placeholders),
@@ -656,17 +645,17 @@ def verify_id_page():
 @app.route('/verify_id_card', methods=['POST'])
 def verify_id_card():
     try:
+        user = user_collection.find_one({'username': session['id']})
         id_card = request.files['id_card']
-        college_name = session['college_name']
-        name = session['name']
+        college_name = user['college_name']
+        name = user['full_name']
+        ht_number = user['roll_number']
 
         file_key = f"ID cards/{name}.jpeg"
         job = s3.upload_fileobj(id_card, s3_bucket_name, file_key)
-
-        result = scan.find_matching_text(college_name, name, file_key)
+        result = scan.find_matching_text(college_name, name, ht_number, file_key)
 
         if result:
-            user = user_collection.find_one({'username': session['id']})
             user['verified'] = True
             session['verified'] = True
             user_collection.update_one({'username': session['id']}, {'$set': user})
@@ -675,8 +664,7 @@ def verify_id_card():
             return {'verified': False}
 
     except Exception as e:
-        print(e)
-        return {'verified':'Could not verify ID card'}
+        return {'verified':False, 'error': str(e)}
     
 
 @app.route('/temp')
@@ -824,7 +812,6 @@ def delete_post():
     post_id = request.form.get('post_id')
     post = posts_collection.find_one({'post_id': int(post_id)})
     users = user_collection.find_one({'full_name': session['name']})
-
     if post:
         if post['contains_image']:
             s3.delete_object(Bucket=s3_bucket_name, Key=post['post_image'])
@@ -838,41 +825,20 @@ def delete_post():
             return redirect(url_for('view_posts'))
         else:
             return 'You are not the author of this post'
-        
-
-
-
-    # for user in users:
-    #     if user['full_name'] == session['name']:
-    #         user['post_count'] = user.get('post_count', 0) - 1
-    #         user_collection.update_one({'full_name': session['name']}, {'$set': user})
-    #         user['posts'] = user.get('posts', [])
-    #         user['posts'].remove(int(post_id))
-    #         user_collection.update_one({'full_name': session['name']}, {'$set': user})
-
-    # for post in posts:
-    #     if post['author'] == session['name']:
-    #         if post['post_id'] == int(post_id):
-    #             posts_collection.delete_one({'post_id': int(post_id)})
-    #             return redirect(url_for('view_posts'))
-    #         if post['contains_image']:
-    #             s3.delete_object(Bucket=s3_bucket_name, Key=post['post_image'])
+                
+    return 'Post not found'
             
 @app.route('/delete_hive_post', methods=['POST'])
 @login_required
 def delete_hive_post():
     post_id = request.form.get('post_id')
     room_id = request.form.get('room_id')
-    room = rooms_collection.find_one({'room_id': room_id})
+    room = rooms_collection.find_one({'room_id': str(room_id)})
     posts = room['posts']
-
-    print('Post ID:', post_id)
-    print(posts)
 
     for post in posts:
         if post['author'] == session['name']:
             if post['post_id'] == post_id:
-                print(post)
                 posts.remove(post)
                 rooms_collection.update_one({'room_id': room_id}, {'$set': room})
                 return redirect(url_for('hive_room', room_id=room_id, session=session,
@@ -937,7 +903,6 @@ def create_hive_post():
     hive_post_image = request.files['post_image']
     contains_image = False
     post_image_s3_key = ''
-    print(request.form)
 
     if hive_post_image:
         contains_image = True

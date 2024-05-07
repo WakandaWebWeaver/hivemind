@@ -42,9 +42,29 @@ As for interacting with the AWS CS, this process is a little extensive.
 1. Sign up for the AWS Console, and search for S3 in the search bar.
    > Follow the instructions on screen to continue to create a Storage Bucket.
 2. Now, search for 'IAM' in the search bar
+
    > Proceed to create a new user in your organization which can interact with these databases.
-   > When setting permissions, make sure to select 'AmazonS3FullAccess' permission for your user.
-3. Finally, copy the relevant data [AWS_ACCESS_KEY_ID and the AWS_SECRET_ACCESS_KEY] which can be found in the user information page, and update the .env file.
+   > When setting permissions, make sure to select the following
+   > permissions:
+   >
+   > - AmazonS3FullAccess
+   > - AmazonTextractFullAccess
+   > - AmazonTextractServiceRole
+   > - IAMUserChangePassword
+
+3. Finally, copy the relevant data [AWS_ACCESS_KEY_ID and the AWS_SECRET_ACCESS_KEY] which can be found in the user information page, and also the region of your S3 bucket, and update the .env file.
+
+```env
+The .env file should look something like this:
+
+AWS_BUCKET_NAME=
+AWS_ACCESS_KEY_ID=
+AWS_REGION=
+AWS_SECRET_ACCESS_KEY=
+MONGO_URI=
+MONGO_DB_NAME=
+GREC_SITEKEY=
+```
 
 > For information on creating, accessing and viewing your mongo dbs, [Mongo Docs](https://www.mongodb.com/docs/atlas/)
 
@@ -68,3 +88,9 @@ Here are some of the special features:
 - User authentication
 - User account creation
 - Profanity filter
+
+## Contributing
+
+> To request features, report issues and bugs, please start a new issue in the issues tab.
+
+> Don't forget to star the repository if you like the project

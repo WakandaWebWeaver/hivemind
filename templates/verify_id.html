@@ -71,15 +71,22 @@
 
     <div class="container mt-5">
         <h1>Verify ID</h1>
-        <p>Upload a picture of your ID card to verify your identity</p>
+        <p>Upload a picture of your college issued ID Card to verify your
+            identity and access all features of the website.</p>
         <div class="row">
             <div class="col-md-6 offset-md-3">
                 <form id="verify-card" method="POST" enctype="multipart/form-data">
-                    <input type="file" class="form-control-file" id="id-card" name="id_card" accept="image/*" required>
-                    <button type="submit" class="btn btn-primary" style="margin: 5px;">Verify</button>
-
-                    <l-dot-wave size="47" speed="1" color="white" class="loading-spinner"
-                        style="display: none;"></l-dot-wave>
+                    <div class="form-group col-6">
+                        <label for="id-card">ID Card</label>
+                        <input type="file" class="form-control-file rounded-circle" id="id-card" name="id_card"
+                            accept="image/*" required>
+                        <span class="text-muted">Make sure the image is visible, and has proper lighting.</span>
+                        <button type="submit" class="btn btn-primary" style="margin: 5px;">Verify</button>
+                    </div>
+                    <div class="form-group col-6">
+                        <l-dot-wave size="47" speed="1" color="white" class="loading-spinner"
+                            style="display: none;"></l-dot-wave>
+                    </div>
                 </form>
                 <div id="error-message" class="alert alert-danger" style="display: none;"></div>
                 <div id="verification-feedback"></div>
@@ -111,14 +118,22 @@
             body: form_data
         }).then(response => response.json())
             .then(data => {
-                if (data.verified) {
-                    verificationFeedback.innerText = 'ID Card verified successfully';
-                    loadingSpinner.style.display = 'none';
-                    alert('ID Card verified successfully');
-                    window.location.href = '{{ url_for("index") }}';
-                } else {
-                    errorMessageDiv.innerText = data.message;
+                loadingSpinner.style.display = 'none';
+                if (data.error) {
                     errorMessageDiv.style.display = 'block';
+                    errorMessageDiv.innerText = data.error;
+                    verificationFeedback.innerText = '';
+                } else {
+                    if (data.verified) {
+                        verificationFeedback.innerText = 'ID Card verified successfully';
+                        errorMessageDiv.style.display = 'none';
+                        alert('ID Card verified successfully. You can now access all features.');
+                        window.location.href = "{{ url_for('view_posts') }}";
+                    } else {
+                        errorMessageDiv.style.display = 'block';
+                        errorMessageDiv.innerText = 'ID Card verification failed';
+                        verificationFeedback.innerText = '';
+                    }
                 }
             });
     });

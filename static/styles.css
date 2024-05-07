@@ -166,8 +166,14 @@ body {
 }
 
 .post-image-container {
-  width: 200px;
-  height: 200px;
+  width: auto;
+  height: auto;
+  justify-content: center;
+}
+
+.post-image-container img {
+  object-fit: cover;
+  border-radius: 5%;
 }
 
 .check:hover::after {
@@ -189,8 +195,27 @@ body {
   color: #000;
   margin: 10px;
   padding: 10px;
-  border-radius: 5%;
   display: flex;
+}
+
+.image-loader {
+  align-items: center;
+}
+
+.add-comment-section {
+  margin: 10px;
+  padding: 10px;
+  width: 500px;
+}
+
+.comments-container {
+  width: 500px;
+}
+
+.comment-icon {
+  src: url("/static/imgs/comment.svg");
+  height: 20px;
+  width: 20px;
 }
 
 .gradient-text {

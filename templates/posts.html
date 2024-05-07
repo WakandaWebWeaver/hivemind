@@ -8,7 +8,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/momentum.js"></script>
-
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/infinity.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
@@ -105,8 +105,9 @@
             <div id="posts-container row">
                 <div class="container col-md-6">
                     {% for post in posts %}
-                    <div class="container">
-                        <div class="card" id="post-card">
+                    {% if post['contains_image'] %}
+                    <div class="card" id="post-card">
+                        <div class="mb-4">
                             <div class="card-header row" style="margin-left: 10px;">
                                 {% if post.anonymous %}
                                 <span class="post-author">Anonymous</span>
@@ -116,8 +117,119 @@
                                 </div>
                                 {% else %}
                                 <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
-                                    post['username']
-                                    }} {% if user.verified %}<i class="fas fa-circle-check"></i>{% endif %}</h5></a>
+                                    post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
+                                    endif %}
+                                    </h5></a>
+                                <div class="post-pfp">
+                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                        class="nav-profile-picture rounded-circle ml-2">
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="post-image-container">
+                                    <div class="image-loader" role="status">
+                                        <l-infinity size="55" stroke="4" stroke-length="0.15" bg-opacity="0.1"
+                                            speed="1.3" color="black" id="image-loader"></l-infinity>
+                                    </div>
+                                    <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid post-image"
+                                        onload="handleImageLoad(this)">
+                                </div>
+                                <hr>
+                                <div>
+                                    {% if post['title'] != "" %}
+                                    <p class="card-title">{{ post['title'] }}</p>
+                                    {% endif %}
+                                    <p class="card-text">{{ post['content'] }}</p>
+                                </div>
+                            </div>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="comments-container dropdown" style="padding: 5px;">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button"
+                                                id="viewCommentsDropdown" data-toggle="dropdown" aria-haspopup="true"
+                                                aria-expanded="false">
+                                                <i class="fas fa-comment"></i>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="viewCommentsDropdown">
+                                                <ul class="list-unstyled">
+                                                    {% for comment in post['comments'] %}
+                                                    {% if comment.comment != "" %}
+                                                    <li style="margin: 5px;">{{ comment['author'] }} said: {{
+                                                        comment['comment'] }}
+                                                        {% if session.name == comment['author'] %}
+                                                        <span>
+                                                            <form action="/delete_comment" method="POST">
+                                                                <input type="hidden" name="comment"
+                                                                    value="{{ comment['comment'] }}">
+                                                                <input type="hidden" name="comment_author"
+                                                                    value="{{ comment['author'] }}">
+                                                                <button type="submit"
+                                                                    class="btn fas fa-trash-alt"></button>
+                                                            </form>
+                                                        </span>
+                                                        {% endif %}
+                                                        <hr class="ruler">
+                                                    </li>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="dropdown" style="padding: 5px;">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button"
+                                                id="addCommentDropdown" data-toggle="dropdown" aria-haspopup="true"
+                                                aria-expanded="false">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="addCommentDropdown">
+                                                <div class="add-comment-section">
+                                                    <h5>Add a Comment</h5>
+                                                    <form action="/comment" method="POST">
+                                                        <input type="hidden" name="post_id"
+                                                            value="{{ post['post_id'] }}">
+                                                        <input type="text" name="comment" class="form-control"
+                                                            placeholder="Add a comment">
+                                                        <button type="submit" class="btn btn-primary mt-2">Add
+                                                            Comment</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="card-footer">
+                                <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
+                                {% if session.name == post['author'] or session.id == post['username'] %}
+                                <form action="/delete_post" method="POST">
+                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="card" id="post-card">
+                        <div class="mb-4">
+                            <div class="card-header row" style="margin-left: 10px;">
+                                {% if post.anonymous %}
+                                <span class="post-author">Anonymous</span>
+                                <div class="post-pfp">
+                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                        class="nav-profile-picture rounded-circle ml-2">
+                                </div>
+                                {% else %}
+                                <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
+                                    post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
+                                    endif %}
+                                    </h5></a>
                                 <div class="post-pfp">
                                     <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
                                         class="nav-profile-picture rounded-circle ml-2">
@@ -129,12 +241,70 @@
                                 <p class="card-title">{{ post['title'] }}</p>
                                 {% endif %}
                                 <p class="card-text">{{ post['content'] }}</p>
-                                {% if post['contains_image'] %}
-                                <div class="post-image-container">
-                                    <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid">
-                                </div>
-                                {% endif %}
                             </div>
+                            <div class="container">
+                                <div class="row">
+                                    <!-- View Comments section -->
+                                    <div class="col-md-6">
+                                        <div class="comments-container dropdown" style="padding: 5px;">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button"
+                                                id="viewCommentsDropdown" data-toggle="dropdown" aria-haspopup="true"
+                                                aria-expanded="false">
+                                                <i class="fas fa-comment"></i>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="viewCommentsDropdown">
+                                                <ul class="list-unstyled">
+                                                    {% for comment in post['comments'] %}
+                                                    {% if comment.comment != "" %}
+                                                    <li style="margin: 5px;">{{ comment['author'] }} said: {{
+                                                        comment['comment'] }}
+                                                        {% if session.name == comment['author'] %}
+                                                        <span>
+                                                            <form action="/delete_comment" method="POST">
+                                                                <input type="hidden" name="comment"
+                                                                    value="{{ comment['comment'] }}">
+                                                                <input type="hidden" name="comment_author"
+                                                                    value="{{ comment['author'] }}">
+                                                                <button type="submit"
+                                                                    class="btn fas fa-trash-alt"></button>
+                                                            </form>
+                                                        </span>
+                                                        {% endif %}
+                                                        <hr class="ruler">
+                                                    </li>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Add Comment section -->
+                                    <div class="col-md-6">
+                                        <div class="dropdown" style="padding: 5px;">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button"
+                                                id="addCommentDropdown" data-toggle="dropdown" aria-haspopup="true"
+                                                aria-expanded="false">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="addCommentDropdown">
+                                                <div class="add-comment-section">
+                                                    <h5>Add a Comment</h5>
+                                                    <form action="/comment" method="POST">
+                                                        <input type="hidden" name="post_id"
+                                                            value="{{ post['post_id'] }}">
+                                                        <input type="text" name="comment" class="form-control"
+                                                            placeholder="Add a comment">
+                                                        <button type="submit" class="btn btn-primary mt-2">Add
+                                                            Comment</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
                             <div class="card-footer">
                                 <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
                                 {% if session.name == post['author'] or session.id == post['username'] %}
@@ -144,37 +314,9 @@
                                 </form>
                                 {% endif %}
                             </div>
-                            <div class="comments-container">
-                                <h5>Comments</h5>
-                                <ul class="list-unstyled">
-                                    {% for comment in post['comments'] %}
-                                    {% if comment.comment != "" %}
-                                    <li>{{ comment['author'] }} said: {{ comment['comment'] }}
-                                        {% if session.name == comment['author'] %}
-                                        <span>
-                                            <form action="/delete_comment" method="POST">
-                                                <input type="hidden" name="comment" value="{{ comment['comment'] }}">
-                                                <input type="hidden" name="comment_author"
-                                                    value="{{ comment['author'] }}">
-                                                <button type="submit" class="btn fas fa-trash-alt"></button>
-                                            </form>
-                                        </span>
-                                        {% endif %}
-                                        <hr class="ruler">
-                                    </li>
-                                    {% endif %}
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            <div class="card-footer">
-                                <form action="/comment" method="POST">
-                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                    <input type="text" name="comment" class="form-control" placeholder="Add a comment">
-                                    <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
-                                </form>
-                            </div>
                         </div>
                     </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
 
@@ -229,15 +371,14 @@
 
     {% else %}
     <div class="container">
-        <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a> to login.</p>
+        <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a> to login.
+        </p>
     </div>
     {% endif %}
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-
-
         document.getElementById('searchButton').addEventListener('click', filterPosts);
 
         document.getElementById('searchInput').addEventListener('input', filterPosts);
@@ -284,12 +425,6 @@
                 }
             }
         }
-
-        document.getElementById('searchButton').addEventListener('click', filterPosts);
-
-        document.getElementById('searchInput').addEventListener('input', filterPosts);
-
-
         var commentsContainers = document.getElementsByClassName('comments-container');
         for (var i = 0; i < commentsContainers.length; i++) {
             var comments = commentsContainers[i].getElementsByTagName('li');
@@ -297,6 +432,18 @@
                 commentsContainers[i].style.height = '100px';
                 commentsContainers[i].style.overflowY = 'scroll';
             }
+        }
+
+        var postImages = document.getElementsByClassName('post-image');
+        for (var i = 0; i < postImages.length; i++) {
+            if (postImages[i].complete) {
+                handleImageLoad(postImages[i]);
+            }
+        }
+
+        function handleImageLoad(image) {
+            var loader = image.previousElementSibling;
+            loader.style.display = 'none';
         }
 
 
