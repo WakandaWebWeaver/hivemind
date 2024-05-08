@@ -40,8 +40,8 @@ blacklist_collection = db['blacklist']
 rooms_collection = db['rooms']
 applications_collection = db['applications']
 colleges_collection = db['colleges']
-
 errors_collection = db['errors']
+notes_collection = db['notes']
 
 
 # User class for Flask-Login
@@ -383,6 +383,22 @@ def create_post():
 
     if user['verified'] == False:
         return redirect(url_for('verify_id_page'))
+    
+    if profanity.contains_profanity(content) or profanity.contains_profanity(title):
+        user['blacklist'] = True
+        blacklist_collection.insert_one({'title': title,
+                                         'content': content,
+                                         'author': author,
+                                         'username': session['id'],
+                                         'profile_picture': profile_picture,
+                                         'date': date,
+                                         'time': time,
+                                         'post_id': post_id,
+                                         'reason': 'Profanity while making a post.',
+                                         'college_name': session['college_name']
+                                         })
+        logout_user()
+        return {'profanity': True}
 
     if post_picture:
         contains_image = True
@@ -395,8 +411,7 @@ def create_post():
 
             post_image_s3_key = file_key
 
-        if profanity.contains_profanity(content) or profanity.contains_profanity(
-                title) or scan.check_image_for_profanity(post_image_s3_key):
+        if scan.check_image_for_profanity(post_image_s3_key):
             blacklist_collection.insert_one({'title': title,
                                              'content': content,
                                              'author': author,
@@ -683,6 +698,64 @@ def view_posts():
                                'profile_picture') else None
                            )
 
+
+@app.route('/serve_post/<post_id>', methods=['GET', 'POST'])
+@login_required
+def serve_post(post_id):
+    post = posts_collection.find_one({'post_id': int(post_id)})
+    user = user_collection.find_one({'username': session['id']})
+
+    return render_template('post.html', post=post, session=session,
+                           builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/", user=user,
+                           profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
+                               'profile_picture') else None
+                           )
+
+
+@app.route('/mindspace')
+@login_required
+def mindspace():
+    notes = notes_collection.find({'author': session['name']})
+
+    return render_template('mindspace.html', session=session,
+                           profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
+                               'profile_picture') else None, notes=notes if notes else None
+                           )
+
+
+@app.route('/note', methods=['POST'])
+@login_required
+def note():
+    content = request.form.get('note_content')
+    title = request.form.get('note_title')
+    note_id = notes_collection.count_documents({}) + 1
+    date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
+    author = session['name']
+
+    note_data = {
+        'content': content,
+        'title': title,
+        'note_id': note_id,
+        'date': date,
+        'author': author
+    }
+
+    notes_collection.insert_one(note_data)
+
+    return redirect(url_for('mindspace'))
+
+
+@app.route('/delete_note', methods=['POST'])
+@login_required
+def delete_note():
+    note_id = request.form.get('note_id')
+    note = notes_collection.find_one({'note_id': int(note_id)})
+
+    if note:
+        notes_collection.delete_one({'note_id': int(note_id)})
+        return redirect(url_for('mindspace'))
+
+    return redirect(url_for('mindspace'))
 
 @app.route('/verify_id_page')
 @login_required
