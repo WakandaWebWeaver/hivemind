@@ -4,22 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="title" content="HiveMind - Student Server">
-    <meta name="description"
-        content="HiveMind is a student server that allows students to collaborate and share resources with each other.">
-    <meta name="keywords" content="student server, student collaboration, study materials, student resources">
-    <meta name="author" content="Esvin Joshua">
-
-    <title>HiveMind - Student Server</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Text Posts</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/momentum.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/lineWobble.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
 <body>
 
-    <!-- Navbar -->
+    {% if current_user.is_authenticated %}
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
@@ -42,11 +38,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -67,16 +59,17 @@
                             <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
                         </div>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
+                    </li>
 
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                     </li>
+
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -84,284 +77,224 @@
         </div>
     </nav>
 
-    <section class="discussion-room-section">
-        {% if is_member %}
-        <div class="container" style="padding: 10px;">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" id="searchInput" placeholder="Search Posts">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
-                        <i class="fas fa-search"></i>
+    <!-- Search bar -->
+    <div class="container" style="padding: 10px;">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="searchInput" placeholder="Search Posts">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        <span class="text-muted">Search by author, title, or content. Anonymous posts do not support searching.</span>
+    </div>
+
+    <div id="posts-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 class="text-center mt-5">Posts</h1>
+                    <p class="text-center">{{ session.college_name }}</p>
+                </div>
+                <div class="col-md-6">
+                    {% if user.verified %}
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
+                        Create Post
                     </button>
+                    {% else %}
+                    <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
+                            href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
+                    {% endif %}
                 </div>
             </div>
-            <span class="text-muted">Search by author, title, or content. Anonymous posts do not support
-                searching.</span>
-        </div>
 
-        <div id="posts-container">
-            <div class="container">
-                <h2 class="mb-4">Posts (Latest first)</h2>
-                <h5 class="text-muted">{{ session.college_name }}</h5>
-                {% if user.verified %}
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
-                    Create Post
-                </button>
-                {% else %}
-                <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
-                        href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
-                {% endif %}
-                <div id="posts-container row">
-                    <div class="container col-md-6">
-                        {% for post in posts %}
-                        {% if post['contains_image'] %}
-                        <div class="card" id="post-card">
-                            <div class="mb-4">
-                                <div class="card-header row" style="margin-left: 10px;">
-                                    {% if post.anonymous %}
-                                    <span class="post-author">Anonymous</span>
-                                    <div class="post-pfp">
-                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                            class="nav-profile-picture rounded-circle ml-2">
-                                    </div>
-                                    {% else %}
-                                    <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
-                                        post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
-                                        endif %}
-                                        </h5></a>
-                                    <div class="post-pfp">
-                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                            class="nav-profile-picture rounded-circle ml-2">
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                <div class="card-body">
-                                    <div class="post-image-container">
-                                        <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid">
-                                    </div>
-                                    <p class="card-text">{{ post['content'] }}</p>
-                                </div>
-                                <div class="card-footer">
-                                    <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
-                                    {% if session.name == post['author'] or session.id == post['username'] %}
-                                    <form action="/delete_post" method="POST">
-                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
-                                    {% endif %}
-                                </div>
-                                <div class="comments-container">
-                                    <h5>Comments</h5>
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle" type="button"
-                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false">
-                                            <i class="fas fa-comment"></i>
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                            <ul class="list-unstyled">
-                                                {% for comment in post['comments'] %}
-                                                {% if comment.comment != "" %}
-                                                <li>{{ comment['author'] }} said: {{ comment['comment'] }}
-                                                    {% if session.name == comment['author'] %}
-                                                    <span>
-                                                        <form action="/delete_comment" method="POST">
-                                                            <input type="hidden" name="comment"
-                                                                value="{{ comment['comment'] }}">
-                                                            <input type="hidden" name="comment_author"
-                                                                value="{{ comment['author'] }}">
-                                                            <button type="submit" class="btn fas fa-trash-alt"></button>
-                                                        </form>
-                                                    </span>
-                                                    {% endif %}
-                                                    <hr class="ruler">
-                                                </li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ul>
+            <div id="posts-container row">
+                <div class="container col-md-6">
+                    {% for post in posts %}
+                    <div class="card" id="post-card">
+                        <div class="mb-4">
+                            <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}"
+                                        data-toggle="tab" href="#postDetails-{{ post['post_id'] }}" role="tab"
+                                        aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                        href="#comments-{{ post['post_id'] }}" role="tab"
+                                        aria-controls="comments-{{ post['post_id'] }}"
+                                        aria-selected="false">Comments</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                        href="#actions-{{ post['post_id'] }}" role="tab"
+                                        aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="postTabsContent">
+                                <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}"
+                                    role="tabpanel" aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
+                                    <div class="card-header row" style="margin-left: 10px;">
+                                        {% if post.anonymous %}
+                                        <span class="post-author">Anonymous</span>
+                                        <div class="post-pfp">
+                                            <img src="{{ builder_url }}{{ post['profile_picture'] }}"
+                                                alt="Profile Picture" class="nav-profile-picture rounded-circle ml-2">
                                         </div>
+                                        {% else %}
+                                        <a class="username-link post-author"
+                                            href="/view_profile/{{ post['username'] }}">{{
+                                            post['username'] }} {% if user.verified %}<i
+                                                class="fas fa-circle-check"></i>{%
+                                            endif %}
+                                            </h5></a>
+                                        <div class="post-pfp">
+                                            <img src="{{ builder_url }}{{ post['profile_picture'] }}"
+                                                alt="Profile Picture" class="nav-profile-picture rounded-circle ml-2">
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-body">
+                                        {% if post['contains_image'] %}
+                                        <div class="post-image-container">
+                                            <div class="image-loader" role="status">
+                                                <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
+                                                    color="black" id="image-loader"></l-line-wobble>
+                                            </div>
+                                            <img src="{{ builder_url }}{{ post['post_image'] }}"
+                                                class="img-fluid post-image" onload="handleImageLoad(this)">
+                                        </div>
+                                        <div>
+                                            {% if post['title'] != "" %}
+                                            <p class="card-title">{{ post['title'] }}</p>
+                                            {% endif %}
+                                            <p class="card-text">{{ post['content'] }}</p>
+                                        </div>
+                                        {% else %}
+                                        <div>
+                                            {% if post['title'] != "" %}
+                                            <p class="card-title">{{ post['title'] }}</p>
+                                            {% endif %}
+                                            <p class="card-text">{{ post['content'] }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <hr>
+                                </div>
+                                <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
+                                    aria-labelledby="comments-tab-{{ post['post_id'] }}">
+                                    <ul class="list-unstyled">
+                                        {% for comment in post['comments'] %}
+                                        {% if comment.comment != "" %}
+                                        <li style="margin: 5px;">{{ comment['author'] }} said: {{
+                                            comment['comment'] }}
+                                            {% if session.name == comment['author'] %}
+                                            <span>
+                                                <form action="/delete_hive_comment" method="POST">
+                                                    <input type="hidden" name="comment"
+                                                        value="{{ comment['comment'] }}">
+                                                    <input type="hidden" name="comment_author"
+                                                        value="{{ comment['author'] }}">
+                                                    <button type="submit" class="btn fas fa-trash-alt"></button>
+                                                </form>
+                                            </span>
+                                            {% endif %}
+                                            <hr class="ruler">
+                                        </li>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                    <div class="add-comment-section">
+                                        <h5>Add a Comment</h5>
+                                        <form action="/hive_comment" method="POST">
+                                            <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                            <input type="text" name="comment" class="form-control"
+                                                placeholder="Add a comment">
+                                            <button type="submit" class="btn btn-primary mt-2">Add
+                                                Comment</button>
+                                        </form>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="card" id="post-card">
-                            <div class="mb-4">
-                                <div class="card-header row" style="margin-left: 10px;">
-                                    {% if post.anonymous %}
-                                    <span class="post-author">Anonymous</span>
-                                    <div class="post-pfp">
-                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                            class="nav-profile-picture rounded-circle ml-2">
-                                    </div>
-                                    {% else %}
-                                    <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
-                                        post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
-                                        endif %}
-                                        </h5></a>
-                                    <div class="post-pfp">
-                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                            class="nav-profile-picture rounded-circle ml-2">
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                <div class="card-body">
-                                    {% if post['title'] != "" %}
-                                    <p class="card-title">{{ post['title'] }}</p>
-                                    {% endif %}
-                                    <p class="card-text">{{ post['content'] }}</p>
-                                </div>
-                                <div class="card-footer">
-                                    <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
+                                <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
+                                    aria-labelledby="actions-tab-{{ post['post_id'] }}">
                                     {% if session.name == post['author'] or session.id == post['username'] %}
                                     <form action="/delete_hive_post" method="POST">
                                         <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                        <input type="hidden" name="room_id" value="{{ room.room_id }}">
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
+                                    {% else %}
+                                    <p>You are not the author of this
+                                        post.</p>
                                     {% endif %}
-                                </div>
-                                <div class="comments-container">
-                                    <h5>Comments</h5>
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle" type="button"
-                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false">
-                                            <i class="fas fa-comment"></i>
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                            <ul class="list-unstyled">
-                                                {% for comment in post['comments'] %}
-                                                {% if comment.comment != "" %}
-                                                <li style="padding: 5px;">{{ comment['author'] }} said: {{
-                                                    comment['comment'] }}
-                                                    {% if session.name == comment['author'] %}
-                                                    <span>
-                                                        <form action="/delete_hive_comment" method="POST">
-                                                            <input type="hidden" name="comment"
-                                                                value="{{ comment['comment'] }}">
-                                                            <input type="hidden" name="comment_author"
-                                                                value="{{ comment['author'] }}">
-                                                            <button type="submit" class="btn fas fa-trash-alt"></button>
-                                                        </form>
-                                                    </span>
-                                                    {% endif %}
-                                                    <hr class="ruler">
-                                                </li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
-                        {% endif %}
-                        {% endfor %}
                     </div>
-
+                    {% endfor %}
                 </div>
             </div>
         </div>
-        {% endif %}
-        {% if applied and not is_member %}
-        <div class="alert alert-warning" role="alert">
-            Your application is pending approval. Please wait to join the discussion.
-        </div>
-        {% endif %}
-        {% if not applied and not is_member %}
-        <form action="{{ url_for('apply', room_id=room.room_id) }}" method="POST">
-            <div class="form-group">
-                <label for="reason">Reason for Joining:</label>
-                <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
-            </div>
-            <input type="hidden" name="room_id" value="{{ room.room_id }}">
-            <button type="submit" class="btn btn-primary">Apply to Join</button>
-        </form>
-        {% endif %}
-        </div>
-        </div>
-        </div>
+    </div>
 
-        <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
-            aria-hidden="true" style="color: black;">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="createPostForm" enctype="multipart/form-data">
-                            <input type="hidden" name="room_id" value="{{ room.room_id }}">
-                            <input type="hidden" name="username" value="{{ session.id }}">
-                            <input type="hidden" name="author" value="{{ session.name }}">
-                            <div class="form-group">
-                                <label for="postTitle">Title</label>
-                                <input type="text" class="form-control" id="postTitle" name="post_title"
-                                    placeholder="optional">
-                            </div>
-                            <div class="form-group">
-                                <label for="postContent">Content</label>
-                                <textarea class="form-control" id="postContent" name="post_text" rows="3" required
-                                    placeholder="{{ content_placeholder }}"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="postImage">Got an image?</label>
-                                <input type="file" class="form-control-file" id="postImage" name="post_image"
-                                    accept="image/*" max-size="20971520">
-                            </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button id="submitPostButton" class="btn btn-primary">Create
-                            Post</button>
-                        <l-momentum size="40" speed="1.1" color="black" class="loading-spinner"
-                            style="display: none;"></l-momentum>
-                    </div>
-                    </form>
+    <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
+        aria-hidden="true" style="color: black;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
+                <div class="modal-body">
+                    <form id="createPostForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="postTitle">Title</label>
+                            <input type="text" class="form-control" id="postTitle" name="post_title"
+                                placeholder="optional">
+                        </div>
+                        <div class="form-group">
+                            <label for="postContent">Content</label>
+                            <textarea class="form-control" id="postContent" name="post_text" rows="3" required
+                                placeholder="{{ content_placeholder }}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="postImage">Got an image?</label>
+                            <input type="file" class="form-control-file" id="postImage" name="post_image"
+                                accept="image/*" max-size="20971520">
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="submitPostButton" class="btn btn-primary">Create
+                        Post</button>
+                    <l-momentum size="40" speed="1.1" color="black" class="loading-spinner"
+                        style="display: none;"></l-momentum>
+                </div>
+                <input type="hidden" name="room_id" value="{{room['room_id']}}">
+                </form>
             </div>
         </div>
+    </div>
 
 
-    </section>
+    {% else %}
+    <div class="container">
+        <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a> to login.
+        </p>
+    </div>
+    {% endif %}
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        document.getElementById('createPostForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+        document.getElementById('searchButton').addEventListener('click', filterPosts);
 
-            var form = document.getElementById('createPostForm');
-            var formData = new FormData(form);
-            var submitButton = document.getElementById('submitPostButton');
-            var loadingSpinner = document.querySelector('.loading-spinner');
+        document.getElementById('searchInput').addEventListener('input', filterPosts);
 
-            submitButton.disabled = true;
-            submitButton.innerText = 'Creating Post...';
-            loadingSpinner.style.display = 'inline-block';
 
-            fetch('/create_hive_post', {
-                method: 'POST',
-                body: formData
-            }).then(response => response.json())
-                .then(data => {
-                    if (data.profanity) {
-                        submitButton.innerText = 'L :(';
-                        loadingSpinner.style.display = 'none';
-                        alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
-                        window.location.href = "{{ url_for('index') }}";
-                    } else if (data.success) {
-                        submitButton.innerText = 'Success!';
-                        window.location.reload();
-                    } else {
-                        submitButton.innerText = 'Create Post';
-                        loadingSpinner.style.display = 'none';
-                        alert('An error occurred while creating the post. Message: ' + data.message);
-                    }
-                });
-        });
         function filterPosts() {
             var searchInput = document.getElementById('searchInput').value.toLowerCase();
             var posts = document.getElementsByClassName('card');
@@ -403,12 +336,6 @@
                 }
             }
         }
-
-        document.getElementById('searchButton').addEventListener('click', filterPosts);
-
-        document.getElementById('searchInput').addEventListener('input', filterPosts);
-
-
         var commentsContainers = document.getElementsByClassName('comments-container');
         for (var i = 0; i < commentsContainers.length; i++) {
             var comments = commentsContainers[i].getElementsByTagName('li');
@@ -417,12 +344,55 @@
                 commentsContainers[i].style.overflowY = 'scroll';
             }
         }
+
+        var postImages = document.getElementsByClassName('post-image');
+        for (var i = 0; i < postImages.length; i++) {
+            if (postImages[i].complete) {
+                handleImageLoad(postImages[i]);
+            }
+        }
+
+        function handleImageLoad(image) {
+            var loader = image.previousElementSibling;
+            loader.style.display = 'none';
+        }
+
+
+        document.getElementById('createPostForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var form = document.getElementById('createPostForm');
+            var formData = new FormData(form);
+            var submitButton = document.getElementById('submitPostButton');
+            var loadingSpinner = document.querySelector('.loading-spinner');
+            var anonymousCheck = document.getElementById('anonymousCheck');
+
+            console.log(formData);
+
+            submitButton.disabled = true;
+            submitButton.innerText = 'Creating Post...';
+            loadingSpinner.style.display = 'inline-block';
+
+            fetch('/create_hive_post', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.profanity) {
+                        submitButton.innerText = 'L :(';
+                        loadingSpinner.style.display = 'none';
+                        alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
+                        window.location.href = "{{ url_for('index') }}";
+                    } else if (data.success) {
+                        window.location.reload();
+                    } else {
+                        submitButton.innerText = 'Create Post';
+                        loadingSpinner.style.display = 'none';
+                        alert('An error occurred while creating the post. Please try again.' + data.message);
+                    }
+                });
+        });
     </script>
-
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 
 </html>

@@ -76,24 +76,17 @@
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <h2 class="mb-4">Login</h2>
-        <form action="/login" method="POST">
-            <!--   onkeydown="if(event.keyCode === 13) { 
-                     alert( 
-                           'You have pressed Enter key, use submit button instead');  
-                           return false; 
-                         }" REMOVE COMMENT TO PREVENT ENTER KEY PRESS-->
-
-            <div class="form-group">
-                <label for="user_id">User ID</label>
-                <input type="text" class="form-control" id="user_id" name="username" required>
+    <div class="login-box" style="z-index: -1;">
+        <h1 class="text-center mt-5">Login</h1>
+        <form action="{{ url_for('login') }}" method="POST">
+            <div class="user-box">
+                <input type="text" name="username" required="">
+                <label>Username</label>
             </div>
-
-            <div class="form-group mt-3">
-                <label for="password">Password</label>
+            <div class="user-box">
                 <div class="input-group">
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <input type="password" id="password" name="password" required="">
+                    <label>Password</label>
                     <div class="input-group-append" style="padding-bottom: 10px;">
                         <button class="btn btn-outline-secondary" type="button" id="togglePassword"
                             onclick="ToggleVisibility()">
@@ -102,13 +95,26 @@
                     </div>
                 </div>
 
-                <div class="g-recaptcha" data-sitekey="{{ grec_sitekey }}" data-callback="enableSubmitButton"></div>
-
-                <button type="submit" id="submit-button" class="btn btn-primary" style="display: none;">Login</button>
-
+            </div>
+            <center>
+                <button class="login-btn" id="submit-button" type="submit" id="submit-button">
+                    Login
+                </button>
+            </center>
         </form>
 
+        <div class="text-center mt-3">
+            <a href="{{ url_for('register') }}">Don't have an account?</a>
+        </div>
+
+        <div class=" g-recaptcha" data-sitekey="{{ grec_sitekey }}" data-callback="enableSubmitButton">
+        </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 
     <script>
         function enableSubmitButton() {

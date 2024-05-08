@@ -98,223 +98,139 @@
                     <p class="text-center">{{ session.college_name }}</p>
                 </div>
                 <div class="col-md-6">
-                        {% if user.verified %}
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
-                            Create Post
-                        </button>
-                        {% else %}
-                        <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
-                                href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
+                    {% if user.verified %}
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
+                        Create Post
+                    </button>
+                    {% else %}
+                    <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
+                            href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
                     {% endif %}
                 </div>
-        </div>
+            </div>
 
             <div id="posts-container row">
                 <div class="container col-md-6">
                     {% for post in posts %}
-                    {% if post['contains_image'] %}
                     <div class="card" id="post-card">
                         <div class="mb-4">
-                            <div class="card-header row" style="margin-left: 10px;">
-                                {% if post.anonymous %}
-                                <span class="post-author">Anonymous</span>
-                                <div class="post-pfp">
-                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                        class="nav-profile-picture rounded-circle ml-2">
-                                </div>
-                                {% else %}
-                                <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
-                                    post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
-                                    endif %}
-                                    </h5></a>
-                                <div class="post-pfp">
-                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                        class="nav-profile-picture rounded-circle ml-2">
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-body">
-                                <div class="post-image-container">
-                                    <div class="image-loader" role="status">
-                                        <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="black"
-                                            id="image-loader"></l-line-wobble>
+                            <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}"
+                                        data-toggle="tab" href="#postDetails-{{ post['post_id'] }}" role="tab"
+                                        aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                        href="#comments-{{ post['post_id'] }}" role="tab"
+                                        aria-controls="comments-{{ post['post_id'] }}"
+                                        aria-selected="false">Comments</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                        href="#actions-{{ post['post_id'] }}" role="tab"
+                                        aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="postTabsContent">
+                                <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}"
+                                    role="tabpanel" aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
+                                    <div class="card-header row" style="margin-left: 10px;">
+                                        {% if post.anonymous %}
+                                        <span class="post-author">Anonymous</span>
+                                        <div class="post-pfp">
+                                            <img src="{{ builder_url }}{{ post['profile_picture'] }}"
+                                                alt="Profile Picture" class="nav-profile-picture rounded-circle ml-2">
+                                        </div>
+                                        {% else %}
+                                        <a class="username-link post-author"
+                                            href="/view_profile/{{ post['username'] }}">{{
+                                            post['username'] }} {% if user.verified %}<i
+                                                class="fas fa-circle-check"></i>{%
+                                            endif %}
+                                            </h5></a>
+                                        <div class="post-pfp">
+                                            <img src="{{ builder_url }}{{ post['profile_picture'] }}"
+                                                alt="Profile Picture" class="nav-profile-picture rounded-circle ml-2">
+                                        </div>
+                                        {% endif %}
                                     </div>
-                                    <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid post-image"
-                                        onload="handleImageLoad(this)">
-                                </div>
-                                <hr>
-                                <div>
-                                    {% if post['title'] != "" %}
-                                    <p class="card-title">{{ post['title'] }}</p>
-                                    {% endif %}
-                                    <p class="card-text">{{ post['content'] }}</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="comments-container dropdown" style="padding: 5px;">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button"
-                                        id="viewCommentsDropdown" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false">
-                                        <i class="fas fa-comment"></i>
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="viewCommentsDropdown">
-                                        <ul class="list-unstyled">
-                                            {% for comment in post['comments'] %}
-                                            {% if comment.comment != "" %}
-                                            <li style="margin: 5px;">{{ comment['author'] }} said: {{
-                                                comment['comment'] }}
-                                                {% if session.name == comment['author'] %}
-                                                <span>
-                                                    <form action="/delete_comment" method="POST">
-                                                        <input type="hidden" name="comment"
-                                                            value="{{ comment['comment'] }}">
-                                                        <input type="hidden" name="comment_author"
-                                                            value="{{ comment['author'] }}">
-                                                        <button type="submit" class="btn fas fa-trash-alt"></button>
-                                                    </form>
-                                                </span>
-                                                {% endif %}
-                                                <hr class="ruler">
-                                            </li>
+                                    <div class="card-body">
+                                        {% if post['contains_image'] %}
+                                        <div class="post-image-container">
+                                            <div class="image-loader" role="status">
+                                                <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
+                                                    color="black" id="image-loader"></l-line-wobble>
+                                            </div>
+                                            <img src="{{ builder_url }}{{ post['post_image'] }}"
+                                                class="img-fluid post-image" onload="handleImageLoad(this)">
+                                        </div>
+                                        <div>
+                                            {% if post['title'] != "" %}
+                                            <p class="card-title">{{ post['title'] }}</p>
                                             {% endif %}
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Add Comment section -->
-                            <div class="col-md-6">
-                                <div class="dropdown" style="padding: 5px;">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button"
-                                        id="addCommentDropdown" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false">
-                                        <i class="fas fa-pen"></i>
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="addCommentDropdown">
-                                        <div class="add-comment-section">
-                                            <h5>Add a Comment</h5>
-                                            <form action="/comment" method="POST">
-                                                <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                                <input type="text" name="comment" class="form-control"
-                                                    placeholder="Add a comment">
-                                                <button type="submit" class="btn btn-primary mt-2">Add
-                                                    Comment</button>
-                                            </form>
+                                            <p class="card-text">{{ post['content'] }}</p>
                                         </div>
+                                        {% else %}
+                                        <div>
+                                            {% if post['title'] != "" %}
+                                            <p class="card-title">{{ post['title'] }}</p>
+                                            {% endif %}
+                                            <p class="card-text">{{ post['content'] }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <hr>
+                                </div>
+                                <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
+                                    aria-labelledby="comments-tab-{{ post['post_id'] }}">
+                                    <ul class="list-unstyled">
+                                        {% for comment in post['comments'] %}
+                                        {% if comment.comment != "" %}
+                                        <li style="margin: 5px;">{{ comment['author'] }} said: {{
+                                            comment['comment'] }}
+                                            {% if session.name == comment['author'] %}
+                                            <span>
+                                                <form action="/delete_comment" method="POST">
+                                                    <input type="hidden" name="comment"
+                                                        value="{{ comment['comment'] }}">
+                                                    <input type="hidden" name="comment_author"
+                                                        value="{{ comment['author'] }}">
+                                                    <button type="submit" class="btn fas fa-trash-alt"></button>
+                                                </form>
+                                            </span>
+                                            {% endif %}
+                                            <hr class="ruler">
+                                        </li>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                    <div class="add-comment-section">
+                                        <h5>Add a Comment</h5>
+                                        <form action="/comment" method="POST">
+                                            <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                            <input type="text" name="comment" class="form-control"
+                                                placeholder="Add a comment">
+                                            <button type="submit" class="btn btn-primary mt-2">Add
+                                                Comment</button>
+                                        </form>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="card-footer">
-                                <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
-                                {% if session.name == post['author'] or session.id == post['username'] %}
-                                <form action="/delete_post" method="POST">
-                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </form>
-                                {% endif %}
+                                <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
+                                    aria-labelledby="actions-tab-{{ post['post_id'] }}">
+                                    {% if session.name == post['author'] or session.id == post['username'] %}
+                                    <form action="/delete_post" method="POST">
+                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                    {% else %}
+                                    <p>You are not the author of this
+                                        post.</p>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    {% else %}
-                    <div class="card" id="post-card">
-                        <div class="mb-4">
-                            <div class="card-header row" style="margin-left: 10px;">
-                                {% if post.anonymous %}
-                                <span class="post-author">Anonymous</span>
-                                <div class="post-pfp">
-                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                        class="nav-profile-picture rounded-circle ml-2">
-                                </div>
-                                {% else %}
-                                <a class="username-link post-author" href="/view_profile/{{ post['username'] }}">{{
-                                    post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
-                                    endif %}
-                                    </h5></a>
-                                <div class="post-pfp">
-                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                        class="nav-profile-picture rounded-circle ml-2">
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-body">
-                                {% if post['title'] != "" %}
-                                <p class="card-title">{{ post['title'] }}</p>
-                                {% endif %}
-                                <p class="card-text">{{ post['content'] }}</p>
-                            </div>
-                            <div class="container">
-                                <div class="row">
-                                    <!-- View Comments section -->
-                                    <div class="col-md-6">
-                                        <div class="comments-container dropdown" style="padding: 5px;">
-                                            <button class="btn btn-secondary dropdown-toggle" type="button"
-                                                id="viewCommentsDropdown" data-toggle="dropdown" aria-haspopup="true"
-                                                aria-expanded="false">
-                                                <i class="fas fa-comment"></i>
-                                            </button>
-                                            <div class="dropdown-menu" aria-labelledby="viewCommentsDropdown">
-                                                <ul class="list-unstyled">
-                                                    {% for comment in post['comments'] %}
-                                                    {% if comment.comment != "" %}
-                                                    <li style="margin: 5px;">{{ comment['author'] }} said: {{
-                                                        comment['comment'] }}
-                                                        {% if session.name == comment['author'] %}
-                                                        <span>
-                                                            <form action="/delete_comment" method="POST">
-                                                                <input type="hidden" name="comment"
-                                                                    value="{{ comment['comment'] }}">
-                                                                <input type="hidden" name="comment_author"
-                                                                    value="{{ comment['author'] }}">
-                                                                <button type="submit"
-                                                                    class="btn fas fa-trash-alt"></button>
-                                                            </form>
-                                                        </span>
-                                                        {% endif %}
-                                                        <hr class="ruler">
-                                                    </li>
-                                                    {% endif %}
-                                                    {% endfor %}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Add Comment section -->
-                                    <div class="col-md-6">
-                                        <div class="dropdown" style="padding: 5px;">
-                                            <button class="btn btn-secondary dropdown-toggle" type="button"
-                                                id="addCommentDropdown" data-toggle="dropdown" aria-haspopup="true"
-                                                aria-expanded="false">
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                            <div class="dropdown-menu" aria-labelledby="addCommentDropdown">
-                                                <div class="add-comment-section">
-                                                    <h5>Add a Comment</h5>
-                                                    <form action="/comment" method="POST">
-                                                        <input type="hidden" name="post_id"
-                                                            value="{{ post['post_id'] }}">
-                                                        <input type="text" name="comment" class="form-control"
-                                                            placeholder="Add a comment">
-                                                        <button type="submit" class="btn btn-primary mt-2">Add
-                                                            Comment</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <p>Posted on: {{ post['date'] }} - {{ post['time'] }}</p>
-                                {% if session.name == post['author'] or session.id == post['username'] %}
-                                <form action="/delete_post" method="POST">
-                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </form>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
                     {% endfor %}
                 </div>
 
@@ -376,6 +292,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script>
         document.getElementById('searchButton').addEventListener('click', filterPosts);
 
