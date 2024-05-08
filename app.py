@@ -267,19 +267,7 @@ def upload_material():
             job = s3.upload_fileobj(material, s3_bucket_name, file_key,
                                     ExtraArgs={'Metadata': {'year': year, 'college': session['college_name']}})
 
-            if scan.check_image_for_profanity(file_key):
-                blacklist_collection.insert_one({'title': material.filename,
-                                                 'author': session['name'],
-                                                 'username': session['id'],
-                                                 'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-                                                 'reason': 'Profanity in material',
-                                                 'college_name': session['college_name']
-                                                 })
-                s3.delete_object(Bucket=s3_bucket_name, Key=file_key)
-                logout_user()
-                return {'profanity': True}
-            else:
-                return {'success': True}
+            return {'success': True} if job else {'success': False}
 
     return redirect(url_for('materials'))
 
