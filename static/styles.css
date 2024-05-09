@@ -157,9 +157,6 @@ body {
   text-decoration-line: none;
 }
 
-.loading-spinner {
-}
-
 .scrollable {
   max-height: 200px; /* Adjust the maximum height as needed */
   overflow-y: auto;
@@ -167,7 +164,7 @@ body {
 
 .post-image-container {
   width: auto;
-  height: auto;
+  height: 400px;
   justify-content: center;
 }
 

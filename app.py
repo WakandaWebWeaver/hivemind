@@ -454,6 +454,13 @@ def create_post():
 
             post_image_s3_key = file_key
 
+            img = s3.get_object(Bucket=s3_bucket_name,
+                                Key=file_key)
+
+            image_size = img['ContentLength']
+            image_size = image_size / 1024
+            image_size = str(image_size)
+
         if scan.check_image_for_profanity(post_image_s3_key):
             blacklist_collection.insert_one({'title': title,
                                              'content': content,
@@ -468,6 +475,7 @@ def create_post():
                                              'reason': 'Profanity while making a post.',
                                              'college_name': session['college_name']
                                              })
+
             s3.delete_object(Bucket=s3_bucket_name, Key=post_image_s3_key)
 
             logout_user()
@@ -487,6 +495,7 @@ def create_post():
         'post_id': post_id,
         'contains_image': contains_image,
         'post_image': post_image_s3_key,
+        'image_size': image_size[0:6] + " KB" if contains_image else None,
         'anonymous': anonymous,
         'college_name': session['college_name']
     }
