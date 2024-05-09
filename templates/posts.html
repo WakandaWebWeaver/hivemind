@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Posts</title>
+    <title>Posts</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/momentum.js"></script>
@@ -88,6 +88,16 @@
             </div>
         </div>
         <span class="text-muted">Search by author, title, or content. Anonymous posts do not support searching.</span>
+        <div class="container" style="padding: 10px;">
+            {% if user.verified %}
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
+                Create Post
+            </button>
+            {% else %}
+            <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
+                    href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
+            {% endif %}
+        </div>
     </div>
 
     <div id="posts-container">
@@ -96,16 +106,6 @@
                 <div class="col-md-12">
                     <h1 class="text-center mt-5">Posts</h1>
                     <p class="text-center">{{ session.college_name }}</p>
-                </div>
-                <div class="col-md-6">
-                    {% if user.verified %}
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
-                        Create Post
-                    </button>
-                    {% else %}
-                    <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
-                            href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
-                    {% endif %}
                 </div>
             </div>
 
@@ -130,6 +130,11 @@
                                     <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
                                         href="#actions-{{ post['post_id'] }}" role="tab"
                                         aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="info-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                        href="#info-{{ post['post_id'] }}" role="tab"
+                                        aria-controls="info-{{ post['post_id'] }}" aria-selected="false">Information</a>
                                 </li>
                             </ul>
                             <div class="tab-content" id="postTabsContent">
@@ -163,7 +168,8 @@
                                                     color="black" id="image-loader"></l-line-wobble>
                                             </div>
                                             <img src="{{ builder_url }}{{ post['post_image'] }}"
-                                                class="img-fluid post-image" onload="handleImageLoad(this)">
+                                                class="img-fluid post-image" onload="handleImageLoad(this)"
+                                                id="post-image-{{ post['post_id'] }}">
                                         </div>
                                         <div>
                                             {% if post['title'] != "" %}
@@ -171,6 +177,12 @@
                                             {% endif %}
                                             <p class="card-text">{{ post['content'] }}</p>
                                         </div>
+                                        <button class="btn btn-secondary"
+                                            onclick="imageMod('increase', 'post-image-{{ post.post_id }}')"><i
+                                                class="fas fa-plus"></i></button>
+                                        <button class="btn btn-secondary"
+                                            onclick="imageMod('decrease', 'post-image-{{ post.post_id }}')"><i
+                                                class="fas fa-minus"></i></button>
                                         {% else %}
                                         <div>
                                             {% if post['title'] != "" %}
@@ -224,8 +236,15 @@
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
                                     {% else %}
-                                    <p>You are not the author of this
-                                        post.</p>
+                                    <p>No actions for this post</p>
+                                    {% endif %}
+                                </div>
+                                <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
+                                    aria-labelledby="info-tab-{{ post['post_id'] }}">
+                                    <p>Posted on: {{ post['date'] }}</p>
+                                    <p>Post ID: {{ post['post_id'] }}</p>
+                                    {% if post['contains_image'] %}
+                                    <p>File size: {{ post['image_size'] }}</p>
                                     {% endif %}
                                 </div>
                             </div>
@@ -359,6 +378,21 @@
         function handleImageLoad(image) {
             var loader = image.previousElementSibling;
             loader.style.display = 'none';
+        }
+
+        function imageMod(action, id) {
+            var image = document.getElementById(id);
+            var currentWidth = image.offsetWidth;
+            var currentHeight = image.offsetHeight;
+
+            if (action === 'increase') {
+                image.style.width = currentWidth + 5 + 'px';
+                image.style.height = currentHeight + 5 + 'px';
+            } else if (action === 'decrease') {
+                image.style.width = currentWidth - 5 + 'px';
+                image.style.height = currentHeight - 5 + 'px';
+            }
+
         }
 
 

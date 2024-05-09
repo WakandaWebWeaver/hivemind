@@ -96,12 +96,11 @@ content_placeholders = [
 @app.route('/debug')
 @login_required
 def debug():
-    if session['name'] != "Esvin Joshua":
+    if session['name'] != "Esvin Joshua" or session['id'] != "esvinjoshua":
         return redirect(url_for('index'))
 
     user_info = user_collection.find()
     s3_files = s3.list_objects_v2(Bucket=s3_bucket_name)['Contents']
-    folders = []
     username = session['id']
     os_info = platform.system()
     release = platform.release()
@@ -109,28 +108,50 @@ def debug():
     time = datetime.datetime.now()
     currenttime = time.strftime("%I:%M:%S %p")
 
-    for file in s3_files:
-        if file['Key'].endswith('/'):
-            folders.append(file['Key'])
-
-    return render_template('debug.html', user_info=user_info, s3_files=s3_files, folders=folders,
+    return render_template('debug.html', user_info=user_info, s3_files=s3_files,
                            session=session, os_info=os_info, release=release, version=version, currenttime=currenttime,
                            username=username,
                            current_dir=os.getcwd(), bucket_name=s3_bucket_name,
-                           files=os.listdir(), )
+                           files=os.listdir(),
+                           profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
+                               'profile_picture') else None,
+                           url=f"https://{s3_bucket_name}.s3.amazonaws.com/"
+
+                           )
 
 
-@app.route('/admin/<action>/<username>', methods=['POST', 'GET'])
+@app.route('/admin/<action>/<keyword>', methods=['POST', 'GET'])
 @login_required
-def admin(action, username):
-    print(action, username)
-    user = user_collection.find_one({'username': username})
+def admin(action, keyword):
+    if session['name'] != "Esvin Joshua" or session['id'] != "esvinjoshua":
+        return redirect(url_for('index'))
+
+    print(action, keyword)
+    user = user_collection.find_one({'username': keyword})
+
     if action == 'verify':
         user['verified'] = True
-        user_collection.update_one({'username': username}, {'$set': user})
+        user_collection.update_one({'username': keyword}, {'$set': user})
     elif action == 'unverify':
         user['verified'] = False
-        user_collection.update_one({'username': username}, {'$set': user})
+        user_collection.update_one({'username': keyword}, {'$set': user})
+    elif action == 'blacklist':
+        user['blacklist'] = True
+        user_collection.update_one({'username': keyword}, {'$set': user})
+        blacklist_collection.insert_one(
+            {'username': keyword, 'reason': 'Blacklist by Admin'})
+    elif action == 'unblacklist':
+        user['blacklist'] = False
+        user_collection.update_one({'username': keyword}, {'$set': user})
+        blacklist_collection.delete_one({'username': keyword})
+    elif action == 'delete':
+        user_collection.delete_one({'username': keyword})
+        posts_collection.delete_many({'username': keyword})
+    elif action == 'delete_file':
+        file_folder = keyword.split('_')[0]
+        file_name = keyword.split('_')[1]
+        file_key = f"{file_folder}/{file_name}"
+        s3.delete_object(Bucket=s3_bucket_name, Key=file_key)
 
     return {'success': True}
 
@@ -885,7 +906,6 @@ def update_profile():
             user['year'] = year
 
         if bio != '' and bio != None:
-            user['bio_changed'] = 0
             user['bio'] = bio
 
         if username != '':
@@ -895,7 +915,6 @@ def update_profile():
                     post['author'] = username
                     posts_collection.update_one(
                         {'post_id': post['post_id']}, {'$set': post})
-            user['username_changed'] = 0
             user['username'] = username
             user_collection.update_one({'full_name': name}, {'$set': user})
             session['id'] = username
@@ -905,6 +924,10 @@ def update_profile():
         if request.files:
             profile_picture = request.files['profile_picture']
             if profile_picture.filename != '':
+                if session['profile_picture'] != 'Profile pictures/avatar_default.jpeg':
+                    s3.delete_object(
+                        Bucket=s3_bucket_name, Key=session['profile_picture'])
+
                 file_key = f"Profile pictures/{username.lower()}.jpeg"
                 job = s3.upload_fileobj(
                     profile_picture, s3_bucket_name, file_key)
@@ -1069,6 +1092,20 @@ def hive_room(room_id):
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None,
                            room=room, is_member=is_member, applied=applied)
+
+
+@app.route('/search_user/<username>', methods=['POST', 'GET'])
+def search_user(username):
+    users = user_collection.find()
+    user_list = []
+
+    for user in users:
+        if username.lower() in user['username'].lower():
+            user_list.append(user['username'])
+
+    print(user_list)
+
+    return {'users': user_list}
 
 
 @app.route('/create_hive_post', methods=['POST'])

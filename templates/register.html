@@ -375,14 +375,14 @@
                 <button type="submit" id="submit-button" class="special-button">Register</button>
             </div>
         </form>
-
+        <p class="mt-4">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+        <p class="mt-4">By registering, you agree to the
+            <a href="{{ url_for('tos_prp') }}">Terms of Service and
+                Privacy
+                Policy</a>.
+        </p>
     </div>
-    <p class="mt-4">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
-    <p class="mt-4">By registering, you agree to the
-        <a href="{{ url_for('tos_prp') }}">Terms of Service and
-            Privacy
-            Policy</a>.
-    </p>
+
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

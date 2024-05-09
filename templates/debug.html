@@ -36,9 +36,6 @@
 
         <div class="container">
             <h2>Users</h2>
-            <div class="edit-user-btn container">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#editUserModal">Edit User</button>
-            </div>
             <table class="table table-dark table-striped" id="user-table">
                 <thead>
                     <tr>
@@ -46,27 +43,55 @@
                         <th scope="col">Username</th>
                         <th scope="col">Roll Number</th>
                         <th scope="col">Verified</th>
-                        <th scope="col">Actions</th>
+                        <th scope="col">Actions
+                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                id="user-action-loader" style="display: none;"></l-line-wobble>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in user_info %}
                     <tr>
-                        <td>{{ user['full_name'] }}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {{ user['full_name'] }}
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" data-toggle="modal" data-target="#editUserModal">Edit</a>
+                                    <p class="dropdown-item">College name: {{ user['college_name'] }}</p>
+                                    <p class="dropdown-item">No. of posts: {{ user['post_count'] }}</p>
+                                </div>
+                            </div>
+                        </td>
                         <td>{{ user['username'] }}</td>
                         <td>{{ user['roll_number'] }}</td>
                         <td>{{ user['verified'] }}</td>
                         <td>
-                            <div class="verification-container">
-                                <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
-                                    id="user-action-loader" style="display: none;"></l-line-wobble>
-                                {% if not user['verified'] %}
-                                <button class="btn btn-primary"
-                                    onclick="userAction('verify', '{{ user.username }}')">Verify</button>
-                                {% else %}
-                                <button class="btn btn-danger"
-                                    onclick="userAction('unverify', '{{ user.username }}')">Unverify</button>
-                                {% endif %}
+                            <div class="container row">
+                                <div class="verification-container col-4">
+                                    {% if not user['verified'] %}
+                                    <button class="btn btn-primary"
+                                        onclick="userAction('verify', '{{ user.username }}')">Verify</button>
+                                    {% else %}
+                                    <button class="btn btn-secondary"
+                                        onclick="userAction('unverify', '{{ user.username }}')">Unverify</button>
+                                    {% endif %}
+                                </div>
+                                <div class="blacklist-container col-4">
+                                    {% if not user['blacklist'] %}
+                                    <button class="btn btn-warning"
+                                        onclick="userAction('blacklist', '{{ user.username }}')">Blacklist</button>
+                                    {% else %}
+                                    <button class="btn btn-primary"
+                                        onclick="userAction('unblacklist', '{{ user.username }}')">Unblacklist</button>
+                                    {% endif %}
+                                </div>
+                                <div class="delete-container col-4">
+                                    <button class="btn btn-danger"
+                                        onclick="userAction('delete', '{{ user.username }}')">Delete</button>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -75,7 +100,7 @@
             </table>
         </div>
 
-        <hr />
+        <hr>
 
         <div class="container">
             <h2>S3 Info</h2>
@@ -86,19 +111,47 @@
                         <th scope="col">Folder</th>
                         <th scope="col">Key</th>
                         <th scope="col">Size</th>
+                        <th scope="col">Actions
+                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                id="file-action-loader" style="display: none;"></l-line-wobble>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for file in s3_files %}
                     <tr>
                         <td>{{ file['Key'].split('/')[0] }}</td>
-                        <td>{{ file['Key'].split('/')[1] }}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {{ file['Key'].split('/')[1] }}
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <l-momentum size="35" stroke="3.5" speed="1" color="white"
+                                        id="img-loader"></l-momentum>
+                                    <img src="{{ url }}{{ file['Key'] }}" alt="File" class="img-fluid"
+                                        style="width: 100px;" onload="handleImageLoad(this)">
+                                </div>
+                            </div>
+                        </td>
                         <td>{{ file['Size'] }}</td>
+                        <td>
+                            <div class="container row">
+                                <div class="container col-4">
+                                    <a href="{{ url }}{{ file['Key'] }}" class="btn btn-primary">Download</a>
+                                </div>
+                                <div class="container col-4">
+                                    <button class="btn btn-danger"
+                                        onclick="fileAction('delete_file', '{{ (file.Key).split('/')[0] }}', '{{ (file.Key).split('/')[1] }}')">Delete</button>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
         </div>
-        <hr />
+        <hr>
 
         <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel"
             aria-hidden="true">
@@ -175,6 +228,11 @@
                 }
             }
 
+            function handleImageLoad(image) {
+                var loader = document.getElementById('img-loader');
+                loader.style.display = 'none';
+            }
+
             function updateCurrentTime() {
                 var currentTimeElement = document.getElementById('current-time');
                 var currentTime = new Date().toLocaleTimeString();
@@ -184,6 +242,25 @@
             setInterval(updateCurrentTime, 1000);
 
             updateCurrentTime();
+
+            function fileAction(action, file_folder, file_name) {
+                const fileActionLoader = document.getElementById('file-action-loader');
+                fileActionLoader.style.display = 'block';
+
+                // console.log(action, file_folder, file_name)
+
+                fetch(`/admin/${action}/${file_folder}_${file_name}`, {
+                    method: 'POST'
+                }).then(response => response.json())
+                    .then(data => {
+                        fileActionLoader.style.display = 'none';
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert('Failed to delete file ${filename}!');
+                        }
+                    });
+            }
 
             function userAction(action, username) {
                 const userActionLoader = document.getElementById('user-action-loader');
@@ -208,7 +285,7 @@
                 const password = document.getElementById('password').value;
                 const phone = document.getElementById('phone').value;
 
-                new FormData = {
+                var FormData = {
                     name: name,
                     username: username,
                     password: password,
