@@ -171,24 +171,30 @@
                                                 class="img-fluid post-image" onload="handleImageLoad(this)"
                                                 id="post-image-{{ post['post_id'] }}">
                                         </div>
-                                        <div>
+                                        <hr>
+                                        <div class="container text-center">
                                             {% if post['title'] != "" %}
                                             <p class="card-title">{{ post['title'] }}</p>
                                             {% endif %}
                                             <p class="card-text">{{ post['content'] }}</p>
                                         </div>
+                                        <hr>
                                         <button class="btn btn-secondary"
                                             onclick="imageMod('increase', 'post-image-{{ post.post_id }}')"><i
                                                 class="fas fa-plus"></i></button>
                                         <button class="btn btn-secondary"
                                             onclick="imageMod('decrease', 'post-image-{{ post.post_id }}')"><i
                                                 class="fas fa-minus"></i></button>
+                                        <button type="button" data-bs-toggle="tooltip" title="Adjust"
+                                            class="btn btn-secondary"
+                                            onclick="imageMod('reset', 'post-image-{{ post.post_id }}')"><i
+                                                class="fas fa-robot"></i></button>
                                         {% else %}
-                                        <div>
+                                        <div class="container">
                                             {% if post['title'] != "" %}
-                                            <p class="card-title">{{ post['title'] }}</p>
+                                            <p class="card-title">>_> {{ post['title'] }}</p>
                                             {% endif %}
-                                            <p class="card-text">{{ post['content'] }}</p>
+                                            <p class="card-text text-center">{{ post['content'] }}</p>
                                         </div>
                                         {% endif %}
                                     </div>
@@ -242,7 +248,6 @@
                                 <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
                                     aria-labelledby="info-tab-{{ post['post_id'] }}">
                                     <p>Posted on: {{ post['date'] }}</p>
-                                    <p>Post ID: {{ post['post_id'] }}</p>
                                     {% if post['contains_image'] %}
                                     <p>File size: {{ post['image_size'] }}</p>
                                     {% endif %}
@@ -309,7 +314,7 @@
     </div>
     {% endif %}
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
@@ -391,6 +396,10 @@
             } else if (action === 'decrease') {
                 image.style.width = currentWidth - 5 + 'px';
                 image.style.height = currentHeight - 5 + 'px';
+            }
+            else if (action === 'reset') {
+                image.style.width = 'auto';
+                image.style.height = '300px';
             }
 
         }

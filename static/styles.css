@@ -163,9 +163,10 @@ body {
 }
 
 .post-image-container {
-  width: auto;
-  height: 400px;
+  width: 300px;
+  height: 300px;
   justify-content: center;
+  margin: auto;
 }
 
 .post-image-container img {
