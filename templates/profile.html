@@ -7,6 +7,8 @@
     <title>{{ user.full_name }} on HiveMind</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
+    <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/dotStream.js"></script>
 
     <link rel="stylesheet" href="/static/styles.css">
 
@@ -244,7 +246,8 @@
             </div>
         </div>
 
-        <div class="list-group" id="search-results" style="margin: 10px auto; width: 400px; z-index: 10;"></div>
+        <div class="list-group bg-light" id="search-results" style="margin: 10px auto; width: 400px; z-index: 10;">
+        </div>
     </div>
 
     <div class="container mt-5 main-container">
@@ -306,20 +309,22 @@
         $('#user-search-bar').on('input', function () {
             var search = $('#user-search-bar').val();
             const collegeSearch = $('#switch').is(':checked');
+            const searchLoader = "<l-dot-stream size='60' speed='2.5' color='black'></l-dot-stream>"
 
             if (search.length > 0) {
+                $('#search-results').append(searchLoader);
                 fetch('/search_user/' + search + '_' + collegeSearch)
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
                         $('#search-results').empty();
                         const users = data['users'];
+                        const names = data['names'];
                         if (users.length === 0) {
                             $('#search-results').append('<a href="#" class="list-group-item list-group-item-action">No users found</a>');
                         } else {
-                            users.forEach(user => {
+                            users.forEach((user, index) => {
                                 $('.main-container').hide();
-                                $('#search-results').append(`<a href="/view_profile/${user}" class="list-group-item list-group-item-action">${user}</a>`);
+                                $('#search-results').append(`<a href="/view_profile/${user}" class="list-group-item list-group-item-action">${user}<br><span class='text-muted'>${names[index]}</span></a>`);
                             });
                         }
                     });
@@ -327,26 +332,6 @@
             } else {
                 $('#search-results').empty();
             }
-            // if (search.length > 0) {
-            //     fetch('/search_user/' + search)
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             console.log(data);
-            //             $('#search-results').empty();
-            //             const users = data['users'];
-            //             if (users.length === 0) {
-            //                 $('#search-results').append('<a href="#" class="list-group-item list-group-item-action">No users found</a>');
-            //             } else {
-            //                 users.forEach(user => {
-            //                     $('.main-container').hide();
-            //                     $('#search-results').append(`<a href="/view_profile/${user}" class="list-group-item list-group-item-action">${user}</a>`);
-            //                 });
-            //             }
-            //         });
-
-            // } else {
-            //     $('#search-results').empty();
-            // }
         });
 
         $(document).click(function (e) {

@@ -1110,6 +1110,7 @@ def hive_room(room_id):
 def search_user(username):
     users = user_collection.find()
     user_list = []
+    names = []
 
     collegeSpecific = username.split('_')[1]
     username = username.split('_')[0]
@@ -1118,12 +1119,14 @@ def search_user(username):
         for user in users:
             if user['college_name'] == session['college_name'] and username.lower() in user['username'].lower():
                 user_list.append(user['username'])
+                names.append(user['full_name'])
     else:
         for user in users:
             if username.lower() in user['username'].lower():
                 user_list.append(user['username'])
+                names.append(user['full_name'])
 
-    return {'users': user_list}
+    return {'users': user_list, 'names': names}
 
 
 @app.route('/create_hive_post', methods=['POST'])

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mindspace - Note down your thoughts</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/styles.css">
-
+    <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/momentum.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/lineWobble.js"></script>
@@ -15,8 +16,9 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </head>
+
 <body>
-{% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
@@ -76,7 +78,7 @@
             </div>
         </div>
     </nav>
-{% endif %}
+    {% endif %}
 
     <div class="container">
         <div class="row">
@@ -90,17 +92,19 @@
                 <form action="/note" method="POST">
                     <div class="form-group">
                         <label for="note">The title</label>
-                        <input type="text" class="form-control" id="note_title" name="note_title" placeholder="something fun...or dark">
+                        <input type="text" class="form-control" id="note_title" name="note_title"
+                            placeholder="something fun...or dark">
                     </div>
                     <div class="form-group">
                         <label for="note">The note</label>
-                        <textarea class="form-control" id="note_content" name="note_content" rows="3" placeholder="whats on your mind"></textarea>
+                        <textarea class="form-control" id="note_content" name="note_content" rows="3"
+                            placeholder="whats on your mind"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </form>
             </div>
         </div>
-    {% if notes %}
+        {% if notes %}
         <div class="row mt-5">
             <div class="col-md-12">
                 <h2>Your notes</h2>
@@ -132,4 +136,5 @@
     </div>
     {% endif %}
 </body>
+
 </html>
