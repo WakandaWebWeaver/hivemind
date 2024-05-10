@@ -151,6 +151,7 @@
                     {% endfor %}
                 </tbody>
         </div>
+
         <hr>
 
         <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel"
@@ -195,135 +196,159 @@
                 </div>
             </div>
         </div>
-
-        <script>
-            async function checkEndpoint(endpoint) {
-                if (endpoint === '/logout') {
-                    alert('ESVIN, DO NOT CLICK -Esvin');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(endpoint, {
-                        method: 'POST'
-                    });
-
-                    if (response.ok) {
-                        alert(`Endpoint ${endpoint} contacted successfully!. Method used: POST`);
-                    } else {
-                        const getResponse = await fetch(endpoint, {
-                            method: 'GET'
-                        });
-
-                        if (getResponse.ok) {
-                            alert(`Endpoint ${endpoint} contacted successfully. Method used: GET`);
-                        } else {
-                            const errorMessage = await getResponse.text();
-                            alert(`Endpoint ${endpoint} returned an error message after retry: ${errorMessage}`);
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Endpoint ${endpoint} failed to contact!`, error);
-                    alert(`Error contacting ${endpoint}`);
-                }
-            }
-
-            function handleImageLoad(image) {
-                var loader = document.getElementById('img-loader');
-                loader.style.display = 'none';
-            }
-
-            function updateCurrentTime() {
-                var currentTimeElement = document.getElementById('current-time');
-                var currentTime = new Date().toLocaleTimeString();
-                currentTimeElement.innerText = 'The time is: ' + currentTime;
-            }
-
-            setInterval(updateCurrentTime, 1000);
-
-            updateCurrentTime();
-
-            function fileAction(action, file_folder, file_name) {
-                const fileActionLoader = document.getElementById('file-action-loader');
-                fileActionLoader.style.display = 'block';
-
-                // console.log(action, file_folder, file_name)
-
-                fetch(`/admin/${action}/${file_folder}_${file_name}`, {
-                    method: 'POST'
-                }).then(response => response.json())
-                    .then(data => {
-                        fileActionLoader.style.display = 'none';
-                        if (data.success) {
-                            window.location.reload();
-                        } else {
-                            alert('Failed to delete file ${filename}!');
-                        }
-                    });
-            }
-
-            function userAction(action, username) {
-                const userActionLoader = document.getElementById('user-action-loader');
-                userActionLoader.style.display = 'block';
-
-                fetch(`/admin/${action}/${username}`, {
-                    method: 'POST'
-                }).then(response => response.json())
-                    .then(data => {
-                        userActionLoader.style.display = 'none';
-                        if (data.success) {
-                            window.location.reload();
-                        } else {
-                            alert('Failed to perform action ${action} on user ${username}!');
-                        }
-                    });
-            }
-
-            function saveUser() {
-                const name = document.getElementById('name').value;
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const phone = document.getElementById('phone').value;
-
-                var FormData = {
-                    name: name,
-                    username: username,
-                    password: password,
-                    phone: phone
-                };
-
-                console.log(formData);
-
-                fetch('/edit_user/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-
-                }).then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('User saved successfully!');
-                            window.location.reload();
-                        } else {
-                            alert('Failed to save user!');
-                        }
-                    });
-            }
-
-        </script>
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-        {% else %}
         <div class="container">
-            <h1>Access Denied</h1>
-            <p>You are not Developer! Go Away!</p>
+            <h2>Test Endpoints</h2>
+            <ul>
+                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/index')"
+                        class="btn btn-primary">Home Page</button></li>
+                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/posts')"
+                        class="btn btn-primary">/posts</button></li>
+                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/create_post')"
+                        class="btn btn-primary">/create_post</button></li>
+                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/logout')"
+                        class="btn btn-danger">Logout</button></li>
+                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/login')"
+                        class="btn btn-primary">Login</button>
+                </li>
+                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/hives')"
+                        class="btn btn-primary">/hives</button></li>
+                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/debug')"
+                        class="btn btn-primary">/debug</button></li>
+            </ul>
         </div>
-        {% endif %}
-        <hr />
+    </div>
+
+    <script>
+        async function checkEndpoint(endpoint) {
+            console.log(`Checking endpoint ${endpoint}`);
+            if (endpoint === '/logout') {
+                alert('ESVIN, DO NOT CLICK -Esvin');
+                return;
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert(`Endpoint ${endpoint} contacted successfully!. Method used: POST`);
+                } else {
+                    const getResponse = await fetch(endpoint, {
+                        method: 'GET'
+                    });
+
+                    if (getResponse.ok) {
+                        alert(`Endpoint ${endpoint} contacted successfully. Method used: GET`);
+                    } else {
+                        const errorMessage = await getResponse.text();
+                        alert(`Endpoint ${endpoint} returned an error message after retry: ${errorMessage}`);
+                    }
+                }
+            } catch (error) {
+                console.error(`Endpoint ${endpoint} failed to contact!`, error);
+                alert(`Error contacting ${endpoint}`);
+            }
+        }
+
+        function handleImageLoad(image) {
+            var loader = document.getElementById('img-loader');
+            loader.style.display = 'none';
+        }
+
+        function updateCurrentTime() {
+            var currentTimeElement = document.getElementById('current-time');
+            var currentTime = new Date().toLocaleTimeString();
+            currentTimeElement.innerText = 'The time is: ' + currentTime;
+        }
+
+        setInterval(updateCurrentTime, 1000);
+
+        updateCurrentTime();
+
+        function fileAction(action, file_folder, file_name) {
+            const fileActionLoader = document.getElementById('file-action-loader');
+            fileActionLoader.style.display = 'block';
+
+            // console.log(action, file_folder, file_name)
+
+            fetch(`/admin/${action}/${file_folder}_${file_name}`, {
+                method: 'POST'
+            }).then(response => response.json())
+                .then(data => {
+                    fileActionLoader.style.display = 'none';
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to delete file ${filename}!');
+                    }
+                });
+        }
+
+        function userAction(action, username) {
+            const userActionLoader = document.getElementById('user-action-loader');
+            userActionLoader.style.display = 'block';
+
+            fetch(`/admin/${action}/${username}`, {
+                method: 'POST'
+            }).then(response => response.json())
+                .then(data => {
+                    userActionLoader.style.display = 'none';
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to perform action ${action} on user ${username}!');
+                    }
+                });
+        }
+
+        function saveUser() {
+            const name = document.getElementById('name').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const phone = document.getElementById('phone').value;
+
+            var FormData = {
+                name: name,
+                username: username,
+                password: password,
+                phone: phone
+            };
+
+            console.log(formData);
+
+            fetch('/edit_user/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('User saved successfully!');
+                        window.location.reload();
+                    } else {
+                        alert('Failed to save user!');
+                    }
+                });
+        }
+
+
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    {% else %}
+    <div class="container">
+        <h1>Access Denied</h1>
+        <p>You are not Developer! Go Away!</p>
+    </div>
+    {% endif %}
+    <hr />
 </body>
 
 </html>

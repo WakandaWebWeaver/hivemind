@@ -115,7 +115,6 @@ body {
 }
 
 .notifications {
-  /* make the width fixed irrelevant of whether its in a navbar or not */
   width: 300px;
 }
 
@@ -157,19 +156,18 @@ body {
   color: #000;
 }
 
-/* disable the username-link turning blue on hover */
 .username-link:hover {
   color: #000;
   text-decoration-line: none;
 }
 
 .scrollable {
-  max-height: 200px; /* Adjust the maximum height as needed */
+  max-height: 200px;
   overflow-y: auto;
 }
 
 .post-image-container {
-  width: 300px;
+  width: auto;
   height: 300px;
   justify-content: center;
   margin: auto;
