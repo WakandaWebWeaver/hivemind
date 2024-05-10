@@ -167,8 +167,9 @@ body {
 }
 
 .post-image-container {
-  width: auto;
   height: 300px;
+  width: auto;
+  display: flex;
   justify-content: center;
   margin: auto;
 }
@@ -176,6 +177,9 @@ body {
 .post-image-container img {
   object-fit: cover;
   border-radius: 5%;
+  width: auto;
+  height: 300px;
+  overflow-x: scroll;
 }
 
 .check:hover::after {

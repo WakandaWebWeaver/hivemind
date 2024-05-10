@@ -178,17 +178,6 @@
                                             {% endif %}
                                             <p class="card-text">{{ post['content'] }}</p>
                                         </div>
-                                        <hr>
-                                        <button class="btn btn-secondary"
-                                            onclick="imageMod('increase', 'post-image-{{ post.post_id }}')"><i
-                                                class="fas fa-plus"></i></button>
-                                        <button class="btn btn-secondary"
-                                            onclick="imageMod('decrease', 'post-image-{{ post.post_id }}')"><i
-                                                class="fas fa-minus"></i></button>
-                                        <button type="button" data-bs-toggle="tooltip" title="Adjust"
-                                            class="btn btn-secondary"
-                                            onclick="imageMod('reset', 'post-image-{{ post.post_id }}')"><i
-                                                class="fas fa-robot"></i></button>
                                         {% else %}
                                         <div class="container">
                                             {% if post['title'] != "" %}
@@ -198,7 +187,6 @@
                                         </div>
                                         {% endif %}
                                     </div>
-                                    <hr>
                                 </div>
                                 <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
                                     aria-labelledby="comments-tab-{{ post['post_id'] }}">
@@ -385,23 +373,11 @@
             loader.style.display = 'none';
         }
 
-        function imageMod(action, id) {
-            var image = document.getElementById(id);
-            var currentWidth = image.offsetWidth;
-            var currentHeight = image.offsetHeight;
-
-            if (action === 'increase') {
-                image.style.width = currentWidth + 5 + 'px';
-                image.style.height = currentHeight + 5 + 'px';
-            } else if (action === 'decrease') {
-                image.style.width = currentWidth - 5 + 'px';
-                image.style.height = currentHeight - 5 + 'px';
+        if (window.innerWidth > 768) {
+            var postImages = document.getElementsByClassName('post-image');
+            for (var i = 0; i < postImages.length; i++) {
+                postImages[i].style.width = '300px';
             }
-            else if (action === 'reset') {
-                image.style.width = 'auto';
-                image.style.height = '300px';
-            }
-
         }
 
 
