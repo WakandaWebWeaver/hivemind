@@ -10,6 +10,8 @@ from better_profanity import profanity
 import random
 import scan
 import platform
+import requests
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
@@ -62,27 +64,28 @@ def index():
     return render_template('index.html',
                            session=session,
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
-                               'profile_picture') else None
+                               'profile_picture') else None, user=User
                            )
 
 
-# @app.errorhandler(Exception)
-# def error_page(e):
-#     if errors_collection.count_documents({}) > 30:
-#         errors_collection.drop()
+@app.errorhandler(Exception)
+def error_page(e):
+    if errors_collection.count_documents({}) > 30:
+        errors_collection.drop()
 
-#     error = {
-#         'error': str(e),
-#         'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-#         'trigger url': request.url,
-#         'method': request.method,
-#         'complete request': f'{request.method} {request.url}',
-#         'client': request.headers.get('User-Agent'),
-#         'headers': dict(request.headers),
-#         'ip': request.remote_addr
-#     }
-#     errors_collection.insert_one(error)
-#     return render_template('error.html')
+    error = {
+        'error': str(e),
+        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+        'trigger url': request.url,
+        'method': request.method,
+        'complete request': f'{request.method} {request.url}',
+        'client': request.headers.get('User-Agent'),
+        'headers': dict(request.headers),
+        'ip': request.remote_addr
+    }
+    errors_collection.insert_one(error)
+    return render_template('error.html')
+
 
 content_placeholders = [
     "time travel is real",
@@ -1108,11 +1111,17 @@ def search_user(username):
     users = user_collection.find()
     user_list = []
 
-    for user in users:
-        if username.lower() in user['username'].lower():
-            user_list.append(user['username'])
+    collegeSpecific = username.split('_')[1]
+    username = username.split('_')[0]
 
-    print(user_list)
+    if collegeSpecific:
+        for user in users:
+            if user['college_name'] == session['college_name'] and username.lower() in user['username'].lower():
+                user_list.append(user['username'])
+    else:
+        for user in users:
+            if username.lower() in user['username'].lower():
+                user_list.append(user['username'])
 
     return {'users': user_list}
 
@@ -1263,6 +1272,15 @@ def create_room_page():
                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None, )
+
+
+# @app.route('/inbox')
+# @login_required
+# def inbox():
+#     return render_template('inbox.html', session=session,
+#                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
+#                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
+#                                'profile_picture') else None, )
 
 
 if __name__ == '__main__':

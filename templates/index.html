@@ -11,8 +11,8 @@
     <meta name="author" content="Esvin Joshua">
 
     <title>HiveMind - Student Server</title>
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
+    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/styles.css">
@@ -88,110 +88,101 @@
         </div>
     </nav>
 
-    <section class="landing-section">
-        <div class="landing-text">
-            <span class="gradient-text" id="part1">Hive</span><span class="gradient-text" id="part2">Mind</span>
-        </div>
-        <p>Created by Esvin Joshua</p>
-    </section>
-
-    <section class="about-section" id="about">
-        <div class="container">
-            <h2>About HiveMind</h2>
-            <p>HiveMind is a student server that allows students to collaborate and share resources with each other.
-                Students can make posts, join hives, and review study materials.</p>
-            <div class="row" id="icons-holder">
-                <div class="col-md-4">
-                    <i class="fas fa-pencil-alt fa-3x"></i>
-                    <p>View Posts</p>
-                </div>
-                <div class="col-md-4">
-                    <i class="fas fa-comments fa-3x"></i>
-                    <p>Join Hives</p>
-                </div>
-                <div class="col-md-4">
-                    <i class="fas fa-file-alt fa-3x"></i>
-                    <p>Review Study Materials</p>
-                </div>
+    <div class="container">
+        <div class="container" style="margin: 20px auto; padding: 40px auto;">
+            {% if current_user.is_authenticated %}
+            <div class="container" style="margin: 20px auto; padding: 40px auto;">
+                <h2>Hey, {{ session.name }}!</h2>
+                <p>Welcome to <span class="gradient-text">HiveMind</span>!
+                    <br>Note: Optimized for desktop and laptop devices.
+                </p>
             </div>
-    </section>
-
-    <hr>
-
-    <section class="cta-section bg-dark">
-        <div class="container">
-            <h2 class="text-white">Get Started</h2>
-            <div class="row justify-content-center">
-                <div class="col-md-4">
-                    <a href="{{ url_for('view_posts') }}" class="btn btn-light btn-lg btn-block cta-button"><i
-                            class="fas fa-pencil-alt"></i> View Posts</a>
+            {% endif %}
+            <h1 class="text-center">Site Map</h1>
+            <div class="row" style="margin: 20px auto; padding: 40px auto;">
+                <div class="col-md-4" style="margin: 20px auto; padding: 40px auto;">
+                    <h2>Features</h2>
+                    <ul>
+                        <li>
+                            <h4><a class="a-special-case" href="{{ url_for('view_posts') }}">Posts</a></h4>
+                            <md-block class="a-special-case-no-hover">
+                                >- View and make posts with images, gifs and text.
+                            </md-block>
+                        </li>
+                        <li>
+                            <h4><a class="a-special-case" href="{{ url_for('materials') }}">Study Materials</a></h4>
+                            <md-block class="a-special-case-no-hover">
+                                >- View, Download and upload study materials in pdf format.
+                            </md-block>
+                        </li>
+                        <li>
+                            <h4><a class="a-special-case" href="{{ url_for('hives') }}">Hives</a></h4>
+                            <md-block class="a-special-case-no-hover">
+                                >- Join and create hives to collaborate with other students.
+                            </md-block>
+                        </li>
+                        <li>
+                            <h4><a class="a-special-case" href="#">Inbox (Under Development)</a></h4>
+                        </li>
+                    </ul>
                 </div>
-                <div class="col-md-4">
-                    <a href="{{ url_for('hives') }}" class="btn btn-light btn-lg btn-block cta-button"><i
-                            class="fas fa-comments"></i> Join
-                        Hives</a>
-                </div>
-                <div class="col-md-4">
-                    <a href="{{ url_for('materials') }}" class="btn btn-light btn-lg btn-block cta-button"><i
-                            class="fas fa-file-alt"></i>
-                        Review Study
-                        Materials</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <hr>
-
-    <section class="footer-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h3>Developed by Esvin Joshua</h3>
-                    <h4>Connect</h4>
-                    <a class="a-special-case" href="https://www.linkedin.com/in/esvin-joshua-a84215291/"
-                        target="_blank">
-                        <i class="fa-brands fa-linkedin fa-3x"></i>
-                    </a>
-                    <a class="a-special-case" href="https://www.github.com/WakandaWebWeaver" target="_blank">
-                        <i class="fa-brands fa-github fa-3x"></i>
-                    </a>
-                    <a class="a-special-case" href="https://www.instagram.com/__esvinj_._" target="_blank">
-                        <i class="fa-brands fa-instagram fa-3x"></i>
-                    </a>
-                </div>
-                <div class="col-md-6">
-                    <img src="/static/imgs/profile.jpg" alt="Developer Profile Picture" class="dev-pfp-image">
+                <div class="col-md-4" style="margin: 20px auto; padding: 40px auto;">
+                    <h2>Account</h2>
+                    <ul>
+                        <li>
+                            <h4><a class="a-special-case" href="{{ url_for('login') }}">Login</a></h4>
+                            {% if not current_user.is_authenticated %}
+                            <md-block class="a-special-case-no-hover">
+                                >- Login to your account. (You are not logged in)
+                            </md-block>
+                            {% endif %}
+                        </li>
+                        <li>
+                            <h4><a class="a-special-case" href="{{ url_for('register') }}">Register</a></h4>
+                            {% if not current_user.is_authenticated %}
+                            <md-block class="a-special-case-no-hover">
+                                >- Register for an account.
+                            </md-block>
+                            {% endif %}
+                        </li>
+                        <li>
+                            <h4><a class="a-special-case" href="{{ url_for('view_profile', username=session.id) }}">View
+                                    Profile</a></h4>
+                            <md-block class="a-special-case-no-hover">
+                                >- View your profile, and search for other users.
+                            </md-block>
+                        </li>
+                        <li>
+                            <h4><a class="a-special-case" href="{{ url_for('update_profile') }}">Account Settings</a>
+                            </h4>
+                        </li>
+                    </ul>
+                    <div id="link-description" class="text-center"></div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+
+
 
     <script>
-        window.addEventListener('scroll', function () {
-            const scroll = window.scrollY;
-            const part1 = document.getElementById('part1');
-            const part2 = document.getElementById('part2');
-
-            var screenWidth = window.innerWidth;
-            if (screenWidth < 768) {
-                part1.style.transform = `translateX(${scroll / screenWidth * 50}px)`;
-                part2.style.transform = `translateX(-${scroll / screenWidth * 50}px)`;
-            } else if (screenWidth >= 768 && screenWidth < 992) {
-                part1.style.transform = `translateX(${scroll / screenWidth * 100}px)`;
-                part2.style.transform = `translateX(-${scroll / screenWidth * 100}px)`;
-            } else {
-                part1.style.transform = `translateX(${scroll / screenWidth * 150}px)`;
-                part2.style.transform = `translateX(-${scroll / screenWidth * 150}px)`;
-            }
-        });
-
         const devPfp = document.getElementById('dev-pfp');
         devPfp.addEventListener('mouseover', function () {
             devPfp.style.transform = 'scale(1.1)';
         });
         devPfp.addEventListener('mouseout', function () {
             devPfp.style.transform = 'scale(1)';
+        });
+
+        const links = document.querySelectorAll('.a-special-case');
+        const linkDescription = document.getElementById('link-description');
+        links.forEach(link => {
+            link.addEventListener('mouseover', function () {
+                linkDescription.innerHTML = `Click to view ${link.text}`;
+            });
+            link.addEventListener('mouseout', function () {
+                linkDescription.innerHTML = '';
+            });
         });
 
     </script>
