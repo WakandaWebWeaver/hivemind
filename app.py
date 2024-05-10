@@ -10,7 +10,7 @@ from better_profanity import profanity
 import random
 import scan
 import platform
-import requests
+import time
 
 
 app = Flask(__name__)
@@ -108,8 +108,8 @@ def debug():
     os_info = platform.system()
     release = platform.release()
     version = platform.version()
-    time = datetime.datetime.now()
-    currenttime = time.strftime("%I:%M:%S %p")
+    currenttime = datetime.datetime.now().strftime("%I:%M:%S %p")
+    timezone = time.tzname[1]
 
     return render_template('debug.html', user_info=user_info, s3_files=s3_files,
                            session=session, os_info=os_info, release=release, version=version, currenttime=currenttime,
@@ -118,7 +118,7 @@ def debug():
                            files=os.listdir(),
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None,
-                           url=f"https://{s3_bucket_name}.s3.amazonaws.com/"
+                           url=f"https://{s3_bucket_name}.s3.amazonaws.com/", timezone=timezone
 
                            )
 
@@ -956,6 +956,10 @@ def update_profile():
                         post['profile_picture'] = profile_picture_s3_key
                         posts_collection.update_one(
                             {'post_id': post['post_id']}, {'$set': post})
+
+                user['profile_picture_s3_key'] = profile_picture_s3_key
+                user_collection.update_one(
+                    {'full_name': name}, {'$set': user})
 
             else:
                 profile_picture_s3_key = session['profile_picture']
