@@ -411,8 +411,7 @@ def unblock_user():
 @app.route('/download', methods=['POST', 'GET'])
 def download():
     filename = request.args.get('filename')
-    print(request.form)
-    print(filename)
+
     file_url = f"https://{s3_bucket_name}.s3.amazonaws.com/materials/{filename}"
     return redirect(file_url)
 
@@ -1155,7 +1154,6 @@ def create_hive_post():
     hive_post_image = request.files['post_image']
     contains_image = False
     post_image_s3_key = ''
-    print(request.form)
 
     if profanity.contains_profanity(post):
         blacklist_collection.insert_one({'post_id': post_id,

@@ -107,21 +107,21 @@
                     <ul>
                         <li>
                             <h4><a class="a-special-case" href="{{ url_for('view_posts') }}">Posts</a></h4>
-                            <md-block class="a-special-case-no-hover">
-                                >- View and make posts with images, gifs and text.
-                            </md-block>
+
                         </li>
                         <li>
                             <h4><a class="a-special-case" href="{{ url_for('materials') }}">Study Materials</a></h4>
-                            <md-block class="a-special-case-no-hover">
-                                >- View, Download and upload study materials in pdf format.
-                            </md-block>
+
                         </li>
                         <li>
                             <h4><a class="a-special-case" href="{{ url_for('hives') }}">Hives</a></h4>
-                            <md-block class="a-special-case-no-hover">
-                                >- Join and create hives to collaborate with other students.
-                            </md-block>
+
+                        </li>
+                        <li>
+                            <h4>
+                                <a class="a-special-case" href="{{ url_for('mindspace') }}">Diary</a>
+                            </h4>
+
                         </li>
                         <li>
                             <h4><a class="a-special-case" href="#">Inbox (Under Development)</a></h4>
@@ -150,16 +150,17 @@
                         <li>
                             <h4><a class="a-special-case" href="{{ url_for('view_profile', username=session.id) }}">View
                                     Profile</a></h4>
-                            <md-block class="a-special-case-no-hover">
-                                >- View your profile, and search for other users.
-                            </md-block>
+
                         </li>
                         <li>
                             <h4><a class="a-special-case" href="{{ url_for('update_profile') }}">Account Settings</a>
                             </h4>
                         </li>
                     </ul>
-                    <div id="link-description" class="text-center"></div>
+                </div>
+                <div class="col-md-4" style="margin: 20px auto; padding: 40px auto;">
+                    <h3>Hover over a link to view its information</h3>
+                    <p id="link-description"></p>
                 </div>
             </div>
         </div>
@@ -168,24 +169,32 @@
 
 
     <script>
-        const devPfp = document.getElementById('dev-pfp');
-        devPfp.addEventListener('mouseover', function () {
-            devPfp.style.transform = 'scale(1.1)';
-        });
-        devPfp.addEventListener('mouseout', function () {
-            devPfp.style.transform = 'scale(1)';
+        const aSpecialCase = document.querySelectorAll('.a-special-case');
+        const linkDescription = document.getElementById('link-description');
+
+        const default_info = 'Hover over a link to view its information';
+
+        const info_table = {
+            'Posts': '> A place to view and make posts with images, gifs and text. Your posts will be visible to other students of your college',
+            'Study Materials': '> View, Download and upload study materials in pdf format. These materials will be visible to other students of your college.',
+            'Hives': '> Join and create hives to collaborate with other students.',
+            'Diary': '> Make notes, diary entries and thoughts. These entries are private and only visible to you.',
+            'Inbox (Under Development)': '> A place to send private one time messages to other students of your college.',
+            'Login': '> Login to your account.',
+            'Register': '> Register for an account on HiveMind.',
+            'View Profile': '> View your profile, and search for other users.',
+            'Account Settings': '> Manage your account settings, update your profile picture, name and password.'
+        };
+
+        aSpecialCase.forEach((element) => {
+            element.addEventListener('mouseover', (e) => {
+                linkDescription.innerText = info_table[element.innerText];
+            });
+            element.addEventListener('mouseout', (e) => {
+                linkDescription.innerText = default_info;
+            });
         });
 
-        const links = document.querySelectorAll('.a-special-case');
-        const linkDescription = document.getElementById('link-description');
-        links.forEach(link => {
-            link.addEventListener('mouseover', function () {
-                linkDescription.innerHTML = `Click to view ${link.text}`;
-            });
-            link.addEventListener('mouseout', function () {
-                linkDescription.innerHTML = '';
-            });
-        });
 
     </script>
 
