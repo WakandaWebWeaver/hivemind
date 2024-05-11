@@ -119,7 +119,6 @@ def debug():
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None,
                            url=f"https://{s3_bucket_name}.s3.amazonaws.com/", timezone=timezone
-
                            )
 
 
@@ -155,6 +154,16 @@ def admin(action, keyword):
         file_name = keyword.split('_')[1]
         file_key = f"{file_folder}/{file_name}"
         s3.delete_object(Bucket=s3_bucket_name, Key=file_key)
+    elif action == 'rename_file':
+        file_folder = keyword.split('_')[0]
+        file_name = keyword.split('_')[1]
+        new_name = keyword.split('_')[2]
+        file_key = f"{file_folder}/{file_name}"
+        new_key = f"{file_folder}/{new_name}"
+        # s3.copy_object(Bucket=s3_bucket_name, CopySource=f"{s3_bucket_name}/{file_key}",
+        #                Key=new_key)
+        # s3.delete_object(Bucket=s3_bucket_name, Key=file_key)
+        print(file_key, new_key)
 
     return {'success': True}
 
@@ -326,6 +335,7 @@ def upload_material():
 @app.route('/logout')
 @login_required
 def logout():
+    session.clear()
     logout_user()
     return redirect(url_for('index'))
 

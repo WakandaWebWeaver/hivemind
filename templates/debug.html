@@ -35,6 +35,15 @@
         <hr />
 
         <div class="container">
+            <h2>Operating System information</h2>
+            <h5>OS: {{ os_info }}</h5>
+            <h5>OS Version: {{ version }}</h5>
+            <h5>OS Release: {{ release }}</h5>
+        </div>
+
+        <hr>
+
+        <div class="container">
             <h2>Users</h2>
             <table class="table table-dark table-striped" id="user-table">
                 <thead>
@@ -145,14 +154,21 @@
                                     <button class="btn btn-danger"
                                         onclick="fileAction('delete_file', '{{ (file.Key).split('/')[0] }}', '{{ (file.Key).split('/')[1] }}')">Delete</button>
                                 </div>
+                                <div class="container col-4">
+                                    <form method="POST">
+                                        <input type="hidden" name="old_folder" value="{{ (file.Key).split('/')[0] }}">
+                                        <input type="hidden" name="old_file" value="{{ (file.Key).split('/')[1] }}">
+                                        <input type="text" name="new_file" placeholder="Enter new name">
+                                        <button type="submit" class="btn btn-primary"
+                                            onsubmit="fileAction('rename_file', '{{ (file.Key).split('/')[0] }}', '{{ (file.Key).split('/')[1] }}', name )">Rename</button>
+                                    </form>
+                                </div>
                             </div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
         </div>
-
-        <hr>
 
         <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel"
             aria-hidden="true">
@@ -165,7 +181,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form class="form" id="editUserForm">
                             <div class="form-group">
                                 <label for="selector">Selector</label>
                                 <input type="text" class="form-control" id="selector" placeholder="Enter a selector">
@@ -184,8 +200,9 @@
                                     placeholder="Enter new password">
                             </div>
                             <div class="form-group">
-                                <label for="phone">Phone</label>
-                                <input type="tel" class="form-control" id="phone" placeholder="Enter new phone number">
+                                <label for="roll_number">Phone</label>
+                                <input type="number" class="form-control" id="roll_number"
+                                    placeholder="Enter new phone number">
                             </div>
                         </form>
                     </div>
@@ -266,13 +283,13 @@
 
         updateCurrentTime();
 
-        function fileAction(action, file_folder, file_name) {
+        function fileAction(action, file_folder, file_name, extra_args = '') {
             const fileActionLoader = document.getElementById('file-action-loader');
             fileActionLoader.style.display = 'block';
 
             // console.log(action, file_folder, file_name)
 
-            fetch(`/admin/${action}/${file_folder}_${file_name}`, {
+            fetch(`/admin/${action}/${file_folder}_${file_name}_${extra_args}`, {
                 method: 'POST'
             }).then(response => response.json())
                 .then(data => {
@@ -284,6 +301,14 @@
                     }
                 });
         }
+
+        $('#editUserForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            alert('Form submitted!');
+
+
+        });
 
         function userAction(action, username) {
             const userActionLoader = document.getElementById('user-action-loader');

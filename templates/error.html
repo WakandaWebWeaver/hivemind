@@ -111,26 +111,6 @@
     </section>
 
 
-    <script>
-        window.addEventListener('scroll', function () {
-            const scroll = window.scrollY;
-            const part1 = document.getElementById('part1');
-            const part2 = document.getElementById('part2');
-            part1.style.transform = `translateX(${scroll / 2}px)`;
-            part2.style.transform = `translateX(-${scroll / 2}px)`;
-        });
-
-        // Make the dev-pfp slightly bigger on hover
-        const devPfp = document.getElementById('dev-pfp');
-        devPfp.addEventListener('mouseover', function () {
-            devPfp.style.transform = 'scale(1.1)';
-        });
-        devPfp.addEventListener('mouseout', function () {
-            devPfp.style.transform = 'scale(1)';
-        });
-
-    </script>
-
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
