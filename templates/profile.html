@@ -261,10 +261,14 @@
                 </div>
                 {% if user.profile_song %}
                 <div class="container">
+                    <div class="music-loader" role="status">
+                        <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                            id="music-loader"></l-line-wobble>
+                    </div>
                     <iframe style="border-radius:10px" src="{{ user.profile_song }}?utm_source=generator"
                         width="max-content" height="100" frameBorder="0" allowfullscreen=""
                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy"></iframe>
+                        loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
                 </div>
                 {% if user.username == current_user.id %}
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#songModal">
@@ -387,6 +391,11 @@
                 $('#search-results').empty();
             }
         });
+
+        function handleMusicEmbedLoad(embed) {
+            var loader = embed.previousElementSibling;
+            loader.style.display = 'none';
+        }
 
         $(document).click(function (e) {
             if (!$(e.target).closest('#search-results').length) {
