@@ -71,23 +71,23 @@ def index():
                            )
 
 
-# @app.errorhandler(Exception)
-# def error_page(e):
-#     if errors_collection.count_documents({}) > 30:
-#         errors_collection.drop()
+@app.errorhandler(Exception)
+def error_page(e):
+    if errors_collection.count_documents({}) > 30:
+        errors_collection.drop()
 
-#     error = {
-#         'error': str(e),
-#         'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-#         'trigger url': request.url,
-#         'method': request.method,
-#         'complete request': f'{request.method} {request.url}',
-#         'client': request.headers.get('User-Agent'),
-#         'headers': dict(request.headers),
-#         'ip': request.remote_addr
-#     }
-#     errors_collection.insert_one(error)
-#     return render_template('error.html')
+    error = {
+        'error': str(e),
+        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+        'trigger url': request.url,
+        'method': request.method,
+        'complete request': f'{request.method} {request.url}',
+        'client': request.headers.get('User-Agent'),
+        'headers': dict(request.headers),
+        'ip': request.remote_addr
+    }
+    errors_collection.insert_one(error)
+    return render_template('error.html')
 
 
 content_placeholders = [
@@ -886,7 +886,8 @@ def mindspace():
 def note():
     content = request.form.get('note_content')
     title = request.form.get('note_title')
-    note_id = notes_collection.count_documents({}) + 1
+    note_id = notes_collection.count_documents(
+        {}) + 1 + int(date[0]) + random.randint(1, 1000)
     date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
     author = session['name']
 
