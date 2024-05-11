@@ -187,6 +187,10 @@
                                             <p class="card-text text-center">{{ post['content'] }}</p>
                                         </div>
                                         {% else %}
+                                        <div class="music-loader" role="status">
+                                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
+                                                color="black" id="music-loader"></l-line-wobble>
+                                        </div>
                                         <iframe style="border-radius:12px"
                                             src="{{ post.song_url }}?utm_source=generator" width="100%" height="150"
                                             frameBorder="0" allowfullscreen=""
@@ -400,6 +404,7 @@
                 var songName = content.substring(6);
                 const songLoader = "<l-leapfrog size='40' speed='2.5' color='black'></l-leapfrog>";
 
+                $('#songResults').empty();
                 $('#songResults').append(songLoader);
 
                 fetch('/search_song/' + songName)
@@ -445,6 +450,9 @@
                 document.getElementById('postContent').disabled = true;
                 document.getElementById('postImage').disabled = true;
                 document.getElementById('anonymousCheck').disabled = true;
+                document.getElementById('submitPostButton').disabled = true;
+                loadingSpinner.style.display = 'block';
+                document.getElementById('submitPostButton').innerText = 'Adding Song...';
 
 
                 const embedUrl = document.getElementById('embed_url').value;

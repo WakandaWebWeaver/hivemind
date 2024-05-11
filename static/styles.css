@@ -7,8 +7,8 @@ body {
 }
 
 .profile-picture-div {
-  width: 250px;
-  height: 250px;
+  width: 200px;
+  height: 200px;
   overflow: hidden;
 }
 
@@ -176,7 +176,7 @@ body {
 
 .post-image-container img {
   object-fit: cover;
-  border-radius: 5%;
+  border-radius: 5px;
   width: auto;
   height: 300px;
   overflow-x: scroll;
@@ -351,6 +351,16 @@ body {
   margin-right: 10px;
   transition: all 0.42s cubic-bezier(0.25, 0.8, 0.25, 1);
   width: 0;
+}
+
+#post-card {
+  background-color: #acacac;
+  border-radius: 10px;
+  box-shadow: 4px 4px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
 }
 
 .special-button:hover:before {

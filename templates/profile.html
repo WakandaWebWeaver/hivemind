@@ -225,7 +225,7 @@
         </div>
     </nav>
     <div class="container">
-        <div class="input-group" style="margin: 10px auto; width: 400px;">
+        <div class="input-group" style="padding: 10px;">
             <input type="text" class="form-control" id="user-search-bar" name="search" placeholder="Search for users"
                 aria-label="Search for users" aria-describedby="button-addon2">
             <div class="input-group-append">
@@ -261,16 +261,20 @@
                 </div>
                 {% if user.profile_song %}
                 <div class="container">
-                    <iframe style="border-radius:12px" src="{{ user.profile_song }}?utm_source=generator"
+                    <iframe style="border-radius:10px" src="{{ user.profile_song }}?utm_source=generator"
                         width="max-content" height="100" frameBorder="0" allowfullscreen=""
                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                         loading="lazy"></iframe>
                 </div>
+                {% if user.username == current_user.id %}
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#songModal">
                     Change Profile Song</button>
+                {% endif %}
                 {% else %}
+                {% if user.username == current_user.id %}
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#songModal">
                     Set Profile Song</button>
+                {% endif %}
                 {% endif %}
             </div>
 
@@ -418,6 +422,7 @@
             const songName = $('#songName').val();
             const songLoader = "<l-leapfrog size='40' speed='2.5' color='black'></l-leapfrog>";
 
+            $('#songResults').empty();
             $('#songResults').append(songLoader);
 
             fetch('/search_song/' + songName)
