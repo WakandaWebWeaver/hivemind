@@ -11,7 +11,10 @@ import random
 import scan
 import platform
 import time
-
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy import Spotify
+import random
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
@@ -68,23 +71,23 @@ def index():
                            )
 
 
-@app.errorhandler(Exception)
-def error_page(e):
-    if errors_collection.count_documents({}) > 30:
-        errors_collection.drop()
+# @app.errorhandler(Exception)
+# def error_page(e):
+#     if errors_collection.count_documents({}) > 30:
+#         errors_collection.drop()
 
-    error = {
-        'error': str(e),
-        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-        'trigger url': request.url,
-        'method': request.method,
-        'complete request': f'{request.method} {request.url}',
-        'client': request.headers.get('User-Agent'),
-        'headers': dict(request.headers),
-        'ip': request.remote_addr
-    }
-    errors_collection.insert_one(error)
-    return render_template('error.html')
+#     error = {
+#         'error': str(e),
+#         'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+#         'trigger url': request.url,
+#         'method': request.method,
+#         'complete request': f'{request.method} {request.url}',
+#         'client': request.headers.get('User-Agent'),
+#         'headers': dict(request.headers),
+#         'ip': request.remote_addr
+#     }
+#     errors_collection.insert_one(error)
+#     return render_template('error.html')
 
 
 content_placeholders = [
@@ -429,12 +432,16 @@ def create_post():
     post_picture = request.files['post_image']
     author = session['name']
     user = user_collection.find_one({'full_name': author})
-    post_id = posts_collection.count_documents({}) + 1
     date = datetime.date.today().strftime("%d/%m/%y")
     time = datetime.datetime.now().strftime("%H:%M")
+    post_id = posts_collection.count_documents(
+        {}) + 1 + user.get('post_count', 0) + int(date[0]) + random.randint(1, 1000)
     profile_picture = session['profile_picture']
     post_image_s3_key = ''
     contains_image = False
+
+    if request.form.get('embed_url') is not None or request.form.get('embed_url') != '':
+        pass
 
     if user['verified'] == False:
         return redirect(url_for('verify_id_page'))
@@ -505,6 +512,7 @@ def create_post():
         'profile_picture': profile_picture if not anonymous else 'Profile pictures/avatar_default.jpeg',
         'date': date,
         'post_id': post_id,
+        'song_url': '',
         'contains_image': contains_image,
         'post_image': post_image_s3_key,
         'image_size': image_size[0:6] + " KB" if contains_image else None,
@@ -522,6 +530,80 @@ def create_post():
     posts_collection.insert_one(post_data)
 
     return {'success': True}
+
+
+@app.route('/add_song_to_post/<song_url>', methods=['GET'])
+@login_required
+def add_song_to_post(song_url):
+    print(song_url)
+    author = session['name']
+    user = user_collection.find_one({'full_name': author})
+    date = datetime.date.today().strftime("%d/%m/%y")
+
+    post_id = posts_collection.count_documents(
+        {}) + 1 + user.get('post_count', 0) + int(date[0]) + random.randint(1, 1000)
+    date = datetime.date.today().strftime("%d/%m/%y")
+    profile_picture = session['profile_picture']
+
+    post_data = {
+        'title': '',
+        'content': '',
+        'author': author,
+        'username': session['id'],
+        'profile_picture': profile_picture,
+        'date': date,
+        'post_id': post_id,
+        'contains_image': False,
+        'post_image': None,
+        'song_url': f"https://open.spotify.com/embed/track/{song_url}",
+        'anonymous': False,
+        'college_name': session['college_name']
+    }
+
+    user['post_count'] = user.get('post_count', 0) + 1
+    user['posts'] = user.get('posts', []) + [post_id]
+    user_collection.update_one({'full_name': author}, {'$set': user})
+    posts_collection.insert_one(post_data)
+
+    return {'success': True}
+
+
+@app.route('/add_song/<song_url>', methods=['GET'])
+@login_required
+def add_song(song_url):
+    print(song_url)
+    user = user_collection.find_one({'username': session['id']})
+    user['profile_song'] = f"https://open.spotify.com/embed/track/{song_url}"
+
+    print(user['profile_song'])
+
+    user_collection.update_one({'username': session['id']}, {'$set': user})
+
+    return {'success': True}
+
+
+@app.route('/search_song/<song_name>', methods=['GET'])
+@login_required
+def search_song(song_name):
+    sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+        client_id=os.getenv('SPOTIFY_CLIENT_ID'),
+        client_secret=os.getenv('SPOTIFY_CLIENT_SECRET')
+    ))
+
+    results = sp.search(q=song_name, limit=3)
+
+    songs = []
+    for song in results['tracks']['items']:
+        song_data = {
+            'song_name': song['name'],
+            'artist_name': song['artists'][0]['name'],
+            'album_name': song['album']['name'],
+            'album_image': song['album']['images'][0]['url'],
+            'embed_url': song['external_urls']['spotify']
+        }
+        songs.append(song_data)
+
+    return {'songs': songs}
 
 
 @app.route('/delete_comment', methods=['POST'])

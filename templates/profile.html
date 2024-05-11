@@ -9,6 +9,7 @@
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/dotStream.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/leapfrog.js"></script>
 
     <link rel="stylesheet" href="/static/styles.css">
 
@@ -253,10 +254,26 @@
     <div class="container mt-5 main-container">
         <div class="row">
             {% if user %}
-            <div class="profile-picture-div mb-4">
-                <img src="{{ builder_url }}{{ user.profile_picture_s3_key }}" alt="Profile Picture"
-                    class="rounded-circle profile-picture">
+            <div>
+                <div class="profile-picture-div mb-4">
+                    <img src="{{ builder_url }}{{ user.profile_picture_s3_key }}" alt="Profile Picture"
+                        class="rounded-circle profile-picture">
+                </div>
+                {% if user.profile_song %}
+                <div class="container">
+                    <iframe style="border-radius:12px" src="{{ user.profile_song }}?utm_source=generator"
+                        width="max-content" height="100" frameBorder="0" allowfullscreen=""
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"></iframe>
+                </div>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#songModal">
+                    Change Profile Song</button>
+                {% else %}
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#songModal">
+                    Set Profile Song</button>
+                {% endif %}
             </div>
+
             <div class="container col-md-4">
                 {% if user.blacklist %}
                 <h1 class="text-danger">User is blacklisted</h1>
@@ -297,6 +314,38 @@
             {% else %}
             <p>User not found</p>
             {% endif %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="songModal" tabindex="-1" role="dialog" aria-labelledby="songModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-dark" id="songModalLabel">Select a Song to display on your profile</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="select-song-form">
+                        <div class="form-group">
+                            <label for="songName" class=" text-dark">Song Name</label>
+                            <input type="text" class="form-control" id="songName" placeholder="Enter song name">
+                        </div>
+                        <input type="hidden" name="artist_name" id="artist_name">
+                        <input type="hidden" name="embed_url" id="embed_url">
+                        <div id="songResults" class="list-group"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="addSong()">Save changes</button>
+                    <l-leapfrog size='40' speed='2.5' color='black' id="add-song-btn-loader"
+                        style="display: none;"></l-leapfrog>
+
+                </div>
+            </div>
         </div>
     </div>
 
@@ -341,6 +390,58 @@
             }
         });
 
+        function addSong() {
+            const embedUrl = $('#embed_url').val();
+
+            const songLoader = document.getElementById('add-song-btn-loader');
+            songLoader.style.display = 'block';
+
+            const embedUrlParts = embedUrl.split('/');
+            const embedUrlValue = embedUrlParts[embedUrlParts.length - 1];
+
+            console.log(embedUrl);
+
+            fetch('/add_song/' + embedUrlValue)
+                .then(response => response.json())
+                .then(data => {
+                    songLoader.style.display = 'none';
+                    if (data.success) {
+                        $('#songModal').modal('hide');
+                        window.location.reload();
+                    } else {
+                        alert('Failed to add song');
+                    }
+                });
+        }
+
+        $('#songName').on('input', function () {
+            const songName = $('#songName').val();
+            const songLoader = "<l-leapfrog size='40' speed='2.5' color='black'></l-leapfrog>";
+
+            $('#songResults').append(songLoader);
+
+            fetch('/search_song/' + songName)
+                .then(response => response.json())
+                .then(data => {
+                    $('#songResults').empty();
+                    const songs = data['songs'];
+                    songs.forEach(song => {
+                        $('#songResults').append(`
+                            <a href="#" class="list-group-item list-group-item-action" onclick="selectSong('${song.embed_url}', '${song.song_name}', '${song.artist_name}')">
+                                <img src="${song.album_image}" alt="Album Image" class="album-image" style="width: 40px; height: 40px;">
+                                ${song.song_name} by 
+                                <span class='text-muted'>${song.artist_name}</span>
+                            </a>
+                        `);
+                    });
+                });
+        });
+
+        function selectSong(embed_url, song_name, artist_name) {
+            $('#songName').val(song_name + ' by ' + artist_name);
+            $('#embed_url').val(embed_url);
+            $('#songResults').empty();
+        }
     </script>
 
 </body>

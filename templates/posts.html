@@ -179,13 +179,19 @@
                                             {% endif %}
                                             <p class="card-text">{{ post['content'] }}</p>
                                         </div>
-                                        {% else %}
+                                        {% elif post['song_url'] == '' %}
                                         <div class="container">
                                             {% if post['title'] != "" %}
                                             <p class="card-title">>_> {{ post['title'] }}</p>
                                             {% endif %}
                                             <p class="card-text text-center">{{ post['content'] }}</p>
                                         </div>
+                                        {% else %}
+                                        <iframe style="border-radius:12px"
+                                            src="{{ post.song_url }}?utm_source=generator" width="100%" height="150"
+                                            frameBorder="0" allowfullscreen=""
+                                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                            loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -272,12 +278,14 @@
                             <label for="postContent">Content</label>
                             <textarea class="form-control" id="postContent" name="post_text" rows="3" required
                                 placeholder="{{ content_placeholder }}"></textarea>
+                            <div id="songResults" class="list-group"></div>
                         </div>
                         <div class="form-group">
                             <label for="postImage">Got an image?</label>
                             <input type="file" class="form-control-file" id="postImage" name="post_image"
                                 accept="image/*" max-size="20971520">
                         </div>
+                        <input type="hidden" name="embed_url" id="embed_url">
                 </div>
                 <div class="form-check mb-2" style="margin-left: 5px;">
                     <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
@@ -374,6 +382,11 @@
             loader.style.display = 'none';
         }
 
+        function handleMusicEmbedLoad(embed) {
+            var loader = embed.previousElementSibling;
+            loader.style.display = 'none';
+        }
+
         if (window.innerWidth > 768) {
             var postImages = document.getElementsByClassName('post-image');
             for (var i = 0; i < postImages.length; i++) {
@@ -381,38 +394,106 @@
             }
         }
 
+        $('#postContent').on('input', function () {
+            var content = $('#postContent').val();
+            if (content.startsWith('song: ')) {
+                var songName = content.substring(6);
+                const songLoader = "<l-leapfrog size='40' speed='2.5' color='black'></l-leapfrog>";
+
+                $('#songResults').append(songLoader);
+
+                fetch('/search_song/' + songName)
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#songResults').empty();
+                        const songs = data['songs'];
+                        songs.forEach(song => {
+                            $('#songResults').append(`
+                            <a href="#" class="list-group-item list-group-item-action" onclick="selectSong('${song.embed_url}', '${song.song_name}')">
+                                <img src="${song.album_image}" alt="Album Image" class="album-image" style="width: 40px; height: 40px;">
+                                ${song.song_name} <br>
+                                <span class='text-muted'>${song.artist_name}</span>
+                            </a>
+                        `);
+                        });
+                    });
+            } else {
+                $('#songResults').empty();
+            }
+        });
+
+        function selectSong(embed_url, song_name) {
+            $('#songResults').empty();
+            $('#embed_url').val(embed_url);
+            console.log(embed_url);
+            console.log($('#embed_url').val());
+            $('#postContent').val('song: ' + song_name);
+        }
+
 
         document.getElementById('createPostForm').addEventListener('submit', function (e) {
             e.preventDefault();
-
-            var form = document.getElementById('createPostForm');
-            var formData = new FormData(form);
-            var submitButton = document.getElementById('submitPostButton');
             var loadingSpinner = document.querySelector('.loading-spinner');
-            var anonymousCheck = document.getElementById('anonymousCheck');
 
-            submitButton.disabled = true;
-            submitButton.innerText = 'Creating Post...';
-            loadingSpinner.style.display = 'inline-block';
+            if (document.getElementById('postContent').value.startsWith('song: ')) {
+                if (document.getElementById('embed_url').value == '') {
+                    alert('Your post contains a song, but you have not selected a song to add.');
+                    return;
+                }
 
-            fetch('/create_post', {
-                method: 'POST',
-                body: formData
-            }).then(response => response.json())
-                .then(data => {
-                    if (data.profanity) {
-                        submitButton.innerText = 'L :(';
+                document.getElementById('postTitle').disabled = true;
+                document.getElementById('postContent').disabled = true;
+                document.getElementById('postImage').disabled = true;
+                document.getElementById('anonymousCheck').disabled = true;
+
+
+                const embedUrl = document.getElementById('embed_url').value;
+
+                const embedUrlParts = embedUrl.split('/');
+                const embedUrlValue = embedUrlParts[embedUrlParts.length - 1];
+
+                console.log(embedUrl);
+
+                fetch('/add_song_to_post/' + embedUrlValue)
+                    .then(response => response.json())
+                    .then(data => {
                         loadingSpinner.style.display = 'none';
-                        alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
-                        window.location.href = "{{ url_for('index') }}";
-                    } else if (data.success) {
-                        window.location.reload();
-                    } else {
-                        submitButton.innerText = 'Create Post';
-                        loadingSpinner.style.display = 'none';
-                        alert('An error occurred while creating the post. Please try again.');
-                    }
-                });
+                        if (data.success) {
+                            $('#songModal').modal('hide');
+                            window.location.reload();
+                        } else {
+                            alert('Failed to add song');
+                        }
+                    });
+            } else {
+                var form = document.getElementById('createPostForm');
+                var formData = new FormData(form);
+                var submitButton = document.getElementById('submitPostButton');
+                var anonymousCheck = document.getElementById('anonymousCheck');
+
+                submitButton.disabled = true;
+                submitButton.innerText = 'Creating Post...';
+                loadingSpinner.style.display = 'inline-block';
+
+                fetch('/create_post', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.profanity) {
+                            submitButton.innerText = 'L :(';
+                            loadingSpinner.style.display = 'none';
+                            alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
+                            window.location.href = "{{ url_for('index') }}";
+                        } else if (data.success) {
+                            window.location.reload();
+                        } else {
+                            submitButton.innerText = 'Create Post';
+                            loadingSpinner.style.display = 'none';
+                            alert('An error occurred while creating the post. Please try again.');
+                        }
+                    });
+            }
         });
     </script>
 </body>
