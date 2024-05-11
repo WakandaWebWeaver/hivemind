@@ -365,6 +365,7 @@
             const searchLoader = "<l-dot-stream size='60' speed='2.5' color='black'></l-dot-stream>"
 
             if (search.length > 0) {
+                $('#search-results').empty();
                 $('#search-results').append(searchLoader);
                 fetch('/search_user/' + search + '_' + collegeSearch)
                     .then(response => response.json())

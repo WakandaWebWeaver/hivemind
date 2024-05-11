@@ -1212,12 +1212,13 @@ def search_user(username):
 
     if collegeSpecific:
         for user in users:
-            if user['college_name'] == session['college_name'] and username.lower() in user['username'].lower():
-                user_list.append(user['username'])
-                names.append(user['full_name'])
+            if user['college_name'] == session['college_name']:
+                if username.lower() in user['username'].lower() or username.lower() in user['full_name'].lower():
+                    user_list.append(user['username'])
+                    names.append(user['full_name'])
     else:
         for user in users:
-            if username.lower() in user['username'].lower():
+            if username.lower() in user['username'].lower() or username.lower() in user['full_name'].lower():
                 user_list.append(user['username'])
                 names.append(user['full_name'])
 
