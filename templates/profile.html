@@ -10,6 +10,7 @@
     <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/dotStream.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/leapfrog.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/waveform.js"></script>
 
     <link rel="stylesheet" href="/static/styles.css">
 
@@ -270,15 +271,6 @@
                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                         loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
                 </div>
-                {% if user.username == current_user.id %}
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#songModal">
-                    Change Profile Song</button>
-                {% endif %}
-                {% else %}
-                {% if user.username == current_user.id %}
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#songModal">
-                    Set Profile Song</button>
-                {% endif %}
                 {% endif %}
             </div>
 
@@ -298,11 +290,20 @@
                 <h4>Bio</h4>
                 <p>{{ user.bio }}</p>
                 <hr>
-                <div class="container" style="padding: 10px;">
+                <div class="container row" style="padding: 10px;">
                     {% if user.username == current_user.id %}
-                    <a href="{{ url_for('update_profile') }}" class="btn btn-primary">Update
+                    <a class="btn btn-primary" style="padding: 10px; margin: 5px;" href="#updateProfileModal"
+                        data-toggle="modal" data-target="#updateProfileModal"><i class="fas fa-user-cog"></i> Update
                         Profile</a>
-                    <a class="btn btn-primary" href="/mindspace"><i class="fas fa-pen"></i> make a note</a>
+                    <a class="btn btn-primary" style="padding: 10px; margin: 5px;" href="/mindspace"><i
+                            class="fas fa-pen"></i> make a note</a>
+                    {% if user.profile_song %}
+                    <a class="btn btn-primary" style="padding: 10px; margin: 5px;" href="#add-song" data-toggle="modal"
+                        data-target="#songModal"><i class="fas fa-music"></i> Change Profile Song</a>
+                    {% else %}
+                    <a class="btn btn-primary" style="padding: 10px; margin: 5px;" href="#add-song" data-toggle="modal"
+                        data-target="#songModal"><i class="fas fa-music"></i> Set Profile Song</a>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -322,6 +323,59 @@
             {% else %}
             <p>User not found</p>
             {% endif %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="updateProfileModal" tabindex="-1" role="dialog"
+        aria-labelledby="updateProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title text-light" id="updateProfileModalLabel">Update Profile</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <form class="text-light" id="account-settings-form" action="/update_profile" method="POST"
+                            enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="profile-pic">Profile Picture</label>
+                                <input type="file" class="form-control-file" id="profile-pic" name="profile_picture"
+                                    accept="image/*">
+                            </div>
+                            <div class="form-group">
+                                <label for="bio">Bio</label>
+                                <textarea class="form-control" id="bio" name="bio" rows="4"
+                                    placeholder="put something fun"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" name="username"
+                                    placeholder="not case sensitive">
+                                <l-waveform size="35" stroke="3.5" speed="1" color="white" id="username-check-loader"
+                                    style="display: none;"></l-waveform>
+                                <div id="username-feedback"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="FullName">Name</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                    placeholder="this may remove your verified status.">
+                            </div>
+                            <div class="form-group">
+                                <select class="form-control" name="year">
+                                    <option value="1">1st Year</option>
+                                    <option value="2">2nd Year</option>
+                                    <option value="3">3rd Year</option>
+                                    <option value="4">4th Year</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -363,6 +417,51 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameInput = document.getElementById('username');
+            const usernameFeedback = document.getElementById('username-feedback');
+            const usernameCheckLoader = document.getElementById('username-check-loader');
+
+            usernameInput.addEventListener('input', async () => {
+                usernameCheckLoader.style.display = 'block';
+                const username = usernameInput.value.trim();
+                if (username.length > 0) {
+                    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                        usernameCheckLoader.style.display = 'none';
+                        usernameFeedback.innerHTML = 'Username should only consist of letters, numbers, and underscores';
+                        usernameInput.classList.add('is-invalid');
+                    } else {
+                        usernameInput.classList.remove('is-invalid');
+                        const response = await fetch(`/check_username/${username}`);
+                        const data = await response.json();
+                        if (data.available) {
+                            usernameFeedback.innerHTML = 'Username is available.';
+                            usernameCheckLoader.style.display = 'none';
+                            usernameInput.classList.add('is-valid');
+                        } else {
+                            usernameFeedback.innerHTML = 'Username is taken.';
+                            usernameCheckLoader.style.display = 'none';
+                            usernameInput.classList.add('is-invalid');
+                        }
+                    }
+                } else {
+                    usernameFeedback.innerHTML = '';
+                    usernameInput.classList.remove('is-invalid');
+                }
+            });
+        });
+
+        document.getElementById('account-settings-form').addEventListener('submit', (event) => {
+            const profilePic = document.getElementById('profile-pic').value;
+            const bio = document.getElementById('bio').value;
+            const username = document.getElementById('username').value;
+
+            if (!profilePic && !bio && !username) {
+                modal.clos
+            }
+        });
+
         $('#user-search-bar').on('input', function () {
             var search = $('#user-search-bar').val();
             const collegeSearch = $('#switch').is(':checked');

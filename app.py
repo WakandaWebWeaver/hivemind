@@ -434,8 +434,20 @@ def create_post():
     user = user_collection.find_one({'full_name': author})
     date = datetime.date.today().strftime("%d/%m/%y")
     time = datetime.datetime.now().strftime("%H:%M")
+
+    posts = posts_collection.find()
+    randomNum = random.randint(1, 999999)
     post_id = posts_collection.count_documents(
-        {}) + 1 + user.get('post_count', 0) + int(date[0]) + random.randint(1, 1000)
+        {}) + 1 + user.get('post_count', 0) + int(datetime.date.today().strftime("%d%m%y")) + randomNum
+
+    for post in posts:
+        if post['post_id'] == post_id:
+            randomNum = random.randint(1, 999999)
+            post_id = posts_collection.count_documents(
+                {}) + 1 + user.get('post_count', 0) + int(datetime.date.today().strftime("%d%m%y")) + randomNum
+        else:
+            break
+
     profile_picture = session['profile_picture']
     post_image_s3_key = ''
     contains_image = False
@@ -447,20 +459,22 @@ def create_post():
         return redirect(url_for('verify_id_page'))
 
     if profanity.contains_profanity(content) or profanity.contains_profanity(title):
-        user['blacklist'] = True
-        blacklist_collection.insert_one({'title': title,
-                                         'content': content,
-                                         'author': author,
-                                         'username': session['id'],
-                                         'profile_picture': profile_picture,
-                                         'date': date,
-                                         'time': time,
-                                         'post_id': post_id,
-                                         'reason': 'Profanity while making a post.',
-                                         'college_name': session['college_name']
-                                         })
-        logout_user()
-        return {'profanity': True}
+        if user['warnings'] > 3:
+            user['blacklist'] = True
+            blacklist_collection.insert_one({'title': title,
+                                            'content': content,
+                                             'author': author,
+                                             'username': session['id'],
+                                             'profile_picture': profile_picture,
+                                             'date': date,
+                                             'time': time,
+                                             'post_id': post_id,
+                                             'reason': 'Profanity while making a post.',
+                                             'college_name': session['college_name']
+                                             })
+            logout_user()
+            return {'profanity': True}
+        return {'warning': True}
 
     if post_picture:
         contains_image = True
@@ -540,8 +554,18 @@ def add_song_to_post(song_url):
     user = user_collection.find_one({'full_name': author})
     date = datetime.date.today().strftime("%d/%m/%y")
 
+    posts = posts_collection.find()
+    randomNum = random.randint(1, 999999)
     post_id = posts_collection.count_documents(
-        {}) + 1 + user.get('post_count', 0) + int(date[0]) + random.randint(1, 1000)
+        {}) + 1 + user.get('post_count', 0) + int(datetime.date.today().strftime("%d%m%y")) + randomNum
+
+    for post in posts:
+        if post['post_id'] == post_id:
+            randomNum = random.randint(1, 999999)
+            post_id = posts_collection.count_documents(
+                {}) + 1 + user.get('post_count', 0) + int(datetime.date.today().strftime("%d%m%y")) + randomNum
+        else:
+            break
     date = datetime.date.today().strftime("%d/%m/%y")
     profile_picture = session['profile_picture']
 
@@ -631,22 +655,23 @@ def hive_comment():
     comment = request.form.get('comment')
     author = session['id']
     date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
-    blacklist = blacklist_collection.find()
+    user = user_collection.find_one({'username': author})
 
     room_id = request.form.get('room_id')
     room = rooms_collection.find_one({'room_id': room_id})
     posts = room['posts']
 
     if profanity.contains_profanity(comment):
-        blacklist_collection.insert_one({'post_id': post_id,
-                                         'comment': comment,
-                                         'author': author,
-                                         'username': session['id'],
-                                         'date': date,
-                                         'reason': 'Profanity while making comment',
-                                         'college_name': session['college_name']
-                                         })
-        return 'Profanity is not allowed'
+        if user['warnings'] > 3:
+            blacklist_collection.insert_one({'post_id': post_id,
+                                            'comment': comment,
+                                             'author': author,
+                                             'username': session['id'],
+                                             'date': date,
+                                             'reason': 'Profanity while making comment',
+                                             'college_name': session['college_name']
+                                             })
+        return 'Profanity is not allowed.'
 
     for post in posts:
         if post['post_id'] == post_id:
@@ -672,18 +697,20 @@ def comment():
     comment = request.form.get('comment')
     author = session['name']
     date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
+    user = user_collection.find_one({'username': session['id']})
 
     post = posts_collection.find_one({'post_id': int(post_id)})
 
     if profanity.contains_profanity(comment):
-        blacklist_collection.insert_one({'post_id': post_id,
-                                         'comment': comment,
-                                         'author': author,
-                                         'username': session['id'],
-                                         'date': date,
-                                         'reason': 'Profanity while making comment',
-                                         'college_name': session['college_name']
-                                         })
+        if user['warnings'] > 3:
+            blacklist_collection.insert_one({'post_id': post_id,
+                                            'comment': comment,
+                                             'author': author,
+                                             'username': session['id'],
+                                             'date': date,
+                                             'reason': 'Profanity while making comment',
+                                             'college_name': session['college_name']
+                                             })
         return 'Profanity is not allowed'
 
     if post:
@@ -755,6 +782,7 @@ def hive_post_comment():
     comment = request.form.get('comment')
     author = session['id']
     date = datetime.datetime.now().strftime("%Y-%m-%D %H:%M")
+    user = user_collection.find_one({'username': author})
 
     room_id = request.form.get('room_id')
     room = rooms_collection.find_one({'room_id': room_id})
@@ -762,14 +790,15 @@ def hive_post_comment():
     posts = room['posts']
 
     if profanity.contains_profanity(comment):
-        blacklist_collection.insert_one({'post_id': post_id,
-                                         'comment': comment,
-                                         'author': author,
-                                         'username': session['id'],
-                                         'date': date,
-                                         'reason': 'Profanity while making comment',
-                                         'college_name': session['college_name']
-                                         })
+        if user['warnings'] > 3:
+            blacklist_collection.insert_one({'post_id': post_id,
+                                            'comment': comment,
+                                             'author': author,
+                                             'username': session['id'],
+                                             'date': date,
+                                             'reason': 'Profanity while making comment',
+                                             'college_name': session['college_name']
+                                             })
         return 'Profanity is not allowed'
 
     for post in posts:
@@ -834,7 +863,6 @@ def view_posts():
 
     posts = posts_collection.find()
 
-    posts = list(posts_collection.find())
     user_posts = []
 
     for post in posts:
@@ -843,7 +871,7 @@ def view_posts():
         if post['college_name'] == session['college_name']:
             user_posts.append(post)
 
-    sorted_posts = sorted(user_posts, key=lambda x: x['post_id'], reverse=True)
+    sorted_posts = sorted(user_posts, key=lambda x: x['_id'], reverse=True)
 
     return render_template('posts.html', posts=sorted_posts,
                            session=session,
@@ -1238,18 +1266,22 @@ def create_hive_post():
     hive_post_image = request.files['post_image']
     contains_image = False
     post_image_s3_key = ''
+    user = user_collection.find_one({'username': username})
 
     if profanity.contains_profanity(post):
-        blacklist_collection.insert_one({'post_id': post_id,
-                                         'content': post,
-                                         'author': author,
-                                         'username': username,
-                                         'date': date,
-                                         'reason': 'Profanity while making post',
-                                         'college_name': session['college_name']
-                                         })
-        logout_user()
-        return {'profanity': True}
+        if user['warnings'] > 3:
+            user['blacklist'] = True
+            blacklist_collection.insert_one({'post_id': post_id,
+                                            'content': post,
+                                             'author': author,
+                                             'username': username,
+                                             'date': date,
+                                             'reason': 'Profanity while making post',
+                                             'college_name': session['college_name']
+                                             })
+            logout_user()
+            return {'profanity': True}
+        return {'warning': True}
 
     if hive_post_image:
         contains_image = True

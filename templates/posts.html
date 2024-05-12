@@ -113,7 +113,7 @@
             <div id="posts-container row">
                 <div class="container col-md-6">
                     {% for post in posts %}
-                    <div class="card" id="post-card">
+                    <div class="card text-light" id="post-card" style="background-color: black;">
                         <div class="mb-4">
                             <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
                                 <li class="nav-item">
@@ -149,7 +149,7 @@
                                                 alt="Profile Picture" class="nav-profile-picture rounded-circle ml-2">
                                         </div>
                                         {% else %}
-                                        <a class="username-link post-author"
+                                        <a class=" a-special-case post-author"
                                             href="/view_profile/{{ post['username'] }}">{{
                                             post['username'] }} {% if user.verified %}<i
                                                 class="fas fa-circle-check"></i>{%
@@ -163,15 +163,13 @@
                                     </div>
                                     <div class="card-body">
                                         {% if post['contains_image'] %}
-                                        <div class="post-image-container">
-                                            <div class="image-loader" role="status">
-                                                <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
-                                                    color="black" id="image-loader"></l-line-wobble>
-                                            </div>
-                                            <img src="{{ builder_url }}{{ post['post_image'] }}"
-                                                class="img-fluid post-image" onload="handleImageLoad(this)"
-                                                id="post-image-{{ post['post_id'] }}">
+                                        <div class="image-loader" role="status">
+                                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
+                                                color="white" id="image-loader"></l-line-wobble>
                                         </div>
+                                        <img src="{{ builder_url }}{{ post['post_image'] }}"
+                                            class="img-fluid post-image" onload="handleImageLoad(this)"
+                                            id="post-image-{{ post['post_id'] }}" style="border-radius: 5px;">
                                         <hr>
                                         <div class="container text-center">
                                             {% if post['title'] != "" %}
@@ -189,13 +187,17 @@
                                         {% else %}
                                         <div class="music-loader" role="status">
                                             <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
-                                                color="black" id="music-loader"></l-line-wobble>
+                                                color="white" id="music-loader"></l-line-wobble>
                                         </div>
                                         <iframe style="border-radius:12px"
                                             src="{{ post.song_url }}?utm_source=generator" width="100%" height="150"
                                             frameBorder="0" allowfullscreen=""
                                             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                             loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
+                                        {% if post['title'] %}
+                                        <p class="card-title">>_> {{ post['title'] }}</p>
+                                        {% endif %}
+                                        <p class="card-text text-center">{{ post['content'] }}</p>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -254,6 +256,7 @@
                             </div>
                         </div>
                     </div>
+                    <hr>
                     {% endfor %}
                 </div>
 
@@ -299,7 +302,7 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button id="submitPostButton" class="btn btn-primary">Create
                         Post</button>
-                    <l-momentum size="40" speed="1.1" color="black" class="loading-spinner"
+                    <l-momentum size="40" speed="1.1" color="white" class="loading-spinner"
                         style="display: none;"></l-momentum>
                 </div>
                 </form>
@@ -394,7 +397,7 @@
         if (window.innerWidth > 768) {
             var postImages = document.getElementsByClassName('post-image');
             for (var i = 0; i < postImages.length; i++) {
-                postImages[i].style.width = '300px';
+                postImages[i].style.width = '400px';
             }
         }
 
@@ -402,7 +405,7 @@
             var content = $('#postContent').val();
             if (content.startsWith('song: ')) {
                 var songName = content.substring(6);
-                const songLoader = "<l-leapfrog size='40' speed='2.5' color='black'></l-leapfrog>";
+                const songLoader = "<l-leapfrog size='40' speed='2.5' color='white'></l-leapfrog>";
 
                 $('#songResults').empty();
                 $('#songResults').append(songLoader);
@@ -428,6 +431,12 @@
         });
 
         function selectSong(embed_url, song_name) {
+            document.getElementById('postTitle').disabled = true;
+            document.getElementById('postImage').disabled = true;
+            document.getElementById('anonymousCheck').disabled = true;
+
+            document.getElementById('postTitle').value = "Cannot set title for songs";
+
             $('#songResults').empty();
             $('#embed_url').val(embed_url);
             console.log(embed_url);
@@ -445,15 +454,8 @@
                     alert('Your post contains a song, but you have not selected a song to add.');
                     return;
                 }
-
-                document.getElementById('postTitle').disabled = true;
-                document.getElementById('postContent').disabled = true;
-                document.getElementById('postImage').disabled = true;
-                document.getElementById('anonymousCheck').disabled = true;
-                document.getElementById('submitPostButton').disabled = true;
                 loadingSpinner.style.display = 'block';
                 document.getElementById('submitPostButton').innerText = 'Adding Song...';
-
 
                 const embedUrl = document.getElementById('embed_url').value;
 
@@ -493,6 +495,10 @@
                             loadingSpinner.style.display = 'none';
                             alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
                             window.location.href = "{{ url_for('index') }}";
+                        } else if (data.warning) {
+                            submitButton.innerText = 'Create Post';
+                            loadingSpinner.style.display = 'none';
+                            alert('Your post contains a word that is not allowed on HiveMind. Please remove it and try again.');
                         } else if (data.success) {
                             window.location.reload();
                         } else {
