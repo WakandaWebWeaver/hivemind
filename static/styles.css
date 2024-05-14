@@ -498,14 +498,6 @@ body {
   margin: 5px;
 }
 
-.login-btn:hover {
-  background: #03f40f;
-  color: #000;
-  border-radius: 5px;
-  box-shadow: 0 0 5px #03f40f, 0 0 25px #03f40f, 0 0 50px #03f40f,
-    0 0 100px #03f40f;
-}
-
 .login-btn span {
   position: absolute;
   display: block;

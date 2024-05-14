@@ -15,10 +15,13 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy import Spotify
 import random
+from urllib import parse, request as urllib_request
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 login_manager = LoginManager(app)
+giphy_url = "http://api.giphy.com/v1/gifs/search"
 
 # Load environment variables
 load_dotenv()
@@ -27,6 +30,7 @@ load_dotenv()
 s3_access_key = os.getenv("AWS_ACCESS_KEY_ID")
 s3_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 s3_bucket_name = os.getenv("AWS_BUCKET_NAME")
+giphy_api_key = os.getenv("GIPHY_API_KEY")
 
 grec_sitekey = os.getenv("GREC_SITEKEY")
 
@@ -174,6 +178,11 @@ def admin(action, keyword):
 @app.route('/edit_user/<username>', methods=['POST'])
 @login_required
 def edit_user(username):
+    blacklist = blacklist_collection.find_one({'username': username})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     user = user_collection.find_one({'username': username})
     user['full_name'] = request.form.get('full_name') if request.form.get(
         'full_name') else user['full_name']
@@ -238,6 +247,12 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    blacklist = blacklist_collection.find_one(
+        {'username': username})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     if request.method == 'POST':
         college = colleges_collection.find_one(
             {'college_name': request.form.get('college_name').lower()})
@@ -312,6 +327,11 @@ def register():
 @app.route('/upload_material_page')
 @login_required
 def upload_material_page():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     return render_template('add_material.html', session=session, grec_sitekey=grec_sitekey,
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None
@@ -321,6 +341,11 @@ def upload_material_page():
 @app.route('/upload_material', methods=['POST'])
 @login_required
 def upload_material():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     if request.files:
         year = request.form.get('year')
         material = request.files['material_file']
@@ -345,6 +370,11 @@ def logout():
 
 @app.route('/materials')
 def materials():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     materials = []
     response = s3.list_objects_v2(Bucket=s3_bucket_name, Prefix='materials/')
     for item in response.get('Contents', []):
@@ -365,6 +395,11 @@ def materials():
 @app.route('/block_user', methods=['POST'])
 @login_required
 def block_user():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     username_to_block = request.form.get('username')
     current_user_id = session['id']
 
@@ -390,6 +425,11 @@ def block_user():
 @app.route('/unblock_user', methods=['POST'])
 @login_required
 def unblock_user():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     username_to_unblock = request.form.get('username')
     current_user_id = session['id']
 
@@ -413,6 +453,11 @@ def unblock_user():
 
 @app.route('/download', methods=['POST', 'GET'])
 def download():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     filename = request.args.get('filename')
 
     file_url = f"https://{s3_bucket_name}.s3.amazonaws.com/materials/{filename}"
@@ -421,12 +466,22 @@ def download():
 
 @app.route('/tos_prp')
 def tos_prp():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     return render_template('tos_prp.html')
 
 
 @app.route('/create_post', methods=['POST', 'GET'])
 @login_required
 def create_post():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     title = request.form.get('post_title')
     content = request.form.get('post_text')
     post_picture = request.files['post_image']
@@ -490,9 +545,7 @@ def create_post():
             img = s3.get_object(Bucket=s3_bucket_name,
                                 Key=file_key)
 
-            image_size = img['ContentLength']
-            image_size = image_size / 1024
-            image_size = str(image_size)
+            image_size = str(img['ContentLength'] / 1024)
 
         if scan.check_image_for_profanity(post_image_s3_key):
             blacklist_collection.insert_one({'title': title,
@@ -546,10 +599,16 @@ def create_post():
     return {'success': True}
 
 
-@app.route('/add_song_to_post/<song_url>', methods=['GET'])
+@app.route('/add_song_to_post/', methods=['POST'])
 @login_required
-def add_song_to_post(song_url):
-    print(song_url)
+def add_song_to_post():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
+    song_url = request.json.get('song_url')
+
     author = session['name']
     user = user_collection.find_one({'full_name': author})
     date = datetime.date.today().strftime("%d/%m/%y")
@@ -570,7 +629,7 @@ def add_song_to_post(song_url):
     profile_picture = session['profile_picture']
 
     post_data = {
-        'title': '',
+        'title': request.json.get('title') if request.json.get('title') else '',
         'content': '',
         'author': author,
         'username': session['id'],
@@ -595,6 +654,11 @@ def add_song_to_post(song_url):
 @app.route('/add_song/<song_url>', methods=['GET'])
 @login_required
 def add_song(song_url):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     print(song_url)
     user = user_collection.find_one({'username': session['id']})
     user['profile_song'] = f"https://open.spotify.com/embed/track/{song_url}"
@@ -606,9 +670,93 @@ def add_song(song_url):
     return {'success': True}
 
 
+@app.route('/search_gif/<search_query>', methods=['GET'])
+@login_required
+def search_gif(search_query):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
+    params = parse.urlencode({
+        "q": search_query,
+        "api_key": giphy_api_key,
+        "limit": "5"
+    })
+
+    with urllib_request.urlopen("".join((giphy_url, "?", params))) as response:
+        data = json.loads(response.read())
+
+    gifs = []
+    for gif in data['data']:
+        gif_data = {
+            'url': gif['images']['original']['url'],
+            'title': gif['title'],
+        }
+        print(gif_data)
+        gifs.append(gif_data)
+
+    return {'gifs': gifs}
+
+
+@app.route('/add_gif_to_post', methods=['GET', 'POST'])
+@login_required
+def add_gif_to_post():
+    gif_url = request.json.get('url')
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
+    author = session['name']
+    user = user_collection.find_one({'full_name': author})
+    date = datetime.date.today().strftime("%d/%m/%y")
+    posts = posts_collection.find()
+    randomNum = random.randint(1, 999999)
+    post_id = posts_collection.count_documents(
+        {}) + 1 + user.get('post_count', 0) + int(datetime.date.today().strftime("%d%m%y")) + randomNum
+
+    for post in posts:
+        if post['post_id'] == post_id:
+            randomNum = random.randint(1, 999999)
+            post_id = posts_collection.count_documents(
+                {}) + 1 + user.get('post_count', 0) + int(datetime.date.today().strftime("%d%m%y")) + randomNum
+        else:
+            break
+
+    date = datetime.date.today().strftime("%d/%m/%y")
+
+    post_data = {
+        'title': request.json.get('title') if request.json.get('title') else '',
+        'content': '',
+        'author': author,
+        'username': session['id'],
+        'profile_picture': session['profile_picture'],
+        'date': date,
+        'post_id': post_id,
+        'contains_image': False,
+        'post_image': None,
+        'gif_url': gif_url,
+        'anonymous': False,
+        'college_name': session['college_name']
+    }
+    posts_collection.insert_one(post_data)
+
+    user['post_count'] = user.get('post_count', 0) + 1
+    user['posts'] = user.get('posts', []) + [post_id]
+    user_collection.update_one({'full_name': author}, {'$set': user})
+
+    return redirect(url_for('view_posts'))
+
+
 @app.route('/search_song/<song_name>', methods=['GET'])
 @login_required
 def search_song(song_name):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
         client_id=os.getenv('SPOTIFY_CLIENT_ID'),
         client_secret=os.getenv('SPOTIFY_CLIENT_SECRET')
@@ -633,6 +781,11 @@ def search_song(song_name):
 @app.route('/delete_comment', methods=['POST'])
 @login_required
 def delete_comment():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     comment = request.form.get('comment')
     author = request.form.get('comment_author')
     posts = posts_collection.find()
@@ -651,6 +804,11 @@ def delete_comment():
 @app.route('/hive_comment', methods=['POST'])
 @login_required
 def hive_comment():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     post_id = request.form.get('post_id')
     comment = request.form.get('comment')
     author = session['id']
@@ -693,6 +851,11 @@ def hive_comment():
 @app.route('/comment', methods=['POST'])
 @login_required
 def comment():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     post_id = request.form.get('post_id')
     comment = request.form.get('comment')
     author = session['name']
@@ -757,6 +920,11 @@ def comment():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     college = colleges_collection.find_one(
         {'college_name': session['college_name']})
 
@@ -778,6 +946,11 @@ def dashboard():
 @app.route('/hive_post_comment', methods=['POST'])
 @login_required
 def hive_post_comment():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     post_id = request.form.get('post_id')
     comment = request.form.get('comment')
     author = session['id']
@@ -834,6 +1007,11 @@ def hive_post_comment():
 @app.route('/delete_hive_comment', methods=['POST'])
 @login_required
 def delete_hive_comment():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     post_id = request.form.get('post_id')
     comment = request.form.get('comment')
     author = request.form.get('comment_author')
@@ -858,6 +1036,11 @@ def delete_hive_comment():
 @app.route('/posts')
 @login_required
 def view_posts():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     if session.get('id') is None:
         return redirect(url_for('login'))
 
@@ -888,6 +1071,11 @@ def view_posts():
 @app.route('/serve_post/<post_id>', methods=['GET', 'POST'])
 @login_required
 def serve_post(post_id):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     post = posts_collection.find_one({'post_id': int(post_id)})
     user = user_collection.find_one({'username': session['id']})
 
@@ -901,6 +1089,11 @@ def serve_post(post_id):
 @app.route('/mindspace')
 @login_required
 def mindspace():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     notes = notes_collection.find({'author': session['name']})
 
     return render_template('mindspace.html', session=session,
@@ -912,6 +1105,11 @@ def mindspace():
 @app.route('/note', methods=['POST'])
 @login_required
 def note():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     content = request.form.get('note_content')
     title = request.form.get('note_title')
     note_id = notes_collection.count_documents(
@@ -935,6 +1133,11 @@ def note():
 @app.route('/delete_note', methods=['POST'])
 @login_required
 def delete_note():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     note_id = request.form.get('note_id')
     note = notes_collection.find_one({'note_id': int(note_id)})
 
@@ -948,6 +1151,11 @@ def delete_note():
 @app.route('/verify_id_page')
 @login_required
 def verify_id_page():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     return render_template('verify_id.html',
                            session=session,
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
@@ -960,6 +1168,11 @@ def verify_id_page():
 
 @app.route('/verify_id_card', methods=['POST'])
 def verify_id_card():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     try:
         user = user_collection.find_one({'username': session['id']})
         id_card = request.files['id_card']
@@ -992,6 +1205,11 @@ def temp():
 
 @app.route('/view_profile/<username>', methods=['GET'])
 def view_profile(username):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     user = user_collection.find_one({'username': username})
 
     return render_template('profile.html', user=user, session=session,
@@ -1001,9 +1219,84 @@ def view_profile(username):
                            )
 
 
+@app.route('/follow_user', methods=['POST'])
+@login_required
+def follow_user():
+    try:
+        user_to_follow = request.json.get('username')
+        current_user_id = session['id']
+
+        current_user = user_collection.find_one({'username': current_user_id})
+        user_to_follow = user_collection.find_one({'username': user_to_follow})
+
+        if user_to_follow:
+            if 'following' not in current_user:
+                current_user['following'] = []
+            if 'followers' not in user_to_follow:
+                user_to_follow['followers'] = []
+
+            if user_to_follow['username'] not in current_user['following']:
+                current_user['following'].append(user_to_follow['username'])
+                user_to_follow['followers'].append(current_user['username'])
+                user_to_follow['reach'][0] += 1
+                current_user['reach'][1] += 1
+
+                user_collection.update_one(
+                    {'username': current_user_id}, {'$set': current_user})
+                user_collection.update_one(
+                    {'username': user_to_follow['username']}, {'$set': user_to_follow})
+
+                return {'success': True}
+
+        else:
+            return {'success': False}
+    except Exception as e:
+        print(e)
+        return {'success': False, 'error': str(e)}
+
+
+@app.route('/unfollow_user', methods=['POST'])
+@login_required
+def unfollow_user():
+    try:
+        user_to_unfollow = request.json.get('username')
+        current_user_id = session['id']
+
+        current_user = user_collection.find_one({'username': current_user_id})
+        user_to_unfollow = user_collection.find_one(
+            {'username': user_to_unfollow})
+
+        if user_to_unfollow:
+            if user_to_unfollow['username'] in current_user['following']:
+                current_user['following'].remove(user_to_unfollow['username'])
+                user_to_unfollow['followers'].remove(current_user['username'])
+
+                user_to_unfollow['reach'][0] -= 1
+                current_user['reach'][1] -= 1
+
+                user_collection.update_one(
+                    {'username': current_user_id}, {'$set': current_user})
+                user_collection.update_one(
+                    {'username': user_to_unfollow['username']}, {'$set': user_to_unfollow})
+
+                return {'success': True}
+
+            else:
+                return {'success': False}
+        else:
+            return {'success': False}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+
 @app.route('/mark_notification_as_read', methods=['POST'])
 @login_required
 def mark_notification_as_read():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     notification_index = request.form.get('notification_id')
     username = session['id']
     user = user_collection.find_one({'username': username})
@@ -1019,6 +1312,11 @@ def mark_notification_as_read():
 @app.route('/update_profile', methods=['POST', 'GET'])
 @login_required
 def update_profile():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     user = user_collection.find_one({'full_name': session['name']})
 
     if request.method == 'POST':
@@ -1098,6 +1396,11 @@ def update_profile():
 
 @app.route('/check_college/<college_name>', methods=['GET'])
 def check_college(college_name):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     college = colleges_collection.find_one({'college': college_name.lower()})
 
     if college:
@@ -1110,6 +1413,11 @@ def check_college(college_name):
 
 @app.route('/check_username/<username>', methods=['GET'])
 def check_username(username):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     users = user_collection.find()
 
     forbidden_names = []
@@ -1136,6 +1444,11 @@ def check_username(username):
 @app.route('/delete_post', methods=['POST'])
 @login_required
 def delete_post():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     post_id = request.form.get('post_id')
     post = posts_collection.find_one({'post_id': int(post_id)})
     users = user_collection.find_one({'full_name': session['name']})
@@ -1161,6 +1474,11 @@ def delete_post():
 @app.route('/delete_hive_post', methods=['POST'])
 @login_required
 def delete_hive_post():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     post_id = request.form.get('post_id')
     room_id = request.form.get('room_id')
     room = rooms_collection.find_one({'room_id': str(room_id)})
@@ -1181,6 +1499,11 @@ def delete_hive_post():
 
 @app.route('/hives')
 def hives():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     rooms = rooms_collection.find()
 
     rooms = list(rooms)
@@ -1200,6 +1523,11 @@ def hives():
 @app.route('/hives/<room_id>')
 @login_required
 def hive_room(room_id):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     room = rooms_collection.find_one({'room_id': room_id})
     application = applications_collection.find_one({'user_id': session['id']})
 
@@ -1232,6 +1560,11 @@ def hive_room(room_id):
 
 @app.route('/search_user/<username>', methods=['POST', 'GET'])
 def search_user(username):
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     users = user_collection.find()
     user_list = []
     names = []
@@ -1257,6 +1590,11 @@ def search_user(username):
 @app.route('/create_hive_post', methods=['POST'])
 @login_required
 def create_hive_post():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     room_id = request.form.get('room_id')
     post = request.form.get('post_text')
     author = session['name']
@@ -1333,6 +1671,11 @@ def create_hive_post():
 @app.route('/apply', methods=['POST'])
 @login_required
 def apply():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     rooms = rooms_collection.find()
     room_id = request.form.get('room_id')
 
@@ -1365,6 +1708,11 @@ def apply():
 @app.route('/delete_notification', methods=['POST'])
 @login_required
 def delete_notification():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     notification_id = request.form.get('notification_id')
     username = session['id']
     user = user_collection.find_one({'username': username})
@@ -1380,6 +1728,11 @@ def delete_notification():
 @app.route('/create_hive', methods=['POST'])
 @login_required
 def create_hive():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     room_name = request.form.get('room_name')
     room_id = room_name.lower() + str(rooms_collection.count_documents({}) + 1)
     room_description = request.form.get('room_description')
@@ -1399,19 +1752,15 @@ def create_hive():
 @app.route('/create_room_page')
 @login_required
 def create_room_page():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
     return render_template('create_hive.html', session=session,
                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None, )
-
-
-# @app.route('/inbox')
-# @login_required
-# def inbox():
-#     return render_template('inbox.html', session=session,
-#                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
-#                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
-#                                'profile_picture') else None, )
 
 
 if __name__ == '__main__':

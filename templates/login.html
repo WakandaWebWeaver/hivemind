@@ -102,11 +102,11 @@
                 </button>
             </center>
         </form>
-
-        <div class="text-center mt-3">
-            <a href="{{ url_for('register') }}">Don't have an account?</a>
+        <div class="account-actions container row justify-content-center">
+            <div class="text-center mt-3">
+                <a href="{{ url_for('register') }}">Don't have an account?</a>
+            </div>
         </div>
-
         <div class=" g-recaptcha" data-sitekey="{{ grec_sitekey }}" data-callback="enableSubmitButton">
         </div>
     </div>
