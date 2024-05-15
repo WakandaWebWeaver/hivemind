@@ -697,7 +697,7 @@ def search_gif():
     return {'gifs': gifs}
 
 
-@app.route('/add_gif_to_post', methods=['GET', 'POST'])
+@app.route('/add_gif_to_post', methods=['POST'])
 @login_required
 def add_gif_to_post():
     gif_url = request.json.get('url')
@@ -744,7 +744,7 @@ def add_gif_to_post():
     user['posts'] = user.get('posts', []) + [post_id]
     user_collection.update_one({'full_name': author}, {'$set': user})
 
-    return redirect(url_for('view_posts'))
+    return {'success': True}
 
 
 @app.route('/search_song', methods=['POST'])
