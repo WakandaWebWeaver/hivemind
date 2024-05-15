@@ -101,184 +101,162 @@
         </div>
     </div>
 
-    <div id="posts-container">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <h1 class="text-center mt-5">Posts</h1>
-                    <p class="text-center">{{ session.college_name }}</p>
-                </div>
-            </div>
-
-            <div id="posts-container row">
-                <div class="container col-md-6">
-                    {% for post in posts %}
-                    <div class="card text-light" id="post-card" style="background-color: black;">
-                        <div class="mb-4">
-                            <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}"
-                                        data-toggle="tab" href="#postDetails-{{ post['post_id'] }}" role="tab"
-                                        aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                        href="#comments-{{ post['post_id'] }}" role="tab"
-                                        aria-controls="comments-{{ post['post_id'] }}"
-                                        aria-selected="false">Comments</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                        href="#actions-{{ post['post_id'] }}" role="tab"
-                                        aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="info-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                        href="#info-{{ post['post_id'] }}" role="tab"
-                                        aria-controls="info-{{ post['post_id'] }}" aria-selected="false">Information</a>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="postTabsContent">
-                                <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}"
-                                    role="tabpanel" aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
-                                    <div class="card-header row text-center">
-                                        {% if post.anonymous %}
-                                        <span class="a-special-case-no-hover post-author">Anonymous</span>
-                                        <div class="post-pfp">
-                                            <img src="{{ builder_url }}{{ post['profile_picture'] }}"
-                                                alt="Profile Picture"
-                                                class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
-                                        </div>
-                                        {% else %}
-                                        <a class="a-special-case post-author"
-                                            href="/view_profile/{{ post['username'] }}">{{
-                                            post['username'] }} {% if user.verified %}<i
-                                                class="fas fa-circle-check"></i>{%
-                                            endif %}
-                                            </h5></a>
-                                        <div class="post-pfp">
-                                            <img src="{{ builder_url }}{{ post['profile_picture'] }}"
-                                                alt="Profile Picture"
-                                                class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="card-body container">
-                                        {% if post['contains_image'] %}
-                                        <div class="image-loader" role="status">
-                                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
-                                                color="white" id="image-loader"></l-line-wobble>
-                                        </div>
-                                        <img src="{{ builder_url }}{{ post['post_image'] }}"
-                                            class="img-fluid post-image" onload="handleImageLoad(this)"
-                                            style="border-radius: 5px;">
-                                        <hr>
-                                        <div class="container text-center">
-                                            {% if post['title'] != "" %}
-                                            <p class="card-title">{{ post['title'] }}</p>
-                                            {% endif %}
-                                            <p class="card-text">{{ post['content'] }}</p>
-                                        </div>
-                                        {% elif post['song_url'] == '' %}
-                                        <div class="container">
-                                            {% if post['title'] != "" %}
-                                            <p class="card-title">{{ post['title'] }}</p>
-                                            {% endif %}
-                                            <p class="card-text text-center">{{ post['content'] }}</p>
-                                        </div>
-                                        {% elif post['gif_url'] %}
-                                        <div class="container">
-                                            <div class="image-loader" role="status">
-                                                <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
-                                                    color="white" id="image-loader"></l-line-wobble>
-                                            </div>
-                                            <img src="{{ post['gif_url'] }}"
-                                                class="img-fluid post-image post-image-container"
-                                                style="border-radius: 5px;" onload=" handleImageLoad(this)">
-                                            {% if post['title'] %}
-                                            <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
-                                            {% endif %}
-                                            <p class="card-text text-center">{{ post['content'] }}</p>
-                                            <hr>
-                                        </div>
-                                        {% else %}
-                                        <div class="music-loader" role="status">
-                                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
-                                                color="white" id="music-loader"></l-line-wobble>
-                                        </div>
-                                        <iframe style="border-radius:12px"
-                                            src="{{ post.song_url }}?utm_source=generator" width="100%" height="150"
-                                            frameBorder="0" allowfullscreen=""
-                                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                            loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
-                                        {% if post['title'] %}
-                                        <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
-                                        {% endif %}
-                                        <p class="card-text text-center">{{ post['content'] }}</p>
-                                        {% endif %}
-                                    </div>
+    <div id="post-container row">
+        <div class="container col-sm-4" style="margin: auto;">
+            {% for post in posts %}
+            <div class="card text-light" id="post-card-{{ post['post_id'] }}" style="background-color: black;">
+                <div class="mb-4">
+                    <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                href="#postDetails-{{ post['post_id'] }}" role="tab"
+                                aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                href="#comments-{{ post['post_id'] }}" role="tab"
+                                aria-controls="comments-{{ post['post_id'] }}" aria-selected="false">Comments</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                href="#actions-{{ post['post_id'] }}" role="tab"
+                                aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="info-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                href="#info-{{ post['post_id'] }}" role="tab" aria-controls="info-{{ post['post_id'] }}"
+                                aria-selected="false">Information</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="postTabsContent">
+                        <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}" role="tabpanel"
+                            aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
+                            <div class="card-header row text-center">
+                                {% if post.anonymous %}
+                                <span class="a-special-case-no-hover post-author">Anonymous</span>
+                                <div class="post-pfp">
+                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                        class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
                                 </div>
-                                <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
-                                    aria-labelledby="comments-tab-{{ post['post_id'] }}">
-                                    <ul class="list-unstyled">
-                                        {% for comment in post['comments'] %}
-                                        {% if comment.comment != "" %}
-                                        <li style="margin: 5px;">{{ comment['author'] }} said: {{
-                                            comment['comment'] }}
-                                            {% if session.name == comment['author'] %}
-                                            <span>
-                                                <form action="/delete_comment" method="POST">
-                                                    <input type="hidden" name="comment"
-                                                        value="{{ comment['comment'] }}">
-                                                    <input type="hidden" name="comment_author"
-                                                        value="{{ comment['author'] }}">
-                                                    <button type="submit" class="btn fas fa-trash"
-                                                        style="color: white;"></button>
-                                                </form>
-                                            </span>
-                                            {% endif %}
-                                            <hr class="ruler">
-                                        </li>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </ul>
-                                    <div class="add-comment-section">
-                                        <h5>Add a Comment</h5>
-                                        <form action="/comment" method="POST">
-                                            <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                            <input type="text" name="comment" class="form-control"
-                                                placeholder="Spill it">
-                                            <button type="submit" class="btn btn-primary mt-2"><i
-                                                    class="fas fa-share"></i></button>
-                                        </form>
-                                    </div>
+                                {% else %}
+                                <a class="a-special-case post-author" href="/view_profile/{{ post['username'] }}">{{
+                                    post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
+                                    endif %}
+                                    </h5></a>
+                                <div class="post-pfp">
+                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                        class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
                                 </div>
-                                <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
-                                    aria-labelledby="actions-tab-{{ post['post_id'] }}">
-                                    {% if session.name == post['author'] or session.id == post['username'] %}
-                                    <form action="/delete_post" method="POST">
-                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
-                                    {% else %}
-                                    <p>No actions for this post</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-body container">
+                                {% if post['contains_image'] %}
+                                <div class="image-loader" role="status">
+                                    <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                        id="image-loader"></l-line-wobble>
+                                </div>
+                                <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid post-image"
+                                    onload="handleImageLoad(this)" style="border-radius: 5px;">
+                                <hr>
+                                <div class="container text-center">
+                                    {% if post['title'] != "" %}
+                                    <p class="card-title">{{ post['title'] }}</p>
                                     {% endif %}
+                                    <p class="card-text">{{ post['content'] }}</p>
                                 </div>
-                                <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
-                                    aria-labelledby="info-tab-{{ post['post_id'] }}">
-                                    <p>Posted on: {{ post['date'] }}</p>
-                                    {% if post['contains_image'] %}
-                                    <p>File size: {{ post['image_size'] }}</p>
+                                {% elif post['song_url'] == '' %}
+                                <div class="container">
+                                    {% if post['title'] != "" %}
+                                    <p class="card-title">{{ post['title'] }}</p>
                                     {% endif %}
+                                    <p class="card-text text-center">{{ post['content'] }}</p>
                                 </div>
+                                {% elif post['gif_url'] %}
+                                <div class="container">
+                                    <div class="image-loader" role="status">
+                                        <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                            id="image-loader"></l-line-wobble>
+                                    </div>
+                                    <img src="{{ post['gif_url'] }}" class="img-fluid post-image post-image-container"
+                                        style="border-radius: 5px;" onload=" handleImageLoad(this)">
+                                    <img src="/static/imgs/powered-by-giphy.png" alt="Powered by Giphy"
+                                        style="justify-content: left; margin: 10px; width: 60px;">
+                                    {% if post['title'] %}
+                                    <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
+                                    {% endif %}
+                                    <p class="card-text text-center">{{ post['content'] }}</p>
+                                    <hr>
+                                </div>
+                                {% else %}
+                                <div class="music-loader" role="status">
+                                    <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                        id="music-loader"></l-line-wobble>
+                                </div>
+                                <iframe style="border-radius:12px" src="{{ post.song_url }}?utm_source=generator"
+                                    width="100%" height="150" frameBorder="0" allowfullscreen=""
+                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                    loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
+                                {% if post['title'] %}
+                                <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
+                                {% endif %}
+                                <p class="card-text text-center">{{ post['content'] }}</p>
+                                {% endif %}
                             </div>
                         </div>
+                        <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
+                            aria-labelledby="comments-tab-{{ post['post_id'] }}">
+                            <ul class="list-unstyled">
+                                {% for comment in post['comments'] %}
+                                {% if comment.comment != "" %}
+                                <li style="margin: 5px;">{{ comment['author'] }} said: {{
+                                    comment['comment'] }}
+                                    {% if session.name == comment['author'] %}
+                                    <span>
+                                        <form action="/delete_comment" method="POST">
+                                            <input type="hidden" name="comment" value="{{ comment['comment'] }}">
+                                            <input type="hidden" name="comment_author" value="{{ comment['author'] }}">
+                                            <button type="submit" class="btn fas fa-trash"
+                                                style="color: white;"></button>
+                                        </form>
+                                    </span>
+                                    {% endif %}
+                                    <hr class="ruler">
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                            <div class="add-comment-section">
+                                <h5>Add a Comment</h5>
+                                <form action="/comment" method="POST">
+                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                    <input type="text" name="comment" class="form-control" placeholder="Spill it">
+                                    <button type="submit" class="btn btn-primary mt-2"><i
+                                            class="fas fa-share"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
+                            aria-labelledby="actions-tab-{{ post['post_id'] }}">
+                            {% if session.name == post['author'] or session.id == post['username'] %}
+                            <button class="btn btn-danger" onclick="deletePost('{{ post.post_id }}')">Delete
+                                Post</button>
+                            {% else %}
+                            <p>No actions for this post</p>
+                            {% endif %}
+                        </div>
+                        <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
+                            aria-labelledby="info-tab-{{ post['post_id'] }}">
+                            <p>Posted on: {{ post['date'] }}</p>
+                            {% if post['contains_image'] %}
+                            <p>File size: {{ post['image_size'] }}</p>
+                            {% endif %}
+                        </div>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
+                <hr>
 
             </div>
+            {% endfor %}
         </div>
     </div>
 
@@ -395,6 +373,28 @@
             }
         }
 
+        function deletePost(post_id) {
+            const postCard = document.getElementById('post-card-' + post_id);
+            if (confirm('Are you sure you want to delete this post?')) {
+                fetch('/delete_post', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        'post_id': post_id
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            postCard.remove();
+                        } else {
+                            alert('An error occurred while deleting the post. Please try again.');
+                        }
+                    });
+            }
+        }
+
         var postImages = document.getElementsByClassName('post-image');
         for (var i = 0; i < postImages.length; i++) {
             if (postImages[i].complete) {
@@ -419,56 +419,75 @@
             }
         }
 
+        var postContainer = document.getElementById('posts-container');
+
         $('#postContent').on('input', function () {
             var content = $('#postContent').val();
             if (content.startsWith('song: ')) {
-                var songName = content.substring(6);
-                const songLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
+                setTimeout(() => {
+                    var songName = content.substring(6);
+                    const songLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
 
-                $('#searchResults').empty();
-                $('#searchResults').append(songLoader);
+                    $('#searchResults').empty();
+                    $('#searchResults').append(songLoader);
 
-                fetch('/search_song/' + songName)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data);
-                        $('#searchResults').empty();
-                        const songs = data['songs'];
-                        songs.forEach(song => {
-                            $('#searchResults').append(`
-                            <a href="#" class="list-group-item list-group-item-action" onclick="selectSong('${song.embed_url}', '${song.song_name}')">
-                                <img src="${song.album_image}" alt="Album Image" class="album-image" style="width: 40px; height: 40px;">
-                                ${song.song_name} <br>
-                                <span class='text-muted'>${song.artist_name}</span>
+                    fetch('/search_song', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            'search_query': songName
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            $('#searchResults').empty();
+                            const songs = data['songs'];
+                            songs.forEach(song => {
+                                $('#searchResults').append(`
+                            <a href="#" class="list-group-item list-group-item-action" onclick="selectSong('${song.embed_url}', '${song.song_name.replace("'", "\\'")}', '${song.artist_name}')">
+                                <img src="${song.album_image}" alt="Song" class="gif-image" style="width: 70px; height: 70px;">
+                                ${song.song_name} <span class="text-muted">by </span>${song.artist_name}
                             </a>
                         `);
+                            });
                         });
-                    });
+                })
 
             } else if (content.startsWith('gif: ')) {
-                var gifName = content.substring(5);
-                const gifLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
+                setTimeout(() => {
+                    var gifName = content.substring(5);
+                    const gifLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
 
-                $('#searchResults').empty();
-                $('#searchResults').append(gifLoader);
+                    $('#searchResults').empty();
+                    $('#searchResults').append(gifLoader);
 
-                fetch('/search_gif/' + gifName)
-                    .then(response => response.json())
-                    .then(data => {
-                        $('#searchResults').empty();
-                        const gifs = data['gifs'];
-                        // Show the gifs in a table, so that theyre easier to see
-                        gifs.forEach(gif => {
-                            $('#searchResults').append(`
+                    fetch('/search_gif', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            'search_query': gifName
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            $('#searchResults').empty();
+                            const gifs = data['gifs'];
+                            gifs.forEach(gif => {
+                                $('#searchResults').append(`
                             <a href="#" class="list-group-item list-group-item-action" onclick="selectGif('${gif.title}', '${gif.url}')">
                                 <img src="${gif.url}" alt="GIF" class="gif-image" style="width: 70px; height: 70px;">
                                 ${gif.title}
                             </a>
                         `);
+                            });
                         });
-                    });
-            }
+                }, 1000);
 
+            }
         });
 
         function selectGif(gif, url) {
@@ -483,7 +502,7 @@
             console.log("embed: " + url);
         }
 
-        function selectSong(embed_url, song_name) {
+        function selectSong(embed_url, song_name, artist_name) {
             document.getElementById('postImage').disabled = true;
             document.getElementById('anonymousCheck').disabled = true;
 
@@ -491,7 +510,7 @@
 
             $('#searchResults').empty();
             $('#embed_url').val(embed_url);
-            $('#postContent').val('song: ' + song_name);
+            $('#postContent').val('song: ' + song_name + ' by ' + artist_name);
         }
 
 
@@ -500,6 +519,7 @@
             var loadingSpinner = document.querySelector('.loading-spinner');
 
             if (document.getElementById('postContent').value.startsWith('song: ')) {
+                console.log('song');
                 if (document.getElementById('embed_url').value == '') {
                     alert('Your post contains a song, but you have not selected a song to add.');
                     return;

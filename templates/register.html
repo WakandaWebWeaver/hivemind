@@ -433,7 +433,13 @@
                         usernameInput.classList.add('is-invalid');
                     } else {
                         usernameInput.classList.remove('is-invalid');
-                        const response = await fetch(`/check_username/${username}`);
+                        const response = await fetch('/check_username', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ username })
+                        });
                         const data = await response.json();
                         if (data.available) {
                             usernameFeedback.innerHTML = 'Username is available.';
@@ -491,7 +497,13 @@
             collegeNameInput.addEventListener('input', async () => {
                 const collegeName = collegeNameInput.value;
                 if (collegeName.length > 0) {
-                    const response = await fetch(`/check_college/${collegeName}`);
+                    const response = await fetch('/check_college', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ collegeName })
+                    });
                     const data = await response.json();
                     if (data.available) {
                         collegeFeedback.innerHTML = 'College is available.';

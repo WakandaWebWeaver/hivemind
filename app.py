@@ -247,12 +247,6 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    blacklist = blacklist_collection.find_one(
-        {'username': username})
-
-    if blacklist:
-        return render_template('blacklist.html', blacklist=blacklist)
-
     if request.method == 'POST':
         college = colleges_collection.find_one(
             {'college_name': request.form.get('college_name').lower()})
@@ -599,7 +593,7 @@ def create_post():
     return {'success': True}
 
 
-@app.route('/add_song_to_post/', methods=['POST'])
+@app.route('/add_song_to_post', methods=['POST'])
 @login_required
 def add_song_to_post():
     blacklist = blacklist_collection.find_one({'username': session["id"]})
@@ -651,14 +645,16 @@ def add_song_to_post():
     return {'success': True}
 
 
-@app.route('/add_song/<song_url>', methods=['GET'])
+@app.route('/add_song', methods=['POST'])
 @login_required
-def add_song(song_url):
+def add_song():
     blacklist = blacklist_collection.find_one({'username': session["id"]})
 
     if blacklist:
         return render_template('blacklist.html', blacklist=blacklist)
 
+    song_url = request.json.get('search_query')
+    print(f"JSON: {request.json}")
     print(song_url)
     user = user_collection.find_one({'username': session['id']})
     user['profile_song'] = f"https://open.spotify.com/embed/track/{song_url}"
@@ -670,13 +666,15 @@ def add_song(song_url):
     return {'success': True}
 
 
-@app.route('/search_gif/<search_query>', methods=['GET'])
+@app.route('/search_gif', methods=['POST'])
 @login_required
-def search_gif(search_query):
+def search_gif():
     blacklist = blacklist_collection.find_one({'username': session["id"]})
 
     if blacklist:
         return render_template('blacklist.html', blacklist=blacklist)
+
+    search_query = request.json.get('search_query')
 
     params = parse.urlencode({
         "q": search_query,
@@ -749,9 +747,9 @@ def add_gif_to_post():
     return redirect(url_for('view_posts'))
 
 
-@app.route('/search_song/<song_name>', methods=['GET'])
+@app.route('/search_song', methods=['POST'])
 @login_required
-def search_song(song_name):
+def search_song():
     blacklist = blacklist_collection.find_one({'username': session["id"]})
 
     if blacklist:
@@ -761,6 +759,8 @@ def search_song(song_name):
         client_id=os.getenv('SPOTIFY_CLIENT_ID'),
         client_secret=os.getenv('SPOTIFY_CLIENT_SECRET')
     ))
+
+    song_name = request.json.get('search_query')
 
     results = sp.search(q=song_name, limit=3)
 
@@ -1289,24 +1289,38 @@ def unfollow_user():
         return {'success': False, 'error': str(e)}
 
 
-@app.route('/mark_notification_as_read', methods=['POST'])
+@app.route('/notif_action', methods=['POST'])
 @login_required
-def mark_notification_as_read():
-    blacklist = blacklist_collection.find_one({'username': session["id"]})
+def notif_action():
+    try:
+        notif_id = request.json.get('notif_id')
+        action = request.json.get('action')
 
-    if blacklist:
-        return render_template('blacklist.html', blacklist=blacklist)
+        print(notif_id, action)
+        print(request.json)
 
-    notification_index = request.form.get('notification_id')
-    username = session['id']
-    user = user_collection.find_one({'username': username})
+        user = user_collection.find_one({'username': session['id']})
 
-    for notification in user['notifications']:
-        if notification['id'] == notification_index:
-            notification['unread'] = False
-            user_collection.update_one({'username': username}, {'$set': user})
+        if action == 'mark_read':
+            for notif in user['notifications']:
+                if notif['id'] == notif_id:
+                    notif['unread'] = False
+                    user_collection.update_one(
+                        {'username': session['id']}, {'$set': user})
+                    return {'success': True}
 
-    return redirect(url_for('view_profile', username=username))
+        elif action == 'delete':
+            for notif in user['notifications']:
+                if notif['id'] == notif_id:
+                    user['notifications'].remove(notif)
+                    user_collection.update_one(
+                        {'username': session['id']}, {'$set': user})
+                    return {'success': True}
+
+        else:
+            return {'success': False}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
 
 
 @app.route('/update_profile', methods=['POST', 'GET'])
@@ -1394,8 +1408,10 @@ def update_profile():
                            )
 
 
-@app.route('/check_college/<college_name>', methods=['GET'])
-def check_college(college_name):
+@app.route('/check_college', methods=['POST'])
+def check_college():
+    college_name = request.json.get('college_name')
+
     blacklist = blacklist_collection.find_one({'username': session["id"]})
 
     if blacklist:
@@ -1411,8 +1427,12 @@ def check_college(college_name):
     return jsonify({'available': available})
 
 
-@app.route('/check_username/<username>', methods=['GET'])
-def check_username(username):
+@app.route('/check_username', methods=['POST'])
+def check_username():
+    username = request.json.get('username')
+    print(username)
+    print(request.json)
+
     blacklist = blacklist_collection.find_one({'username': session["id"]})
 
     if blacklist:
@@ -1449,7 +1469,7 @@ def delete_post():
     if blacklist:
         return render_template('blacklist.html', blacklist=blacklist)
 
-    post_id = request.form.get('post_id')
+    post_id = request.json.get('post_id')
     post = posts_collection.find_one({'post_id': int(post_id)})
     users = user_collection.find_one({'full_name': session['name']})
     if post:
@@ -1464,11 +1484,11 @@ def delete_post():
             users['posts'].remove(int(post_id))
             user_collection.update_one(
                 {'full_name': session['name']}, {'$set': users})
-            return redirect(url_for('view_posts'))
+            return {'success': True}
         else:
-            return 'You are not the author of this post'
+            return {'success': False}
 
-    return 'Post not found'
+    return {'success': False}
 
 
 @app.route('/delete_hive_post', methods=['POST'])

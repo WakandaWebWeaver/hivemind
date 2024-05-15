@@ -185,33 +185,16 @@
                         </button>
                         <div class="dropdown-menu notifications" aria-labelledby="dropdownMenuButton">
                             {% for notification in user.notifications %}
-                            {% if notification.unread %}
-                            <div class="alert alert-danger" role="alert">
+                            <div class="alert {% if notification.unread %} alert-danger {% endif %}" role="alert"
+                                id="notifications-div-{{ notification.id }}">
                                 {{ notification.message }}
-                                <form action="{{ url_for('mark_notification_as_read') }}" method="post">
-                                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
-                                    <button type="submit"><i class="fa-regular fa-bell"></i></button>
-                                </form>
-                                <form action="{{ url_for('delete_notification') }}" method="post">
-                                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
-                                    <button type="submit"><i class="fa-regular fa-trash"></i></button>
-                                </form>
-                                <span class="text-muted">Unread</span>
+                                <button class="btn btn-primary"
+                                    onclick="notifAction('{{ notification.id }}', 'mark_read')"><i
+                                        class="fa-regular fa-bell"></i></button>
+                                <button class="btn btn-primary"
+                                    onclick="notifAction('{{ notification.id }}', 'delete')"><i
+                                        class="fas fa-trash"></i></button>
                             </div>
-                            {% else %}
-                            <div class="alert alert-secondary" role="alert">
-                                {{ notification.message }}
-                                <form action="{{ url_for('mark_notification_as_read') }}" method="post">
-                                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
-                                    <button type="submit"><i class="fa-regular fa-bell"></i></button>
-                                </form>
-                                <form action="{{ url_for('delete_notification') }}" method="post">
-                                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
-                                    <button type="submit"><i class="fa-regular fa-trash"></i></button>
-                                </form>
-                                <span class="text-muted">read</span>
-                            </div>
-                            {% endif %}
                             {% endfor %}
                         </div>
                     </div>
@@ -256,7 +239,7 @@
         <div class="row">
             {% if user %}
             <div>
-                <div class="profile-picture-div mb-4">
+                <div class="profile-picture-div mb-4" style="margin: auto;">
                     <img src="{{ builder_url }}{{ user.profile_picture_s3_key }}" alt="Profile Picture"
                         class="rounded-circle profile-picture">
                 </div>
@@ -321,7 +304,7 @@
                         Follow</button>
                     {% else %}
                     <button class="btn btn-primary" style="padding: 10px; margin: 5px;"
-                        onclick=" reachAction('unfollow')" id="unfollow-btn"><i class="fas fa-user-minus"></i>
+                        onclick="reachAction('unfollow')" id="unfollow-btn"><i class="fas fa-user-minus"></i>
                         Unfollow</button>
                     {% endif %}
                     {% endif %}
@@ -433,6 +416,34 @@
 
     <script>
 
+        function notifAction(id, action) {
+            const notifDiv = document.getElementById('notifications-div-' + id);
+            console.log(id, action);
+            console.log(notifDiv);
+            fetch('/notif_action', {
+                method: 'POST',
+                body: JSON.stringify({
+                    'notif_id': id,
+                    'action': action
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (action === 'mark_read') {
+                            notifDiv.classList.remove('alert-danger');
+                            notifDiv.classList.add('alert-secondary');
+                        } else {
+                            notifDiv.remove();
+                        }
+                    } else {
+                        alert('Failed to perform action');
+                    }
+                });
+        }
+
         function reachAction(action) {
             const followBtn = document.getElementById('follow-btn');
             const unfollowBtn = document.getElementById('unfollow-btn');
@@ -494,7 +505,13 @@
                         usernameInput.classList.add('is-invalid');
                     } else {
                         usernameInput.classList.remove('is-invalid');
-                        const response = await fetch(`/check_username/${username}`);
+                        const response = await fetch('/check_username', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ username })
+                        });
                         const data = await response.json();
                         if (data.available) {
                             usernameFeedback.innerHTML = 'Username is available.';
@@ -575,7 +592,16 @@
 
             console.log(embedUrl);
 
-            fetch('/add_song/' + embedUrlValue)
+            fetch('/add_song', {
+                method: 'POST',
+                body: JSON.stringify({
+                    'embed_url': embedUrlValue
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+
+            })
                 .then(response => response.json())
                 .then(data => {
                     songLoader.style.display = 'none';
