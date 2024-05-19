@@ -16,15 +16,18 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy import Spotify
 import random
 from urllib import parse, request as urllib_request
+from cryptography.fernet import Fernet
+from flask_mail import Mail, Message
 
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 login_manager = LoginManager(app)
 giphy_url = "http://api.giphy.com/v1/gifs/search"
 
-# Load environment variables
-load_dotenv()
+key = os.getenv('FERNET_KEY')
+
 
 # AWS S3 configuration
 s3_access_key = os.getenv("AWS_ACCESS_KEY_ID")
@@ -75,23 +78,23 @@ def index():
                            )
 
 
-@app.errorhandler(Exception)
-def error_page(e):
-    if errors_collection.count_documents({}) > 30:
-        errors_collection.drop()
+# @app.errorhandler(Exception)
+# def error_page(e):
+#     if errors_collection.count_documents({}) > 30:
+#         errors_collection.drop()
 
-    error = {
-        'error': str(e),
-        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-        'trigger url': request.url,
-        'method': request.method,
-        'complete request': f'{request.method} {request.url}',
-        'client': request.headers.get('User-Agent'),
-        'headers': dict(request.headers),
-        'ip': request.remote_addr
-    }
-    errors_collection.insert_one(error)
-    return render_template('error.html')
+#     error = {
+#         'error': str(e),
+#         'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+#         'trigger url': request.url,
+#         'method': request.method,
+#         'complete request': f'{request.method} {request.url}',
+#         'client': request.headers.get('User-Agent'),
+#         'headers': dict(request.headers),
+#         'ip': request.remote_addr
+#     }
+#     errors_collection.insert_one(error)
+#     return render_template('error.html')
 
 
 content_placeholders = [
@@ -245,77 +248,84 @@ def login():
     return render_template('login.html', grec_sitekey=grec_sitekey)
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        college = colleges_collection.find_one(
-            {'college_name': request.form.get('college_name').lower()})
-        if college:
-            pass
-        else:
-            colleges_collection.insert_one({'college_name': request.form.get('college_name').lower()},
-                                           {'$set': {'college_name': request.form.get('college_name').lower()}})
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    college = request.json.get('college_name')
+    full_name = request.json.get('full_name')
+    phone_number = request.json.get('phone_number')
+    roll_number = request.json.get('roll_number')
+    password = request.json.get('password')
+    username = request.json.get('username').strip().lower()
+    college_name = request.json.get('college_name').lower()
+    country_code = request.json.get('country_code')
 
-        forbidden_names = []
+    college = colleges_collection.find_one(
+        {'college_name': college_name.lower()})
 
-        f = open("bad_usernames.json")
-        data = json.load(f)
+    if college:
+        pass
+    else:
+        colleges_collection.insert_one({'college_name': college_name})
 
-        for line in data["usernames"]:
-            forbidden_names.append(line)
+    user = user_collection.find_one({'username': username})
 
-        full_name = request.form.get('full_name')
-        phone_number = request.form.get('phone_number')
-        roll_number = request.form.get('roll_number')
-        password = request.form.get('password')
-        username = request.form.get('username').strip().lower()
-        college_name = request.form.get('college_name').lower()
-        country_code = request.form.get('country_code')
+    if user:
+        return {'is_exists': True}
 
-        user = user_collection.find_one({'username': username})
+    if request.files:
+        profile_picture = request.files['profile_picture']
+        if profile_picture.filename != '':
+            file_key = f"Profile pictures/{username.lower()}.jpeg"
+            job = s3.upload_fileobj(
+                profile_picture, s3_bucket_name, file_key)
 
-        if user:
-            return 'User already exists'
+            if job:
+                print('Profile picture uploaded successfully')
 
-        if username in forbidden_names:
-            return 'Username is not allowed'
-
-        if request.files:
-            profile_picture = request.files['profile_picture']
-            if profile_picture.filename != '':
-                file_key = f"Profile pictures/{username.lower()}.jpeg"
-                job = s3.upload_fileobj(
-                    profile_picture, s3_bucket_name, file_key)
-
-                if job:
-                    print('Profile picture uploaded successfully')
-
-                profile_picture_s3_key = file_key
-            else:
-                profile_picture_s3_key = "Profile pictures/avatar_default.jpeg"
+            profile_picture_s3_key = file_key
         else:
             profile_picture_s3_key = "Profile pictures/avatar_default.jpeg"
+    else:
+        profile_picture_s3_key = "Profile pictures/avatar_default.jpeg"
 
-        user_data = {
-            'full_name': full_name,
-            'phone_number': country_code + ' ' + phone_number,
-            'roll_number': roll_number,
-            'profile_picture_s3_key': profile_picture_s3_key,
-            'password': password,
-            'username': username,
-            'verified': False,
-            'college_name': college_name,
-        }
+    user_data = {
+        'full_name': full_name,
+        'phone_number': country_code + ' ' + phone_number,
+        'roll_number': roll_number,
+        'profile_picture_s3_key': profile_picture_s3_key,
+        'password': password,
+        'username': username,
+        'verified': False,
+        'college_name': college_name,
+    }
 
-        user_collection.insert_one(user_data)
-        user = user_collection.find_one({'username': username})
+    user['following'] = []
+    user['followers'] = []
+    user['blacklist'] = False
 
-        user['badges'] = user.get('badges', [])
-        user['badges'].append('Welcome aboard: Make a HiveMind account')
+    user_collection.insert_one(user_data)
+    user = user_collection.find_one({'username': username})
 
-        return redirect(url_for('login'))
+    user['badges'] = user.get('badges', [])
+    user['badges'].append('Welcome aboard: Make a HiveMind account')
 
-    return render_template('register.html')
+    session['name'] = user['full_name']
+    session['id'] = user['username']
+    session['profile_picture'] = user['profile_picture_s3_key']
+    session['default_profile_picture'] = 'Profile pictures/avatar_default.jpeg'
+    session['college_name'] = user['college_name']
+    session['ht_number'] = user['roll_number']
+
+    user_obj = User()
+    user_obj.id = username
+    login_user(user_obj)
+
+    return {'success': True}
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    return render_template('register.html', grec_sitekey=grec_sitekey)
 
 
 @app.route('/upload_material_page')
@@ -384,6 +394,26 @@ def materials():
     return render_template('materials.html', materials=materials, session=session,
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None)
+
+
+@app.route('/serve_asset', methods=['POST', 'GET'])
+@login_required
+def serve_asset():
+    blacklist = blacklist_collection.find_one({'username': session["id"]})
+
+    if blacklist:
+        return render_template('blacklist.html', blacklist=blacklist)
+
+    print("Args: ", request.args.get('asset'))
+
+    asset = request.args.get('asset')
+
+    if asset == "pfp":
+        user = request.args.get('user')
+        user = user_collection.find_one({'username': user})
+        return redirect(f"https://{s3_bucket_name}.s3.amazonaws.com/{user['profile_picture_s3_key']}")
+    elif asset == "default_pfp":
+        return redirect(f"https://{s3_bucket_name}.s3.amazonaws.com/Profile pictures/avatar_default.jpeg")
 
 
 @app.route('/block_user', methods=['POST'])
@@ -460,10 +490,6 @@ def download():
 
 @app.route('/tos_prp')
 def tos_prp():
-    blacklist = blacklist_collection.find_one({'username': session["id"]})
-
-    if blacklist:
-        return render_template('blacklist.html', blacklist=blacklist)
 
     return render_template('tos_prp.html')
 
@@ -760,7 +786,7 @@ def search_song():
         client_secret=os.getenv('SPOTIFY_CLIENT_SECRET')
     ))
 
-    song_name = request.json.get('search_query')
+    song_name = request.json.get('song_name')
 
     results = sp.search(q=song_name, limit=3)
 
@@ -1168,11 +1194,6 @@ def verify_id_page():
 
 @app.route('/verify_id_card', methods=['POST'])
 def verify_id_card():
-    blacklist = blacklist_collection.find_one({'username': session["id"]})
-
-    if blacklist:
-        return render_template('blacklist.html', blacklist=blacklist)
-
     try:
         user = user_collection.find_one({'username': session['id']})
         id_card = request.files['id_card']
@@ -1195,6 +1216,7 @@ def verify_id_card():
             return {'verified': False}
 
     except Exception as e:
+        print(e)
         return {'verified': False, 'error': str(e)}
 
 
@@ -1211,11 +1233,14 @@ def view_profile(username):
         return render_template('blacklist.html', blacklist=blacklist)
 
     user = user_collection.find_one({'username': username})
+    follower_count = user.get('followers', [])
+    following_count = user.get('following', [])
+    post_count = user.get('post_count', 0)
 
     return render_template('profile.html', user=user, session=session,
                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
-                               'profile_picture') else None
+                               'profile_picture') else None, follower_count=len(follower_count), following_count=len(following_count), post_count=post_count
                            )
 
 
@@ -1427,38 +1452,57 @@ def check_college():
     return jsonify({'available': available})
 
 
-@app.route('/check_username', methods=['POST'])
-def check_username():
+@app.route('/check_item', methods=['POST'])
+def check_item():
     username = request.json.get('username')
-    print(username)
-    print(request.json)
+    item = request.json.get('item')
 
-    blacklist = blacklist_collection.find_one({'username': session["id"]})
+    if item == "username":
+        users = user_collection.find()
 
-    if blacklist:
-        return render_template('blacklist.html', blacklist=blacklist)
+        forbidden_names = []
 
-    users = user_collection.find()
+        f = open("bad_usernames.json")
+        data = json.load(f)
 
-    forbidden_names = []
+        for line in data["usernames"]:
+            forbidden_names.append(line)
 
-    f = open("bad_usernames.json")
-    data = json.load(f)
+        for user in users:
+            if user['username'].lower() == username.lower():
+                available = False
+                break
+            elif username in forbidden_names:
+                available = False
+                break
+            else:
+                available = True
 
-    for line in data["usernames"]:
-        forbidden_names.append(line)
+        return jsonify({'available': available})
 
-    for user in users:
-        if user['username'].lower() == username.lower():
-            available = False
-            break
-        elif username in forbidden_names:
-            available = False
-            break
-        else:
-            available = True
+    elif item == "name":
+        users = user_collection.find()
 
-    return jsonify({'available': available})
+        for user in users:
+            if user['full_name'].lower() == username.lower():
+                available = False
+                break
+            else:
+                available = True
+
+        return jsonify({'available': available})
+
+    elif item == "phone":
+        users = user_collection.find()
+
+        for user in users:
+            if user['phone_number'] == username:
+                available = False
+                break
+            else:
+                available = True
+
+        return jsonify({'available': available})
 
 
 @app.route('/delete_post', methods=['POST'])

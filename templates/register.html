@@ -10,13 +10,29 @@
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/waveform.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/dotWave.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/hatch.js"></script>
+
     <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
+
     <style>
         .form-step {
             display: none;
         }
 
+        .loader-step {
+            display: none;
+        }
+
         .form-step.active {
+            display: block;
+        }
+
+        #page-step-2 {
+            display: none;
+        }
+
+        .page-step.active {
             display: block;
         }
 
@@ -88,22 +104,21 @@
         </div>
     </nav>
 
-    <div class="centered-container container mt-5">
+    <div class="centered-container container mt-5 page-step" id="page-step-1">
         <h2 class="mb-4">Register</h2>
-        <form id="register-form" action="/register" method="POST" enctype="multipart/form-data">
+        <form id="register-form" method="POST" enctype="multipart/form-data" style="margin: 10px auto;">
             <div class="form-step active" id="step-1">
                 <h3 class="mb-4">Personal Details <span class="fa-solid fa-user"></span> </h3>
                 <div class="container">
                     <div class="form__group field">
-                        <input type="input" class="form__field" placeholder="Name" id="full_name" name="full_name"
-                            required="">
+                        <input type="input" class="form__field" placeholder="Name" id="full_name" name="full_name">
                         <label for="name" class="form__label">Name</label>
                     </div>
                 </div>
                 <div class="container">
                     <div class="form__group field">
                         <input type="input" class="form__field" placeholder="Username" id="username" name="username"
-                            required minlength="5">
+                            minlength="5">
                         <label for="name" class="form__label">username</label>
                     </div>
                     <l-waveform size="35" stroke="3.5" speed="1" color="white" id="username-check-loader"
@@ -111,26 +126,40 @@
                     <div id="username-feedback"></div>
                 </div>
                 <div class="container">
+                    <div class="form__group field">
+                        <select class="form-control bg-dark text-light" name="year" id="year"
+                            style="margin: 10px auto; width: 150px; ">
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="container">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="form__group field">
                                 <input type="input" class="form__field" placeholder="Name" id="country_code"
-                                    name="country_code" required minlength="3" maxlength="5">
+                                    name="country_code" minlength="3" maxlength="5">
                                 <label for="name" class="form__label">Country Code</label>
                             </div>
                         </div>
                         <div class="container">
-                            <div class="col-md-12 phone-number-box">
+                            <div class="phone-number-box">
                                 <div class="form__group field">
                                     <input type="input" class="form__field" placeholder="Phone Number" id="phone_number"
-                                        name="phone_number" required minlength="10" maxlength="10">
+                                        name="phone_number" minlength="10" maxlength="10">
                                     <label for="name" class="form__label">Phone Number</label>
                                 </div>
+                                <div id="phone-feedback"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button class="next-step special-button">Next</button>
+                <button type="button" class="next-step special-button">Next</button>
             </div>
 
             <div class="form-step" id="step-2">
@@ -138,7 +167,7 @@
                 <div class="container">
                     <div class="form__group field">
                         <input type="input" class="form__field" placeholder="Roll Number" id="collegeRollNumber"
-                            name="roll_number" required minlength="10" maxlength="10">
+                            name="roll_number" minlength="10" maxlength="10">
                         <label for="name" class="form__label">College Roll No.</label>
                     </div>
                 </div>
@@ -151,16 +180,19 @@
                 </div>
                 <div class="form-group">
                     <label for="collegeName">College Name</label>
-                    <select class="form-control" name="college_name">
+                    <select class="form-control" name="college_name" id="collegeName">
                         <option value="malla reddy institution of technology and science">Malla Reddy institution of
                             technology and science
                         </option>
-                        <option value="vnr vignana jyothi institute of engineering and technology">VNR Vignana Jyothi
+                        <option value="vnr vignana jyothi institute of engineering and technology">VNR Vignana
+                            Jyothi
                             Institute of
                             Engineering and Technology</option>
-                        <option value="mahatma gandhi institute of technology">Mahatma Gandhi Institute of Technology
+                        <option value="mahatma gandhi institute of technology">Mahatma Gandhi Institute of
+                            Technology
                         </option>
-                        <option value="ellenki college of engineering and technology">Ellenki College of Engineering and
+                        <option value="ellenki college of engineering and technology">Ellenki College of Engineering
+                            and
                             Technology</option>
                         <option value="rajiv gandhi university of knowledge technologies">Rajiv Gandhi University of
                             Knowledge Technologies
@@ -175,16 +207,19 @@
                         <option value="vignan institute of management and technology for women">Vignan Institute of
                             management and
                             technology For Women</option>
-                        <option value="samskruti college of engineering and technology">Samskruti college of Engineering
+                        <option value="samskruti college of engineering and technology">Samskruti college of
+                            Engineering
                             and Technology
                         </option>
                         <option value="princeton institute of engineering and technology">Princeton Institute of
                             engineering and technology
                         </option>
                         <option value="anurag group of institutions">Anurag Group of Institutions</option>
-                        <option value="sreenidhi institute of science and technology">sreenidhi institute of science and
+                        <option value="sreenidhi institute of science and technology">sreenidhi institute of science
+                            and
                             technology</option>
-                        <option value="kommuri pratap reddy institute of technology">Kommuri pratap reddy institute of
+                        <option value="kommuri pratap reddy institute of technology">Kommuri pratap reddy institute
+                            of
                             technology</option>
                         <option value="nalla malla reddy engineering college">Nalla Malla Reddy Engineering College
                         </option>
@@ -203,16 +238,19 @@
                         <option value="osmania university">Osmania University</option>
                         <option value="dvr college of engineering and technology">DVR College of Engineering and
                             Technology</option>
-                        <option value="kakatiya institute of technology and science">Kakatiya Institute of Technology
+                        <option value="kakatiya institute of technology and science">Kakatiya Institute of
+                            Technology
                             and Science</option>
-                        <option value="gandhi institute of technology and management">Gandhi Institute of Technology and
+                        <option value="gandhi institute of technology and management">Gandhi Institute of Technology
+                            and
                             Management</option>
                         <option value="mnr college of engineering and technology">MNR College of Engineering and
                             Technology</option>
                         <option value="chaitanya bharathi institute of technology">Chaitanya Bharathi Institute of
                             Technology</option>
                         <option value="mlr institute of technology">MLR Institute of Technology</option>
-                        <option value="sridevi women's engineering college">Sridevi Women's Engineering College</option>
+                        <option value="sridevi women's engineering college">Sridevi Women's Engineering College
+                        </option>
                         <option value="vasavi college of engineering">Vasavi College of Engineering</option>
                         <option value="bandari srinivas institute of technology">Bandari Srinivas Institute of
                             Technology</option>
@@ -227,40 +265,50 @@
                             Research Institute</option>
                         <option value="nalla malla reddy engineering college">Nalla Malla Reddy Engineering College
                         </option>
-                        <option value="tammannagari ramakrishna reddy college of engineering">Tammannagari Ramakrishna
+                        <option value="tammannagari ramakrishna reddy college of engineering">Tammannagari
+                            Ramakrishna
                             Reddy College of
                             Engineering</option>
                         <option value="bhoj reddy engineering college for women">Bhoj Reddy Engineering College for
                             Women</option>
-                        <option value="deccan college of engineering and technology">Deccan College of Engineering and
+                        <option value="deccan college of engineering and technology">Deccan College of Engineering
+                            and
                             Technology</option>
-                        <option value="g. narayanamma institute of technology and science">G. Narayanamma Institute of
+                        <option value="g. narayanamma institute of technology and science">G. Narayanamma Institute
+                            of
                             Technology and
                             Science</option>
-                        <option value="islamia college of engineering and technology">Islamia College of Engineering and
+                        <option value="islamia college of engineering and technology">Islamia College of Engineering
+                            and
                             Technology</option>
-                        <option value="keshav memorial institute of technology">Keshav Memorial Institute of Technology
+                        <option value="keshav memorial institute of technology">Keshav Memorial Institute of
+                            Technology
                         </option>
-                        <option value="methodist college of engineering and technology">Methodist College of Engineering
+                        <option value="methodist college of engineering and technology">Methodist College of
+                            Engineering
                             and Technology
                         </option>
-                        <option value="shadan women's college of engineering and technology">Shadan Women's College of
+                        <option value="shadan women's college of engineering and technology">Shadan Women's College
+                            of
                             Engineering and
                             Technology</option>
                         <option value="stanley college of engineering and technology for women">Stanley College of
                             Engineering and
                             Technology for Women</option>
-                        <option value="sri indu college of engineering and technology">Sri Indu College of Engineering
+                        <option value="sri indu college of engineering and technology">Sri Indu College of
+                            Engineering
                             and Technology
                         </option>
                         <option value="sri datta college of engineering">Sri Datta College of Engineering</option>
                         <option value="bharath institute of science and technology">Bharath Institute of Science and
                             Technology</option>
-                        <option value="guru nanak institute of technology">Guru Nanak Institute of Technology</option>
+                        <option value="guru nanak institute of technology">Guru Nanak Institute of Technology
+                        </option>
                         <option value="scient institute of technology">SCIENT Institute of Technology</option>
                         <option value="teegala krishna reddy engineering college">Teegala Krishna Reddy Engineering
                             College</option>
-                        <option value="mahaveer institute of science and technology">Mahaveer Institute of Science and
+                        <option value="mahaveer institute of science and technology">Mahaveer Institute of Science
+                            and
                             Technology</option>
                         <option value="vaagdevi engineering college">Vaagdevi Engineering College</option>
                         <option value="vaagdevi college of engineering">Vaagdevi College of Engineering</option>
@@ -271,40 +319,49 @@
                         <option value="muffakam jha college of engineering and technology">Muffakam Jha College of
                             Engineering and
                             Technology</option>
-                        <option value="princeton college of engineering and technology">Princeton College of Engineering
+                        <option value="princeton college of engineering and technology">Princeton College of
+                            Engineering
                             and Technology
                         </option>
-                        <option value="shadan college of engineering and technology">Shadan College of Engineering and
+                        <option value="shadan college of engineering and technology">Shadan College of Engineering
+                            and
                             Technology</option>
                         <option value="matrusri engineering college">Matrusri Engineering College</option>
                         <option value="cvr college of engineering">CVR College of Engineering</option>
-                        <option value="nawab shah alam khan college of engineering and technology">Nawab Shah Alam Khan
+                        <option value="nawab shah alam khan college of engineering and technology">Nawab Shah Alam
+                            Khan
                             College of
                             Engineering and Technology</option>
-                        <option value="sreyas institute of engineering and technology">Sreyas Institute Of Engineering
+                        <option value="sreyas institute of engineering and technology">Sreyas Institute Of
+                            Engineering
                             and
                             Technology</option>
-                        <option value="jntuh college of engineering sultanpur">JNTUH College of Engineering Sultanpur
+                        <option value="jntuh college of engineering sultanpur">JNTUH College of Engineering
+                            Sultanpur
                         </option>
                         <option value="vidya jyothi institute of science and technology">Vidya Jyothi Institute of
                             Science and Technology
                         </option>
-                        <option value="abhinav hi-tech college of engineering and technology">Abhinav Hi-Tech College of
+                        <option value="abhinav hi-tech college of engineering and technology">Abhinav Hi-Tech
+                            College of
                             Engineering and
                             Technology</option>
-                        <option value="joginpally b r engineering college">Joginpally B R Engineering College</option>
+                        <option value="joginpally b r engineering college">Joginpally B R Engineering College
+                        </option>
                         <option value="jb institute of engineering and technology">JB Institute of Engineering and
                             Technology</option>
                         <option value="siddhartha institute of technology and sciences">Siddhartha Institute of
                             Technology and Sciences
                         </option>
-                        <option value="lords institute of engineering and technology">Lords Institute of Engineering and
+                        <option value="lords institute of engineering and technology">Lords Institute of Engineering
+                            and
                             Technology</option>
                         <option value="avn college of engineering">AVN College of Engineering</option>
                         <option value="visvesvaraya college of engineering and technology">Visvesvaraya College of
                             Engineering and
                             Technology</option>
-                        <option value="jagruti institute of engineering and technology">Jagruti Institute of Engineering
+                        <option value="jagruti institute of engineering and technology">Jagruti Institute of
+                            Engineering
                             and
                             Technology</option>
                         <option value="gokraju ranjaraju institute of engineering and technology">Gokraju Ranjaraju
@@ -323,8 +380,8 @@
                         </option>
                     </select>
                 </div>
-                <button class="special-button prev-step">Previous</button>
-                <button class="next-step special-button">Next</button>
+                <button type="button" class="special-button prev-step">Previous</button>
+                <button type="button" class="next-step special-button">Next</button>
             </div>
 
             <div class="form-step" id="step-3">
@@ -334,7 +391,7 @@
                         <div class="container">
                             <div class="form__group field">
                                 <input type="password" class="form__field" placeholder="Password" id="password"
-                                    name="password" required minlength="6" maxlength="12">
+                                    name="password" minlength="6" maxlength="12">
                                 <label for="name" class="form__label">Enter Password</label>
                             </div>
 
@@ -347,14 +404,14 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group">
                             <div class="container">
                                 <div class="form__group field">
                                     <input type="password" class="form__field" placeholder="Password"
-                                        id="confirmPassword" name="confirmPassword" required minlength="6"
-                                        maxlength="12">
+                                        id="confirmPassword" name="confirmPassword" minlength="6" maxlength="12">
                                     <label for="name" class="form__label">Confirm Password</label>
                                 </div>
 
@@ -372,7 +429,7 @@
 
                 <div class="g-recaptcha" data-sitekey="{{ grec_sitekey }}" data-callback="enableSubmitButton"></div>
                 <button type="button" class="special-button prev-step">Previous</button>
-                <button type="submit" id="submit-button" class="special-button">Register</button>
+                <button type="button" id="submit-button" class="special-button">Register</button>
             </div>
         </form>
         <p class="mt-4">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
@@ -383,6 +440,34 @@
         </p>
     </div>
 
+    <div class="centered-container container mt-5 page-step" id="loader-step" style="display: none;">
+        <h1>Registering...</h1>
+        <l-hatch size="35" stroke="4" speed="3.5" color="white"></l-hatch>
+    </div>
+
+    <div class="container mt-5 page-step" id="page-step-2" style="display: none;">
+        <h2>Almost there!!</h2>
+        <p>Upload a picture of your college issued ID Card to verify your
+            identity and access all features of the website.</p>
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <form id="verify-card" method="POST" enctype="multipart/form-data">
+                    <div class="form-group col-6">
+                        <label for="id-card">ID Card</label>
+                        <input type="file" class="form-control-file rounded-circle" id="id-card" name="id_card"
+                            accept="image/*" required>
+                        <span class="text-muted">Make sure the image is visible, and has proper lighting.</span>
+                        <button type="submit" class="btn btn-primary" style="margin: 5px;">Verify</button>
+                    </div>
+                    <div class="form-group col-6">
+                        <l-dot-wave size="47" speed="1" color="white" class="loading-spinner"
+                            style="display: none;"></l-dot-wave>
+                    </div>
+                </form>
+                <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+                <div id="verification-feedback"></div>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -394,20 +479,115 @@
             var currentStep = 1;
             var formSteps = $('.form-step');
 
-            // Comment this line and uncomment immediately below
-            // formSteps.eq(currentStep + 1).addClass('active');
-
             $('.next-step').click(function () {
                 formSteps.eq(currentStep - 1).removeClass('active');
                 currentStep++;
                 formSteps.eq(currentStep - 1).addClass('active');
+                console.log(currentStep);
+                console.log(formSteps);
+                console.log(formSteps.eq(currentStep - 1));
             });
 
             $('.prev-step').click(function () {
                 formSteps.eq(currentStep - 1).removeClass('active');
                 currentStep--;
                 formSteps.eq(currentStep - 1).addClass('active');
+                console.log(currentStep);
+                console.log(formSteps);
+                console.log(formSteps.eq(currentStep - 1));
             });
+        });
+
+        document.getElementById('submit-button').addEventListener('click', async (event) => {
+            event.preventDefault();
+            console.log('submitting form');
+
+            const full_name = document.getElementById('full_name').value;
+            const username = document.getElementById('username').value;
+            const country_code = document.getElementById('country_code').value;
+            const phone_number = document.getElementById('phone_number').value;
+            const roll_number = document.getElementById('collegeRollNumber').value;
+            const password = document.getElementById('password').value;
+            const profile_picture = document.getElementById('profile-pic').files[0];
+            const college_name = document.getElementById('collegeName').value;
+
+            const loaderStep = document.getElementById('loader-step');
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
+            const pageStep1 = document.getElementById('page-step-1');
+            const pageStep2 = document.getElementById('page-step-2');
+
+            loaderStep.style.display = 'block';
+            step1.style.display = 'none';
+            step2.style.display = 'none';
+            pageStep1.style.display = 'none';
+            pageStep2.style.display = 'none';
+
+            fetch('/create_user', {
+                method: 'POST',
+                body: JSON.stringify({
+                    full_name,
+                    username,
+                    country_code,
+                    phone_number,
+                    roll_number,
+                    password,
+                    college_name
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        setTimeout(() => {
+                            loaderStep.style.display = 'none';
+                            pageStep1.style.display = 'none';
+                            pageStep2.style.display = 'block';
+                        }, 3000);
+                    } else if (data.is_exists) {
+                        alert('User already exists');
+                    } else {
+                        alert('An error occurred. Please try again later.');
+                    }
+                });
+        });
+
+        document.getElementById('verify-card').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const errorMessageDiv = document.getElementById('error-message');
+            const verificationFeedback = document.getElementById('verification-feedback');
+            const loadingSpinner = document.querySelector('.loading-spinner');
+            var form_data = new FormData();
+
+            form_data.append('id_card', document.getElementById('id-card').files[0]);
+            verificationFeedback.innerText = 'Verifying ID Card...';
+            loadingSpinner.style.display = 'inline-block';
+
+            fetch('/verify_id_card', {
+                method: 'POST',
+                body: form_data
+            }).then(response => response.json())
+                .then(data => {
+                    loadingSpinner.style.display = 'none';
+                    if (data.error) {
+                        errorMessageDiv.style.display = 'block';
+                        errorMessageDiv.innerText = data.error;
+                        verificationFeedback.innerText = '';
+                    } else {
+                        if (data.verified) {
+                            verificationFeedback.innerText = 'ID Card verified successfully';
+                            errorMessageDiv.style.display = 'none';
+                            alert('ID Card verified successfully. You can now access all features.');
+                            window.location.href = "{{ url_for('view_posts') }}";
+                        } else {
+                            errorMessageDiv.style.display = 'block';
+                            errorMessageDiv.innerText = 'ID Card verification failed. Please ensure you are using your own ID Card.';
+                            verificationFeedback.innerText = '';
+                        }
+                    }
+                });
         });
 
         function enableSubmitButton() {
@@ -421,6 +601,31 @@
             const usernameCheckLoader = document.getElementById('username-check-loader');
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('confirmPassword');
+            const passwordFeedback = document.getElementById('password-feedback');
+            const phoneInput = document.getElementById('phone_number');
+            const phoneFeedback = document.getElementById('phone-feedback');
+
+            phoneInput.addEventListener('input', () => {
+                const fullName = fullNameInput.value;
+                if (fullName.length > 0) {
+                    fetch('/check_item',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ fullName, 'item': 'phone' })
+                        }).then(response => response.json())
+                        .then(data => {
+                            if (data.available) {
+                                fullNameInput.classList.add('is-valid');
+                            } else {
+                                phoneFeedback.innerHTML = 'Phone number is already in use.';
+                                fullNameInput.classList.add('is-invalid');
+                            }
+                        });
+                }
+            });
 
             usernameInput.addEventListener('input', async () => {
                 usernameFeedback.innerHTML = '';
@@ -433,23 +638,25 @@
                         usernameInput.classList.add('is-invalid');
                     } else {
                         usernameInput.classList.remove('is-invalid');
-                        const response = await fetch('/check_username', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ username })
-                        });
-                        const data = await response.json();
-                        if (data.available) {
-                            usernameFeedback.innerHTML = 'Username is available.';
-                            usernameCheckLoader.style.display = 'none';
-                            usernameInput.classList.add('is-valid');
-                        } else {
-                            usernameFeedback.innerHTML = 'Username is taken.';
-                            usernameCheckLoader.style.display = 'none';
-                            usernameInput.classList.add('is-invalid');
-                        }
+                        fetch('/check_item',
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ username, 'item': 'username' })
+                            }).then(response => response.json())
+                            .then(data => {
+                                if (data.available) {
+                                    usernameFeedback.innerHTML = 'Username is available.';
+                                    usernameCheckLoader.style.display = 'none';
+                                    usernameInput.classList.add('is-valid');
+                                } else {
+                                    usernameFeedback.innerHTML = 'Username is taken.';
+                                    usernameCheckLoader.style.display = 'none';
+                                    usernameInput.classList.add('is-invalid');
+                                }
+                            });
                     }
                 } else {
                     usernameCheckLoader.style.display = 'none';
@@ -491,27 +698,6 @@
                     }
                 } else {
                     passwordFeedback.innerHTML = '';
-                }
-            });
-
-            collegeNameInput.addEventListener('input', async () => {
-                const collegeName = collegeNameInput.value;
-                if (collegeName.length > 0) {
-                    const response = await fetch('/check_college', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ collegeName })
-                    });
-                    const data = await response.json();
-                    if (data.available) {
-                        collegeFeedback.innerHTML = 'College is available.';
-                    } else {
-                        collegeFeedback.innerHTML = 'College is not available. Continue to register if you wish to add your college.';
-                    }
-                } else {
-                    collegeFeedback.innerHTML = '';
                 }
             });
         });

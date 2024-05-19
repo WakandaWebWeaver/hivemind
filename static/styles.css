@@ -124,8 +124,13 @@ body {
 }
 
 .a-special-case-no-hover {
-  color: #909090;
+  color: #fbfbfb;
   text-decoration: none;
+}
+
+.a-special-case-no-hover:hover {
+  color: #fbfbfb;
+  text-decoration: underline;
 }
 
 .a-special-case:hover {
@@ -264,7 +269,7 @@ body {
   position: relative;
   padding: 20px 0 0;
   width: 100%;
-  max-width: 180px;
+  max-width: 250px;
 }
 
 .form__field {
@@ -525,11 +530,6 @@ body {
 
 .image-loader {
   align-items: center;
-}
-
-.phone-number-box {
-  height: auto;
-  width: 200px;
 }
 
 .gradient-text {
