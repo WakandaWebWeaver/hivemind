@@ -8,3 +8,4 @@ better_profanity
 requests
 spotipy
 cryptography
+flask_mail
