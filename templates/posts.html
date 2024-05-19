@@ -497,7 +497,7 @@
             document.getElementsByClassName('anon-label').value = "Cannot post anonymously with GIFs";
 
             $('#searchResults').empty();
-            $('#postContent').val('gif: ' + gif);
+            $('#postContent').val(gif);
             $('#embed_url').val(url);
             console.log("embed: " + url);
         }
@@ -578,6 +578,12 @@
                     .then(response => response.text())
                     .then(data => {
                         loadingSpinner.style.display = 'none';
+                        if (data.success) {
+                            $('#gifModal').modal('hide');
+                            window.location.reload();
+                        } else {
+                            alert('Failed to add GIF');
+                        }
                     });
 
             } else {
