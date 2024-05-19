@@ -7,3 +7,4 @@ python-dotenv
 better_profanity
 requests
 spotipy
+cryptography
