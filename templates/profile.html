@@ -293,7 +293,7 @@
                     <a class="btn btn-primary" style="padding: 10px; margin: 5px;" data-toggle="modal"
                         data-target="#updateProfileModal"><i class="fas fa-user-cog"></i> Update
                         Profile</a>
-                    <a class="btn btn-primary" style="padding: 10px; margin: 5px;" href="/mindspace"><i
+                    <a class="btn btn-primary" style="padding: 10px; margin: 5px;" href="/Diary"><i
                             class="fas fa-pen"></i> make a note</a>
                     {% if user.profile_song %}
                     <a class="btn btn-primary" style="padding: 10px; margin: 5px;" href="#add-song" data-toggle="modal"
@@ -491,9 +491,6 @@
     <script>
 
         function notifAction(id, action) {
-            const notifDiv = document.getElementById('notifications-div-' + id);
-            console.log(id, action);
-            console.log(notifDiv);
             fetch('/notif_action', {
                 method: 'POST',
                 body: JSON.stringify({
@@ -523,8 +520,6 @@
             const unfollowBtn = document.getElementById('unfollow-btn');
             var followCount = document.getElementById('follower-count');
             var followingCount = document.getElementById('following-count');
-
-            console.log(action);
 
             if (action === 'follow') {
                 fetch('/follow_user', {
@@ -584,7 +579,7 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ username, 'item': 'username' })
+                            body: JSON.stringify({ 'check_item': username, 'item': 'username' })
                         });
                         const data = await response.json();
                         if (data.available) {
@@ -664,8 +659,6 @@
             const embedUrlParts = embedUrl.split('/');
             const embedUrlValue = embedUrlParts[embedUrlParts.length - 1];
 
-            console.log(embedUrl);
-
             fetch('/add_song', {
                 method: 'POST',
                 body: JSON.stringify({
@@ -698,7 +691,7 @@
             fetch('/search_song', {
                 method: 'POST',
                 body: JSON.stringify({
-                    'song_name': songName
+                    'search_query': songName
                 }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -713,8 +706,9 @@
                         $('#songResults').append(`
                             <a href="#" class="list-group-item list-group-item-action" onclick="selectSong('${song.embed_url}', '${song.song_name}', '${song.artist_name}')">
                                 <img src="${song.album_image}" alt="Album Image" class="album-image" style="width: 40px; height: 40px;">
-                                ${song.song_name} by 
-                                <span class='text-muted'>${song.artist_name}</span>
+                                ${song.song_name}
+                                <span class='text-muted'> by </span>
+                                ${song.artist_name}
                             </a>
                         `);
                     });

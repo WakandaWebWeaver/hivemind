@@ -22,19 +22,34 @@ from flask_mail import Mail, Message
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+app.secret_key = os.getenv('FLASK_SECRET_KEY')
 login_manager = LoginManager(app)
+
+
 giphy_url = "http://api.giphy.com/v1/gifs/search"
 
-key = os.getenv('FERNET_KEY')
+
+key = os.getenv("FERNET_KEY").encode()
+f = Fernet(key)
+
+
+def encrypt(data):
+    encrypted = f.encrypt(data)
+    return encrypted
+
+
+def decrypt(data):
+    decrypted = f.decrypt(data)
+    return decrypted
 
 
 # AWS S3 configuration
 s3_access_key = os.getenv("AWS_ACCESS_KEY_ID")
 s3_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 s3_bucket_name = os.getenv("AWS_BUCKET_NAME")
-giphy_api_key = os.getenv("GIPHY_API_KEY")
 
+
+giphy_api_key = os.getenv("GIPHY_API_KEY")
 grec_sitekey = os.getenv("GREC_SITEKEY")
 
 # Connect to AWS S3
@@ -78,23 +93,23 @@ def index():
                            )
 
 
-# @app.errorhandler(Exception)
-# def error_page(e):
-#     if errors_collection.count_documents({}) > 30:
-#         errors_collection.drop()
+@app.errorhandler(Exception)
+def error_page(e):
+    if errors_collection.count_documents({}) > 30:
+        errors_collection.drop()
 
-#     error = {
-#         'error': str(e),
-#         'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-#         'trigger url': request.url,
-#         'method': request.method,
-#         'complete request': f'{request.method} {request.url}',
-#         'client': request.headers.get('User-Agent'),
-#         'headers': dict(request.headers),
-#         'ip': request.remote_addr
-#     }
-#     errors_collection.insert_one(error)
-#     return render_template('error.html')
+    error = {
+        'error': str(e),
+        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+        'trigger url': request.url,
+        'method': request.method,
+        'complete request': f'{request.method} {request.url}',
+        'client': request.headers.get('User-Agent'),
+        'headers': dict(request.headers),
+        'ip': request.remote_addr
+    }
+    errors_collection.insert_one(error)
+    return render_template('error.html')
 
 
 content_placeholders = [
@@ -103,6 +118,24 @@ content_placeholders = [
     "what's on your mind?",
     "what's your favorite color?",
     "what's the tea?",
+    "what's your favorite movie?",
+    "type 'song: ' to make a song post",
+    "type 'gif: ' to make a gif post",
+    "Got a fun image to share?",
+    "What's your favorite book?",
+    "Been to any cool places lately?",
+    "HELP ME",
+    "i Am TrApPeD iN tHe InTeRnEt",
+    "i aM a RoBoT",
+    "erm what the sigma 🤓",
+    "i am a bot, beep boop",
+    "skibidi bop",
+    "for real? 🤨 Just like that? 🤨🤨",
+    "pls dont upload bad stuff",
+    "all hail the mighty bot",
+    "if you post bad stuff, you will be banned",
+    "i am a bot, but i have feelings too",
+    "mission: steal the homeless man's dog",
 ]
 
 
@@ -120,12 +153,26 @@ def debug():
     version = platform.version()
     currenttime = datetime.datetime.now().strftime("%I:%M:%S %p")
     timezone = time.tzname[1]
+    current_dir = os.getcwd()
+    files = os.listdir()
+
+    folders = []
+
+    # If there are any folders, navigate them and list their contents
+    for file in files:
+        if os.path.isdir(file):
+            folder_data = {
+                'folder': file,
+                'contents': os.listdir(file)
+            }
+            folders.append(folder_data)
 
     return render_template('debug.html', user_info=user_info, s3_files=s3_files,
                            session=session, os_info=os_info, release=release, version=version, currenttime=currenttime,
                            username=username,
-                           current_dir=os.getcwd(), bucket_name=s3_bucket_name,
-                           files=os.listdir(),
+                           current_dir=current_dir, bucket_name=s3_bucket_name,
+                           files=files,
+                           folders=folders,
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None,
                            url=f"https://{s3_bucket_name}.s3.amazonaws.com/", timezone=timezone
@@ -138,7 +185,6 @@ def admin(action, keyword):
     if session['name'] != "Esvin Joshua" or session['id'] != "esvinjoshua":
         return redirect(url_for('index'))
 
-    print(action, keyword)
     user = user_collection.find_one({'username': keyword})
 
     if action == 'verify':
@@ -240,6 +286,7 @@ def login():
                                                 {'username': session['id']})
                                             ))
         except Exception as e:
+            print(e)
             return render_template('error.html')
 
         else:
@@ -289,19 +336,18 @@ def create_user():
         profile_picture_s3_key = "Profile pictures/avatar_default.jpeg"
 
     user_data = {
-        'full_name': full_name,
+        'full_name': encrypt(full_name),
         'phone_number': country_code + ' ' + phone_number,
         'roll_number': roll_number,
         'profile_picture_s3_key': profile_picture_s3_key,
-        'password': password,
+        'password': encrypt(password),
         'username': username,
         'verified': False,
         'college_name': college_name,
+        'following': [],
+        'followers': [],
+        'blacklist': False,
     }
-
-    user['following'] = []
-    user['followers'] = []
-    user['blacklist'] = False
 
     user_collection.insert_one(user_data)
     user = user_collection.find_one({'username': username})
@@ -309,7 +355,7 @@ def create_user():
     user['badges'] = user.get('badges', [])
     user['badges'].append('Welcome aboard: Make a HiveMind account')
 
-    session['name'] = user['full_name']
+    session['name'] = decrypt(user['full_name'])
     session['id'] = user['username']
     session['profile_picture'] = user['profile_picture_s3_key']
     session['default_profile_picture'] = 'Profile pictures/avatar_default.jpeg'
@@ -396,24 +442,9 @@ def materials():
                                'profile_picture') else None)
 
 
-@app.route('/serve_asset', methods=['POST', 'GET'])
-@login_required
-def serve_asset():
-    blacklist = blacklist_collection.find_one({'username': session["id"]})
-
-    if blacklist:
-        return render_template('blacklist.html', blacklist=blacklist)
-
-    print("Args: ", request.args.get('asset'))
-
-    asset = request.args.get('asset')
-
-    if asset == "pfp":
-        user = request.args.get('user')
-        user = user_collection.find_one({'username': user})
-        return redirect(f"https://{s3_bucket_name}.s3.amazonaws.com/{user['profile_picture_s3_key']}")
-    elif asset == "default_pfp":
-        return redirect(f"https://{s3_bucket_name}.s3.amazonaws.com/Profile pictures/avatar_default.jpeg")
+@app.route('/error')
+def error():
+    return render_template('error.html')
 
 
 @app.route('/block_user', methods=['POST'])
@@ -679,13 +710,9 @@ def add_song():
     if blacklist:
         return render_template('blacklist.html', blacklist=blacklist)
 
-    song_url = request.json.get('search_query')
-    print(f"JSON: {request.json}")
-    print(song_url)
+    song_url = request.json.get('embed_url')
     user = user_collection.find_one({'username': session['id']})
     user['profile_song'] = f"https://open.spotify.com/embed/track/{song_url}"
-
-    print(user['profile_song'])
 
     user_collection.update_one({'username': session['id']}, {'$set': user})
 
@@ -716,8 +743,8 @@ def search_gif():
         gif_data = {
             'url': gif['images']['original']['url'],
             'title': gif['title'],
+            'optimized_url': gif['images']['preview_gif']['url']
         }
-        print(gif_data)
         gifs.append(gif_data)
 
     return {'gifs': gifs}
@@ -786,7 +813,7 @@ def search_song():
         client_secret=os.getenv('SPOTIFY_CLIENT_SECRET')
     ))
 
-    song_name = request.json.get('song_name')
+    song_name = request.json.get('search_query')
 
     results = sp.search(q=song_name, limit=3)
 
@@ -1112,9 +1139,9 @@ def serve_post(post_id):
                            )
 
 
-@app.route('/mindspace')
+@app.route('/Diary')
 @login_required
-def mindspace():
+def Diary():
     blacklist = blacklist_collection.find_one({'username': session["id"]})
 
     if blacklist:
@@ -1122,7 +1149,7 @@ def mindspace():
 
     notes = notes_collection.find({'author': session['name']})
 
-    return render_template('mindspace.html', session=session,
+    return render_template('Diary.html', session=session,
                            profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
                                'profile_picture') else None, notes=notes if notes else None
                            )
@@ -1153,7 +1180,7 @@ def note():
 
     notes_collection.insert_one(note_data)
 
-    return redirect(url_for('mindspace'))
+    return redirect(url_for('Diary'))
 
 
 @app.route('/delete_note', methods=['POST'])
@@ -1169,9 +1196,9 @@ def delete_note():
 
     if note:
         notes_collection.delete_one({'note_id': int(note_id)})
-        return redirect(url_for('mindspace'))
+        return redirect(url_for('Diary'))
 
-    return redirect(url_for('mindspace'))
+    return redirect(url_for('Diary'))
 
 
 @app.route('/verify_id_page')
@@ -1321,9 +1348,6 @@ def notif_action():
         notif_id = request.json.get('notif_id')
         action = request.json.get('action')
 
-        print(notif_id, action)
-        print(request.json)
-
         user = user_collection.find_one({'username': session['id']})
 
         if action == 'mark_read':
@@ -1454,7 +1478,7 @@ def check_college():
 
 @app.route('/check_item', methods=['POST'])
 def check_item():
-    username = request.json.get('username')
+    check_item = request.json.get('check_item')
     item = request.json.get('item')
 
     if item == "username":
@@ -1469,10 +1493,10 @@ def check_item():
             forbidden_names.append(line)
 
         for user in users:
-            if user['username'].lower() == username.lower():
+            if user['username'].lower() == check_item.lower():
                 available = False
                 break
-            elif username in forbidden_names:
+            elif check_item in forbidden_names:
                 available = False
                 break
             else:
@@ -1484,7 +1508,7 @@ def check_item():
         users = user_collection.find()
 
         for user in users:
-            if user['full_name'].lower() == username.lower():
+            if user['full_name'].lower() == check_item.lower():
                 available = False
                 break
             else:
@@ -1496,7 +1520,7 @@ def check_item():
         users = user_collection.find()
 
         for user in users:
-            if user['phone_number'] == username:
+            if user['phone_number'] in check_item:
                 available = False
                 break
             else:

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindspace - Note down your thoughts</title>
+    <title>Diary - Note down your thoughts</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
@@ -46,17 +46,8 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Account
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('view_profile', username=session.id) }}">View
-                                Profile</a>
-                            <a class="dropdown-item" href="{{ url_for('update_profile') }}">Account Settings</a>
-                        </div>
-                    </li>
+                    <!--  -->
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives

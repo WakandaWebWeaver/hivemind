@@ -11,8 +11,8 @@
     <meta name="author" content="Esvin Joshua">
 
     <title>Error Page</title>
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/styles.css">
@@ -55,17 +55,6 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Account
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('view_profile', username=session.id) }}">View
-                                Profile</a>
-                            <a class="dropdown-item" href="{{ url_for('update_profile') }}">Account Settings</a>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -89,26 +78,24 @@
         </div>
     </nav>
 
-
-
-    <!-- Landing Section -->
-    <section class="landing-section">
+    <section class="landing-section error-sect">
         <div class="container">
             <div class="row">
                 <div class="col-md-6" id="landing-text">
                     <h2>Something's Wrong</h2>
                     <p>The server encountered an error.
                         Try some of the following options:
-                        1. Refresh the page
-                        2. Go back to the previous page
-                        3. Check if you are logged in
-
-                        If the problem persists, please Wait for a few minutes and try again.
+                    <ol>
+                        <li>Check your internet connection</li>
+                        <li>Refresh the page</li>
+                        <li>Try again later</li>
+                    </ol>
+                    If the problem persists, please Wait for a few minutes and try again.
                     </p>
                     <a href="{{ url_for('index') }}" class="btn btn-primary">Go back to Home</a>
                 </div>
                 <div class="col-md-6">
-                    <img src="/static/imgs/computer-broken.png" alt="Error Image" class="img-fluid">
+                    <img src="/static/imgs/error.svg" alt="Laptop with a cracked screen" class="img-fluid">
                 </div>
             </div>
         </div>

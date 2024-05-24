@@ -46,17 +46,8 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Account
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('view_profile', username=session.id) }}">View
-                                Profile</a>
-                            <a class="dropdown-item" href="{{ url_for('update_profile') }}">Account Settings</a>
-                        </div>
-                    </li>
+                    <!--  -->
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
@@ -83,11 +74,11 @@
     </nav>
 
 
-    <section class="landing-section">
+    <section class="landing-section dashboard-section">
         <div class="container">
             <div class="row">
                 <div class="col-md-6" id="landing-text">
-                    <h2>Hey there, {{ session.name }}!</h2>
+                    <h2>Hey there, <span class="gradient-text">{{ session.name }}</span>!</h2>
                     <p>Here's some quick info about your College {{ session.college_name }}: </p>
                     <div class="container">
                         <ol class="list-group">
@@ -103,7 +94,6 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
     </section>
 
 

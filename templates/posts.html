@@ -41,17 +41,8 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Account
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('view_profile', username=session.id) }}">View
-                                Profile</a>
-                            <a class="dropdown-item" href="{{ url_for('update_profile') }}">Account Settings</a>
-                        </div>
-                    </li>
+                    <!--  -->
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
@@ -101,164 +92,168 @@
         </div>
     </div>
 
-    <div id="post-container row">
-        <div class="container col-sm-4" style="margin: auto;">
-            {% for post in posts %}
-            <div class="card text-light" id="post-card-{{ post['post_id'] }}" style="background-color: black;">
-                <div class="mb-4">
-                    <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                href="#postDetails-{{ post['post_id'] }}" role="tab"
-                                aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                href="#comments-{{ post['post_id'] }}" role="tab"
-                                aria-controls="comments-{{ post['post_id'] }}" aria-selected="false">Comments</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                href="#actions-{{ post['post_id'] }}" role="tab"
-                                aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="info-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                href="#info-{{ post['post_id'] }}" role="tab" aria-controls="info-{{ post['post_id'] }}"
-                                aria-selected="false">Information</a>
-                        </li>
-                    </ul>
-                    <div class="tab-content" id="postTabsContent">
-                        <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}" role="tabpanel"
-                            aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
-                            <div class="card-header row text-center">
-                                {% if post.anonymous %}
-                                <span class="a-special-case-no-hover post-author">Anonymous</span>
-                                <div class="post-pfp">
-                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                        class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
-                                </div>
-                                {% else %}
-                                <a class="a-special-case post-author" href="/view_profile/{{ post['username'] }}">{{
-                                    post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
-                                    endif %}
-                                    </h5></a>
-                                <div class="post-pfp">
-                                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                        class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-body container">
-                                {% if post['contains_image'] %}
-                                <div class="image-loader" role="status">
-                                    <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
-                                        id="image-loader"></l-line-wobble>
-                                </div>
-                                <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid post-image"
-                                    onload="handleImageLoad(this)" style="border-radius: 5px;">
-                                <hr>
-                                <div class="container text-center">
-                                    {% if post['title'] != "" %}
-                                    <p class="card-title">{{ post['title'] }}</p>
+    <section class="post-section">
+        <div id="post-container">
+            <div class="container col-sm-4" style="margin: auto;">
+                {% for post in posts %}
+                <div class="card text-light" id="post-card-{{ post['post_id'] }}" style="background-color: black;">
+                    <div class="mb-4">
+                        <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                    href="#postDetails-{{ post['post_id'] }}" role="tab"
+                                    aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                    href="#comments-{{ post['post_id'] }}" role="tab"
+                                    aria-controls="comments-{{ post['post_id'] }}" aria-selected="false">Comments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                    href="#actions-{{ post['post_id'] }}" role="tab"
+                                    aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="info-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                    href="#info-{{ post['post_id'] }}" role="tab"
+                                    aria-controls="info-{{ post['post_id'] }}" aria-selected="false">Information</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="postTabsContent">
+                            <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}"
+                                role="tabpanel" aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
+                                <div class="card-header row text-center">
+                                    {% if post.anonymous %}
+                                    <span class="a-special-case-no-hover post-author">Anonymous</span>
+                                    <div class="post-pfp">
+                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                            class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
+                                    </div>
+                                    {% else %}
+                                    <a class="a-special-case post-author" href="/view_profile/{{ post['username'] }}">{{
+                                        post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
+                                        endif %}
+                                        </h5></a>
+                                    <div class="post-pfp">
+                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                            class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
+                                    </div>
                                     {% endif %}
-                                    <p class="card-text">{{ post['content'] }}</p>
                                 </div>
-                                {% elif post['song_url'] == '' %}
-                                <div class="container">
-                                    {% if post['title'] != "" %}
-                                    <p class="card-title">{{ post['title'] }}</p>
-                                    {% endif %}
-                                    <p class="card-text text-center">{{ post['content'] }}</p>
-                                </div>
-                                {% elif post['gif_url'] %}
-                                <div class="container">
+                                <div class="card-body container">
+                                    {% if post['contains_image'] %}
                                     <div class="image-loader" role="status">
                                         <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
                                             id="image-loader"></l-line-wobble>
                                     </div>
-                                    <img src="{{ post['gif_url'] }}" class="img-fluid post-image post-image-container"
-                                        style="border-radius: 5px;" onload=" handleImageLoad(this)">
-                                    <img src="/static/imgs/powered-by-giphy.png" alt="Powered by Giphy"
-                                        style="justify-content: left; margin: 10px; width: 60px;">
+                                    <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid post-image"
+                                        onload="handleImageLoad(this)" style="border-radius: 5px;">
+                                    <hr>
+                                    <div class="container text-center">
+                                        {% if post['title'] != "" %}
+                                        <p class="card-title">{{ post['title'] }}</p>
+                                        {% endif %}
+                                        <p class="card-text">{{ post['content'] }}</p>
+                                    </div>
+                                    {% elif post['song_url'] == '' %}
+                                    <div class="container">
+                                        {% if post['title'] != "" %}
+                                        <p class="card-title">{{ post['title'] }}</p>
+                                        {% endif %}
+                                        <p class="card-text text-center">{{ post['content'] }}</p>
+                                    </div>
+                                    {% elif post['gif_url'] %}
+                                    <div class="container">
+                                        <div class="image-loader" role="status">
+                                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
+                                                color="white" id="image-loader"></l-line-wobble>
+                                        </div>
+                                        <img src="{{ post['gif_url'] }}"
+                                            class="img-fluid post-image post-image-container"
+                                            style="border-radius: 5px;" onload=" handleImageLoad(this)">
+                                        <img src="/static/imgs/powered-by-giphy.png" alt="Powered by Giphy"
+                                            style="justify-content: left; margin: 10px; width: 60px;">
+                                        {% if post['title'] %}
+                                        <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
+                                        {% endif %}
+                                        <p class="card-text text-center">{{ post['content'] }}</p>
+                                        <hr>
+                                    </div>
+                                    {% else %}
+                                    <div class="music-loader" role="status">
+                                        <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                            id="music-loader"></l-line-wobble>
+                                    </div>
+                                    <iframe style="border-radius:12px" src="{{ post.song_url }}?utm_source=generator"
+                                        width="100%" height="150" frameBorder="0" allowfullscreen=""
+                                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                        loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
                                     {% if post['title'] %}
                                     <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
                                     {% endif %}
                                     <p class="card-text text-center">{{ post['content'] }}</p>
-                                    <hr>
-                                </div>
-                                {% else %}
-                                <div class="music-loader" role="status">
-                                    <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
-                                        id="music-loader"></l-line-wobble>
-                                </div>
-                                <iframe style="border-radius:12px" src="{{ post.song_url }}?utm_source=generator"
-                                    width="100%" height="150" frameBorder="0" allowfullscreen=""
-                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                    loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
-                                {% if post['title'] %}
-                                <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
-                                {% endif %}
-                                <p class="card-text text-center">{{ post['content'] }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
-                            aria-labelledby="comments-tab-{{ post['post_id'] }}">
-                            <ul class="list-unstyled">
-                                {% for comment in post['comments'] %}
-                                {% if comment.comment != "" %}
-                                <li style="margin: 5px;">{{ comment['author'] }} said: {{
-                                    comment['comment'] }}
-                                    {% if session.name == comment['author'] %}
-                                    <span>
-                                        <form action="/delete_comment" method="POST">
-                                            <input type="hidden" name="comment" value="{{ comment['comment'] }}">
-                                            <input type="hidden" name="comment_author" value="{{ comment['author'] }}">
-                                            <button type="submit" class="btn fas fa-trash"
-                                                style="color: white;"></button>
-                                        </form>
-                                    </span>
                                     {% endif %}
-                                    <hr class="ruler">
-                                </li>
-                                {% endif %}
-                                {% endfor %}
-                            </ul>
-                            <div class="add-comment-section">
-                                <h5>Add a Comment</h5>
-                                <form action="/comment" method="POST">
-                                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                    <input type="text" name="comment" class="form-control" placeholder="Spill it">
-                                    <button type="submit" class="btn btn-primary mt-2"><i
-                                            class="fas fa-share"></i></button>
-                                </form>
+                                </div>
                             </div>
-                        </div>
-                        <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
-                            aria-labelledby="actions-tab-{{ post['post_id'] }}">
-                            {% if session.name == post['author'] or session.id == post['username'] %}
-                            <button class="btn btn-danger" onclick="deletePost('{{ post.post_id }}')">Delete
-                                Post</button>
-                            {% else %}
-                            <p>No actions for this post</p>
-                            {% endif %}
-                        </div>
-                        <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
-                            aria-labelledby="info-tab-{{ post['post_id'] }}">
-                            <p>Posted on: {{ post['date'] }}</p>
-                            {% if post['contains_image'] %}
-                            <p>File size: {{ post['image_size'] }}</p>
-                            {% endif %}
+                            <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
+                                aria-labelledby="comments-tab-{{ post['post_id'] }}">
+                                <ul class="list-unstyled">
+                                    {% for comment in post['comments'] %}
+                                    {% if comment.comment != "" %}
+                                    <li style="margin: 5px;">{{ comment['author'] }} said: {{
+                                        comment['comment'] }}
+                                        {% if session.name == comment['author'] %}
+                                        <span>
+                                            <form action="/delete_comment" method="POST">
+                                                <input type="hidden" name="comment" value="{{ comment['comment'] }}">
+                                                <input type="hidden" name="comment_author"
+                                                    value="{{ comment['author'] }}">
+                                                <button type="submit" class="btn fas fa-trash"
+                                                    style="color: white;"></button>
+                                            </form>
+                                        </span>
+                                        {% endif %}
+                                        <hr class="ruler">
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                </ul>
+                                <div class="add-comment-section">
+                                    <h5>Add a Comment</h5>
+                                    <form action="/comment" method="POST">
+                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                        <input type="text" name="comment" class="form-control" placeholder="Spill it">
+                                        <button type="submit" class="btn btn-primary mt-2"><i
+                                                class="fas fa-share"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
+                                aria-labelledby="actions-tab-{{ post['post_id'] }}">
+                                {% if session.name == post['author'] or session.id == post['username'] %}
+                                <button class="btn btn-danger" onclick="deletePost('{{ post.post_id }}')">Delete
+                                    Post</button>
+                                {% else %}
+                                <p>No actions for this post</p>
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
+                                aria-labelledby="info-tab-{{ post['post_id'] }}">
+                                <p>Posted on: {{ post['date'] }}</p>
+                                {% if post['contains_image'] %}
+                                <p>File size: {{ post['image_size'] }}</p>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <hr>
+                    <hr>
 
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
-    </div>
+    </section>
 
     <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
         aria-hidden="true" style="color: black;">
@@ -424,68 +419,64 @@
         $('#postContent').on('input', function () {
             var content = $('#postContent').val();
             if (content.startsWith('song: ')) {
-                setTimeout(() => {
-                    var songName = content.substring(6);
-                    const songLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
+                var songName = content.substring(6);
+                const songLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
 
-                    $('#searchResults').empty();
-                    $('#searchResults').append(songLoader);
+                $('#searchResults').empty();
+                $('#searchResults').append(songLoader);
 
-                    fetch('/search_song', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            'search_query': songName
-                        }),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            $('#searchResults').empty();
-                            const songs = data['songs'];
-                            songs.forEach(song => {
-                                $('#searchResults').append(`
+                fetch('/search_song', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        'search_query': songName
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#searchResults').empty();
+                        const songs = data['songs'];
+                        songs.forEach(song => {
+                            $('#searchResults').append(`
                             <a href="#" class="list-group-item list-group-item-action" onclick="selectSong('${song.embed_url}', '${song.song_name.replace("'", "\\'")}', '${song.artist_name}')">
                                 <img src="${song.album_image}" alt="Song" class="gif-image" style="width: 70px; height: 70px;">
                                 ${song.song_name} <span class="text-muted">by </span>${song.artist_name}
                             </a>
                         `);
-                            });
                         });
-                })
-
+                    });
             } else if (content.startsWith('gif: ')) {
-                setTimeout(() => {
-                    var gifName = content.substring(5);
-                    const gifLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
+                var gifName = content.substring(5);
+                const gifLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
 
-                    $('#searchResults').empty();
-                    $('#searchResults').append(gifLoader);
+                $('#searchResults').empty();
+                $('#searchResults').append(gifLoader);
 
-                    fetch('/search_gif', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            'search_query': gifName
-                        }),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            $('#searchResults').empty();
-                            const gifs = data['gifs'];
-                            gifs.forEach(gif => {
-                                $('#searchResults').append(`
+                fetch('/search_gif', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        'search_query': gifName
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#searchResults').empty();
+                        const gifs = data['gifs'];
+                        gifs.forEach(gif => {
+                            $('#searchResults').append(`
                             <a href="#" class="list-group-item list-group-item-action" onclick="selectGif('${gif.title}', '${gif.url}')">
-                                <img src="${gif.url}" alt="GIF" class="gif-image" style="width: 70px; height: 70px;">
+                                <img src="${gif.optimized_url}" alt="GIF" class="gif-image" style="width: 70px; height: 70px;">
                                 ${gif.title}
                             </a>
                         `);
-                            });
+                            console.log(gif);
                         });
-                }, 1000);
+                    });
 
             }
         });
@@ -497,7 +488,7 @@
             document.getElementsByClassName('anon-label').value = "Cannot post anonymously with GIFs";
 
             $('#searchResults').empty();
-            $('#postContent').val(gif);
+            $('#postContent').val('gif: ' + gif);
             $('#embed_url').val(url);
             console.log("embed: " + url);
         }
@@ -578,6 +569,7 @@
                     .then(response => response.text())
                     .then(data => {
                         loadingSpinner.style.display = 'none';
+                        alert(data.success);
                         if (data.success) {
                             $('#gifModal').modal('hide');
                             window.location.reload();

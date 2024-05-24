@@ -30,6 +30,31 @@
                 <li>{{ file }}</li>
                 {% endfor %}
             </ol>
+            <hr>
+            <div class="container">
+                <h2>Files on Server</h2>
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Folder</th>
+                            <th scope="col">Files</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for folder in folders %}
+                        <tr>
+                            <td>{{ folder.folder }}</td>
+                            <td>
+                                <ul>
+                                    {% for file in folder.contents %}
+                                    <li>{{ file }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                </table>
+            </div>
         </div>
 
         <hr />
@@ -154,15 +179,6 @@
                                     <button class="btn btn-danger"
                                         onclick="fileAction('delete_file', '{{ (file.Key).split('/')[0] }}', '{{ (file.Key).split('/')[1] }}')">Delete</button>
                                 </div>
-                                <div class="container col-4">
-                                    <form method="POST">
-                                        <input type="hidden" name="old_folder" value="{{ (file.Key).split('/')[0] }}">
-                                        <input type="hidden" name="old_file" value="{{ (file.Key).split('/')[1] }}">
-                                        <input type="text" name="new_file" placeholder="Enter new name">
-                                        <button type="submit" class="btn btn-primary"
-                                            onsubmit="fileAction('rename_file', '{{ (file.Key).split('/')[0] }}', '{{ (file.Key).split('/')[1] }}', name )">Rename</button>
-                                    </form>
-                                </div>
                             </div>
                         </td>
                     </tr>
@@ -216,21 +232,21 @@
         <div class="container">
             <h2>Test Endpoints</h2>
             <ul>
-                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/index')"
+                <li class="endpoint-list-items list-item" style="margin: 10px;"><button onclick="checkEndpoint('/')"
                         class="btn btn-primary">Home Page</button></li>
-                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/posts')"
-                        class="btn btn-primary">/posts</button></li>
-                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/create_post')"
-                        class="btn btn-primary">/create_post</button></li>
-                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/logout')"
-                        class="btn btn-danger">Logout</button></li>
-                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/login')"
-                        class="btn btn-primary">Login</button>
+                <li class="endpoint-list-items list-item" style="margin: 10px;"><button
+                        onclick="checkEndpoint('/posts')" class="btn btn-primary">/posts</button></li>
+                <li class="endpoint-list-items list-item" style="margin: 10px;"><button
+                        onclick="checkEndpoint('/create_post')" class="btn btn-primary">/create_post</button></li>
+                <li class="endpoint-list-items list-item" style="margin: 10px;"><button
+                        onclick="checkEndpoint('/logout')" class="btn btn-danger">Logout</button></li>
+                <li class="endpoint-list-items list-item" style="margin: 10px;"><button
+                        onclick="checkEndpoint('/login')" class="btn btn-primary">Login</button>
                 </li>
-                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/hives')"
-                        class="btn btn-primary">/hives</button></li>
-                <li class="endpoint-list-items list-item"><button onclick="checkEndpoint('/debug')"
-                        class="btn btn-primary">/debug</button></li>
+                <li class="endpoint-list-items list-item" style="margin: 10px;"><button
+                        onclick="checkEndpoint('/hives')" class="btn btn-primary">/hives</button></li>
+                <li class="endpoint-list-items list-item" style="margin: 10px;"><button
+                        onclick="checkEndpoint('/debug')" class="btn btn-primary">/debug</button></li>
             </ul>
         </div>
     </div>

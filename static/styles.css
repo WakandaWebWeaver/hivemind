@@ -532,8 +532,18 @@ body {
   align-items: center;
 }
 
+.dashboard-section {
+  background-image: url(/static/imgs/dashboard.svg);
+  background-size: 70% 70%;
+  background-repeat: no-repeat;
+  background-position: right;
+}
+
+.error-sect img {
+  margin: 30px;
+}
+
 .gradient-text {
-  font-size: 20px;
   background: -webkit-linear-gradient(rgb(83, 92, 145), rgb(146, 144, 195));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
