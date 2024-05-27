@@ -34,6 +34,7 @@ f = Fernet(key)
 
 
 def encrypt(data):
+    data = data.encode()
     encrypted = f.encrypt(data)
     return encrypted
 
@@ -259,14 +260,15 @@ def login():
             password = request.form['password']
 
             user = user_collection.find_one(
-                {'username': username, 'password': password})
+                {'username': username})
             blacklist = blacklist_collection.find_one({'username': username})
 
             if blacklist:
                 return render_template('blacklist.html', blacklist=blacklist)
 
             if user:
-                if user['username'] == username and user['password'] == password:
+
+                if user['username'] == username and decrypt(user['password']).decode() == password:
                     user_obj = User()
                     user_obj.id = username
                     login_user(user_obj)
@@ -305,6 +307,12 @@ def create_user():
     username = request.json.get('username').strip().lower()
     college_name = request.json.get('college_name').lower()
     country_code = request.json.get('country_code')
+    default_pfp = request.json.get('default_pfp')
+    year_of_study = request.json.get('year_of_study')
+    security_question = request.json.get('security_question')
+    security_answer = request.json.get('security_answer')
+    email = request.json.get('email')
+    gender = request.json.get('gender')
 
     college = colleges_collection.find_one(
         {'college_name': college_name.lower()})
@@ -331,19 +339,24 @@ def create_user():
 
             profile_picture_s3_key = file_key
         else:
-            profile_picture_s3_key = "Profile pictures/avatar_default.jpeg"
+            profile_picture_s3_key = f"Profile pictures/{default_pfp}" if default_pfp != "" else "Profile pictures/avatar_default.jpeg"
     else:
-        profile_picture_s3_key = "Profile pictures/avatar_default.jpeg"
+        profile_picture_s3_key = f"Profile pictures/{default_pfp}" if default_pfp != "" else "Profile pictures/avatar_default.jpeg"
 
     user_data = {
-        'full_name': encrypt(full_name),
+        'full_name': full_name,
+        'gender': gender,
         'phone_number': country_code + ' ' + phone_number,
+        'email': email,
         'roll_number': roll_number,
         'profile_picture_s3_key': profile_picture_s3_key,
         'password': encrypt(password),
+        'security_question': security_question,
+        'security_answer': security_answer,
         'username': username,
         'verified': False,
         'college_name': college_name,
+        'year_of_study': year_of_study,
         'following': [],
         'followers': [],
         'blacklist': False,
@@ -355,7 +368,7 @@ def create_user():
     user['badges'] = user.get('badges', [])
     user['badges'].append('Welcome aboard: Make a HiveMind account')
 
-    session['name'] = decrypt(user['full_name'])
+    session['name'] = user['full_name']
     session['id'] = user['username']
     session['profile_picture'] = user['profile_picture_s3_key']
     session['default_profile_picture'] = 'Profile pictures/avatar_default.jpeg'
