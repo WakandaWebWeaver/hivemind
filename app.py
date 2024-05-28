@@ -196,11 +196,13 @@ def admin(action, keyword):
         user_collection.update_one({'username': keyword}, {'$set': user})
     elif action == 'blacklist':
         user['blacklist'] = True
+        user['warnings'] = 4
         user_collection.update_one({'username': keyword}, {'$set': user})
         blacklist_collection.insert_one(
             {'username': keyword, 'reason': 'Blacklist by Admin'})
     elif action == 'unblacklist':
         user['blacklist'] = False
+        user['warnings'] = 0
         user_collection.update_one({'username': keyword}, {'$set': user})
         blacklist_collection.delete_one({'username': keyword})
     elif action == 'delete':
@@ -593,6 +595,8 @@ def create_post():
                                              })
             logout_user()
             return {'profanity': True}
+        user['warnings'] = user.get('warnings', 0) + 1
+        user_collection.update_one({'full_name': author}, {'$set': user})
         return {'warning': True}
 
     if post_picture:

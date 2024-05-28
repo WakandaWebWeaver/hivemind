@@ -117,7 +117,7 @@
                                         <option value="">Gender ?</option>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
-                                        <option value="batman">Prefer not to say</option>
+                                        <option value="batman">Prefer not to say (batman)</option>
                                     </select>
                                 </div>
                             </div>
@@ -147,7 +147,7 @@
                                 <div class="form-group field">
                                     <label for="country_code" class="form-label">Country Code</label>
                                     <input type="input" class="form-control" placeholder="country code"
-                                        id="country_code" name="country_code" minlength="3" maxlength="5">
+                                        id="country_code" name="country_code" minlength="3" maxlength="5" required>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -155,7 +155,8 @@
                                     <div class="form-group">
                                         <label for="phone_number">Phone Number</label>
                                         <input type="input" class="form-control" placeholder="Phone Number"
-                                            id="phone_number" name="phone_number" minlength="10" maxlength="10">
+                                            id="phone_number" name="phone_number" minlength="10" maxlength="10"
+                                            required>
                                     </div>
                                     <div id="phone-feedback"></div>
                                 </div>
@@ -176,7 +177,7 @@
                                 <div class="form-group">
                                     <label for="username">Pick a Username</label>
                                     <input type="input" class="form-control" placeholder="pick a Username" id="username"
-                                        name="username" minlength="5">
+                                        name="username" minlength="5" required>
                                 </div>
                                 <l-waveform size="35" stroke="3.5" speed="1" color="white" id="username-check-loader"
                                     style="display: none;"></l-waveform>
@@ -699,7 +700,8 @@
             var formSteps = $('.form-step');
 
             $('.next-step').click(function () {
-                var inputs = formSteps.eq(currentStep - 1).find('input, select, textarea');
+                // only if the field has a 'required' attribute, check if it's empty
+                var inputs = formSteps.eq(currentStep - 1).find('input[required], select[required], textarea[required]');
                 var empty = false;
                 inputs.each(function () {
                     if ($(this).val() === '') {

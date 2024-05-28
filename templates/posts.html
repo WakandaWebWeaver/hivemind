@@ -593,6 +593,7 @@
                     body: formData
                 }).then(response => response.json())
                     .then(data => {
+                        console.log(data);
                         if (data.profanity) {
                             submitButton.innerText = 'L :(';
                             loadingSpinner.style.display = 'none';
@@ -602,6 +603,7 @@
                             submitButton.innerText = 'Create Post';
                             loadingSpinner.style.display = 'none';
                             alert('Your post contains a word that is not allowed on HiveMind. Please remove it and try again.');
+                            submitButton.disabled = false;
                         } else if (data.success) {
                             window.location.reload();
                         } else {

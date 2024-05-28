@@ -31,7 +31,6 @@
     </nav>
 
 
-
     <!-- Landing Section -->
     <section class="landing-section">
         <div class="container">
@@ -41,8 +40,7 @@
                     <p>Name: {{ blacklist.author }}</p>
                     <p>Username: {{ blacklist.username }}</p>
                     <p>Reason for blacklist: {{ blacklist.reason }}</p>
-                    <!-- <p>Profanity content: {{ blacklist.content }}</p> -->
-                    <!-- <p>For more information, please contact the administrator.</p> -->
+                    <p>Profanity content: '{{ blacklist.content }}'</p>
                     <p>
                         Check out <a href="{{ url_for('tos_prp') }}">Terms of service</a> for information on how to use
                         this site safely.
