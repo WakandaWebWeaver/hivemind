@@ -78,19 +78,22 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6" id="landing-text">
-                    <h2>Hey there, <span class="gradient-text">{{ session.name }}</span>!</h2>
-                    <p>Here's some quick info about your College {{ session.college_name }}: </p>
+                    <h2 class="landing-text-dashboard">Hey there, <span class="gradient-text">{{ session.name }}</span>!
+                    </h2>
+                    <p class="landing-text-dashboard">Here's some quick info about your College {{ session.college_name
+                        }}: </p>
                     <div class="container">
                         <ol class="list-group">
                             <li class="list-item">Number of people: {{ college.user_count }}</li>
                         </ol>
-                        <p>{{ message }}</p>
+                        <p class="landing-text-dashboard">{{ message }}</p>
                     </div>
                     <a href="{{ url_for('index') }}" class="btn btn-primary">Go back to Home</a>
                     {% if user.verified %}
-                    <p>Your account is verified! You can use the entire site.</p>
+                    <p class="landing-text-dashboard">Your account is verified! You can use the entire site.</p>
                     {% else %}
-                    <p>Your account is not verified. <a href="{{ url_for('verify_id_page') }}">Verify now</a></p>
+                    <p class="landing-text-dashboard">Your account is not verified. <a
+                            href="{{ url_for('verify_id_page') }}">Verify now</a></p>
                     {% endif %}
                 </div>
             </div>

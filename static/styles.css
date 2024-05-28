@@ -294,6 +294,11 @@ body {
   width: 0;
 }
 
+.landing-text-dashboard {
+  background-color: #000;
+  border-radius: 5px;
+}
+
 #post-card {
   background-color: #acacac;
   border-radius: 10px;
