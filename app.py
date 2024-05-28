@@ -320,9 +320,15 @@ def create_user():
         {'college_name': college_name.lower()})
 
     if college:
+        college['user_count'] = college.get('user_count', 0) + 1
+        colleges_collection.update_one(
+            {'college_name': college_name}, {'$set': college})
         pass
     else:
         colleges_collection.insert_one({'college_name': college_name})
+        college['user_count'] = college.get('user_count', 0) + 1
+        colleges_collection.update_one(
+            {'college_name': college_name}, {'$set': college})
 
     user = user_collection.find_one({'username': username})
 
