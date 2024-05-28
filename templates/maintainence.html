@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="HiveMind - Student Server">
+    <meta name="description"
+        content="HiveMind is a student server that allows students to collaborate and share resources with each other.">
+    <meta name="keywords" content="student server, student collaboration, study materials, student resources">
+    <meta name="author" content="Esvin Joshua">
+
+    <title>Error Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <div class="profile-picture-div-navbar"> <img src="{{ profile_picture_url }}"
+                                alt="Profile Picture" class="nav-profile-picture rounded-circle"
+                                style="width: 40px; height: 40px;">
+                        </div>
+                    </li>
+
+                    <li class="nav-item nav-username a-special-case">
+                        <a class="nav-username a-special-case" href="/view_profile/{{ session.id }}">{{ session.name }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_posts') }}">View Posts</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="landing-section error-sect">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6" id="landing-text">
+                    <h2>Working on This Feature</h2>
+                    <p>
+                        I'm currently working on this feature. Don't worry, your posts are safe and sound. I'll have
+                        this
+                        feature up and running in no time. Here's a dog to keep you company in the meantime.
+                    </p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">Go back to Home</a>
+                </div>
+                <div class="col-md-6">
+                    <img src="/static/imgs/dog.svg" alt="Laptop with a cracked screen" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

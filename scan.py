@@ -41,8 +41,10 @@ def scan_web_url_image(url, return_text_type):
             text.append('\033[94m' + item["Text"] + '\033[0m')
 
     if return_text_type == "clean":
+        print(text)
         return clean_text(text, "string")
     else:
+        print(text)
         return clean_text(text, "list")
 
 
@@ -50,6 +52,7 @@ def find_matching_text(college_name, name, ht_number, s3_image_url):
     try:
         result = scan_web_url_image(s3_image_url, "clean")
         result = result.lower()
+        print(result)
         if result.__contains__(college_name.lower()) and result.__contains__(name.lower()) and result.__contains__(ht_number.lower()):
             return True
         else:

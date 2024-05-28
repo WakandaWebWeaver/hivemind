@@ -80,154 +80,180 @@
             </div>
         </div>
         <span class="text-muted">Search by author, title, or content. Anonymous posts do not support searching.</span>
+        <div class="container" style="padding: 10px;">
+            {% if user.verified %}
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
+                Create Post
+            </button>
+            {% else %}
+            <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
+                    href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
+            {% endif %}
+        </div>
     </div>
 
-    <div id="posts-container">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <h1 class="text-center mt-5">Posts</h1>
-                    <p class="text-center">{{ session.college_name }}</p>
-                </div>
-                <div class="col-md-6">
-                    {% if user.verified %}
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
-                        Create Post
-                    </button>
-                    {% else %}
-                    <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
-                            href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div id="posts-container row">
-                <div class="container col-md-6">
-                    {% for post in posts %}
-                    <div class="card" id="post-card">
-                        <div class="mb-4">
-                            <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}"
-                                        data-toggle="tab" href="#postDetails-{{ post['post_id'] }}" role="tab"
-                                        aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                        href="#comments-{{ post['post_id'] }}" role="tab"
-                                        aria-controls="comments-{{ post['post_id'] }}"
-                                        aria-selected="false">Comments</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                        href="#actions-{{ post['post_id'] }}" role="tab"
-                                        aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="postTabsContent">
-                                <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}"
-                                    role="tabpanel" aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
-                                    <div class="card-header row" style="margin-left: 10px;">
-                                        {% if post.anonymous %}
-                                        <span class="post-author">Anonymous</span>
-                                        <div class="post-pfp">
-                                            <img src="{{ builder_url }}{{ post['profile_picture'] }}"
-                                                alt="Profile Picture" class="nav-profile-picture rounded-circle ml-2">
-                                        </div>
-                                        {% else %}
-                                        <a class="username-link post-author"
-                                            href="/view_profile/{{ post['username'] }}">{{
-                                            post['username'] }} {% if user.verified %}<i
-                                                class="fas fa-circle-check"></i>{%
-                                            endif %}
-                                            </h5></a>
-                                        <div class="post-pfp">
-                                            <img src="{{ builder_url }}{{ post['profile_picture'] }}"
-                                                alt="Profile Picture" class="nav-profile-picture rounded-circle ml-2">
-                                        </div>
-                                        {% endif %}
+    <section class="post-section">
+        <div id="post-container">
+            <div class="container col-sm-4" style="margin: auto;">
+                {% for post in posts %}
+                <div class="card text-light" id="post-card-{{ post['post_id'] }}" style="background-color: black;">
+                    <div class="mb-4">
+                        <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                    href="#postDetails-{{ post['post_id'] }}" role="tab"
+                                    aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                    href="#comments-{{ post['post_id'] }}" role="tab"
+                                    aria-controls="comments-{{ post['post_id'] }}" aria-selected="false">Comments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                    href="#actions-{{ post['post_id'] }}" role="tab"
+                                    aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="info-tab-{{ post['post_id'] }}" data-toggle="tab"
+                                    href="#info-{{ post['post_id'] }}" role="tab"
+                                    aria-controls="info-{{ post['post_id'] }}" aria-selected="false">Information</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="postTabsContent">
+                            <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}"
+                                role="tabpanel" aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
+                                <div class="card-header row text-center">
+                                    {% if post.anonymous %}
+                                    <span class="a-special-case-no-hover post-author">Anonymous</span>
+                                    <div class="post-pfp">
+                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                            class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
                                     </div>
-                                    <div class="card-body">
-                                        {% if post['contains_image'] %}
-                                        <div class="post-image-container">
-                                            <div class="image-loader" role="status">
-                                                <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
-                                                    color="black" id="image-loader"></l-line-wobble>
-                                            </div>
-                                            <img src="{{ builder_url }}{{ post['post_image'] }}"
-                                                class="img-fluid post-image" onload="handleImageLoad(this)">
-                                        </div>
-                                        <div>
-                                            {% if post['title'] != "" %}
-                                            <p class="card-title">{{ post['title'] }}</p>
-                                            {% endif %}
-                                            <p class="card-text">{{ post['content'] }}</p>
-                                        </div>
-                                        {% else %}
-                                        <div>
-                                            {% if post['title'] != "" %}
-                                            <p class="card-title">{{ post['title'] }}</p>
-                                            {% endif %}
-                                            <p class="card-text">{{ post['content'] }}</p>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    <hr>
-                                </div>
-                                <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
-                                    aria-labelledby="comments-tab-{{ post['post_id'] }}">
-                                    <ul class="list-unstyled">
-                                        {% for comment in post['comments'] %}
-                                        {% if comment.comment != "" %}
-                                        <li style="margin: 5px;">{{ comment['author'] }} said: {{
-                                            comment['comment'] }}
-                                            {% if session.name == comment['author'] %}
-                                            <span>
-                                                <form action="/delete_hive_comment" method="POST">
-                                                    <input type="hidden" name="comment"
-                                                        value="{{ comment['comment'] }}">
-                                                    <input type="hidden" name="comment_author"
-                                                        value="{{ comment['author'] }}">
-                                                    <button type="submit" class="btn fas fa-trash-alt"></button>
-                                                </form>
-                                            </span>
-                                            {% endif %}
-                                            <hr class="ruler">
-                                        </li>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </ul>
-                                    <div class="add-comment-section">
-                                        <h5>Add a Comment</h5>
-                                        <form action="/hive_comment" method="POST">
-                                            <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                            <input type="text" name="comment" class="form-control"
-                                                placeholder="Add a comment">
-                                            <button type="submit" class="btn btn-primary mt-2">Add
-                                                Comment</button>
-                                        </form>
-                                    </div>
-                                </div>
-                                <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
-                                    aria-labelledby="actions-tab-{{ post['post_id'] }}">
-                                    {% if session.name == post['author'] or session.id == post['username'] %}
-                                    <form action="/delete_hive_post" method="POST">
-                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
                                     {% else %}
-                                    <p>You are not the author of this
-                                        post.</p>
+                                    <a class="a-special-case post-author" href="/view_profile/{{ post['username'] }}">{{
+                                        post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
+                                        endif %}
+                                        </h5></a>
+                                    <div class="post-pfp">
+                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                                            class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body container">
+                                    {% if post['contains_image'] %}
+                                    <div class="image-loader" role="status">
+                                        <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                            id="image-loader"></l-line-wobble>
+                                    </div>
+                                    <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid post-image"
+                                        onload="handleImageLoad(this)" style="border-radius: 5px;">
+                                    <hr>
+                                    <div class="container text-center">
+                                        {% if post['title'] != "" %}
+                                        <p class="card-title">{{ post['title'] }}</p>
+                                        {% endif %}
+                                        <p class="card-text">{{ post['content'] }}</p>
+                                    </div>
+                                    {% elif post['song_url'] == '' %}
+                                    <div class="container">
+                                        {% if post['title'] != "" %}
+                                        <p class="card-title">{{ post['title'] }}</p>
+                                        {% endif %}
+                                        <p class="card-text text-center">{{ post['content'] }}</p>
+                                    </div>
+                                    {% elif post['gif_url'] %}
+                                    <div class="container">
+                                        <div class="image-loader" role="status">
+                                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
+                                                color="white" id="image-loader"></l-line-wobble>
+                                        </div>
+                                        <img src="{{ post['gif_url'] }}"
+                                            class="img-fluid post-image post-image-container"
+                                            style="border-radius: 5px;" onload=" handleImageLoad(this)">
+                                        <img src="/static/imgs/powered-by-giphy.png" alt="Powered by Giphy"
+                                            style="justify-content: left; margin: 10px; width: 60px;">
+                                        {% if post['title'] %}
+                                        <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
+                                        {% endif %}
+                                        <p class="card-text text-center">{{ post['content'] }}</p>
+                                        <hr>
+                                    </div>
+                                    {% else %}
+                                    <div class="music-loader" role="status">
+                                        <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                                            id="music-loader"></l-line-wobble>
+                                    </div>
+                                    <iframe style="border-radius:12px" src="{{ post.song_url }}?utm_source=generator"
+                                        width="100%" height="150" frameBorder="0" allowfullscreen=""
+                                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                        loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
+                                    {% if post['title'] %}
+                                    <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
+                                    {% endif %}
+                                    <p class="card-text text-center">{{ post['content'] }}</p>
                                     {% endif %}
                                 </div>
                             </div>
+                            <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
+                                aria-labelledby="comments-tab-{{ post['post_id'] }}">
+                                <ul class="list-unstyled">
+                                    {% for comment in post['comments'] %}
+                                    {% if comment.comment != "" %}
+                                    <li style="margin: 5px;">{{ comment['author'] }} said: {{
+                                        comment['comment'] }}
+                                        {% if session.name == comment['author'] %}
+                                        <span>
+                                            <form action="/delete_comment" method="POST">
+                                                <input type="hidden" name="comment" value="{{ comment['comment'] }}">
+                                                <input type="hidden" name="comment_author"
+                                                    value="{{ comment['author'] }}">
+                                                <button type="submit" class="btn fas fa-trash"
+                                                    style="color: white;"></button>
+                                            </form>
+                                        </span>
+                                        {% endif %}
+                                        <hr class="ruler">
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                </ul>
+                                <div class="add-comment-section">
+                                    <h5>Add a Comment</h5>
+                                    <form action="/comment" method="POST">
+                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                                        <input type="text" name="comment" class="form-control" placeholder="Spill it">
+                                        <button type="submit" class="btn btn-primary mt-2"><i
+                                                class="fas fa-share"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
+                                aria-labelledby="actions-tab-{{ post['post_id'] }}">
+                                {% if session.name == post['author'] or session.id == post['username'] %}
+                                <button class="btn btn-danger" onclick="deletePost('{{ post.post_id }}')">Delete
+                                    Post</button>
+                                {% else %}
+                                <p>No actions for this post</p>
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
+                                aria-labelledby="info-tab-{{ post['post_id'] }}">
+                                <p>Posted on: {{ post['date'] }}</p>
+                                {% if post['contains_image'] %}
+                                <p>File size: {{ post['image_size'] }}</p>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
+                    <hr>
+
                 </div>
+                {% endfor %}
             </div>
         </div>
-    </div>
+    </section>
 
     <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
         aria-hidden="true" style="color: black;">

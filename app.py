@@ -113,6 +113,11 @@ def error_page(e):
     return render_template('error.html')
 
 
+@app.errorhandler(401)
+def unauthorized(e):
+    return redirect(url_for('login'))
+
+
 content_placeholders = [
     "time travel is real",
     "aliens are real",
@@ -389,6 +394,38 @@ def create_user():
     login_user(user_obj)
 
     return {'success': True}
+
+
+@app.route('/recover_password', methods=['POST'])
+def recover_password():
+    action = request.json.get('action')
+
+    print(request.json)
+    if action == 'get_question':
+        username = request.json.get('username')
+        user = user_collection.find_one({'username': username})
+        question = user['security_question']
+        answer = user['security_answer']
+        if user:
+            return {'success': True, 'question': question}
+        else:
+            return {'error': 'User not found'}
+    elif action == 'verify_answer':
+        username = request.json.get('username')
+        answer = request.json.get('answer')
+        user = user_collection.find_one({'username': username})
+        if answer == answer:
+            return {'success': True}
+        else:
+            return {'error': 'Incorrect answer'}
+    elif action == 'change_password':
+        username = request.json.get('username')
+        password = request.json.get('password')
+        user = user_collection.find_one({'username': username})
+        print(user)
+        user['password'] = encrypt(password)
+        user_collection.update_one({'username': username}, {'$set': user})
+        return {'success': True}
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -1610,26 +1647,28 @@ def delete_hive_post():
 
 
 @app.route('/hives')
+@login_required
 def hives():
-    blacklist = blacklist_collection.find_one({'username': session["id"]})
+    return render_template('maintainence.html')
+    # blacklist = blacklist_collection.find_one({'username': session["id"]})
 
-    if blacklist:
-        return render_template('blacklist.html', blacklist=blacklist)
+    # if blacklist:
+    #     return render_template('blacklist.html', blacklist=blacklist)
 
-    rooms = rooms_collection.find()
+    # rooms = rooms_collection.find()
 
-    rooms = list(rooms)
+    # rooms = list(rooms)
 
-    for room in rooms:
-        if room['college_name'] != session['college_name']:
-            rooms.remove(room)
+    # for room in rooms:
+    #     if room['college_name'] != session['college_name']:
+    #         rooms.remove(room)
 
-    return render_template('hives.html', rooms=rooms, session=session,
-                           user=user_collection.find_one(
-                               {'username': session['id']}),
-                           builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
-                           profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
-                               'profile_picture') else None, )
+    # return render_template('hives.html', rooms=rooms, session=session,
+    #                        user=user_collection.find_one(
+    #                            {'username': session['id']}),
+    #                        builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
+    #                        profile_picture_url=f"https://{s3_bucket_name}.s3.amazonaws.com/{session['profile_picture']}" if session.get(
+    #                            'profile_picture') else None, )
 
 
 @app.route('/hives/<room_id>')
