@@ -362,6 +362,7 @@ def create_user():
         'following': [],
         'followers': [],
         'blacklist': False,
+        'warnings': 0,
     }
 
     user_collection.insert_one(user_data)
