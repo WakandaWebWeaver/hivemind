@@ -1,5 +1,8 @@
 # HiveMind
+
 > Development paused. Might resume, idk :)
+
+> Star the repository if you like the project, and feel free to contribute.
 
 ## Description
 
