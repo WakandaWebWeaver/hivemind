@@ -1,4 +1,5 @@
 # HiveMind
+> Development paused. Might resume, idk :)
 
 ## Description
 
