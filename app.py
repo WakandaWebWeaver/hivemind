@@ -94,23 +94,23 @@ def index():
                            )
 
 
-@app.errorhandler(Exception)
-def error_page(e):
-    if errors_collection.count_documents({}) > 30:
-        errors_collection.drop()
+# @app.errorhandler(Exception)
+# def error_page(e):
+#     if errors_collection.count_documents({}) > 30:
+#         errors_collection.drop()
 
-    error = {
-        'error': str(e),
-        'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
-        'trigger url': request.url,
-        'method': request.method,
-        'complete request': f'{request.method} {request.url}',
-        'client': request.headers.get('User-Agent'),
-        'headers': dict(request.headers),
-        'ip': request.remote_addr
-    }
-    errors_collection.insert_one(error)
-    return render_template('error.html')
+#     error = {
+#         'error': str(e),
+#         'date': datetime.datetime.now().strftime("%Y-%m-%D %H:%M"),
+#         'trigger url': request.url,
+#         'method': request.method,
+#         'complete request': f'{request.method} {request.url}',
+#         'client': request.headers.get('User-Agent'),
+#         'headers': dict(request.headers),
+#         'ip': request.remote_addr
+#     }
+#     errors_collection.insert_one(error)
+#     return render_template('error.html')
 
 
 @app.errorhandler(401)
@@ -1150,30 +1150,30 @@ def delete_hive_comment():
 @app.route('/posts')
 @login_required
 def view_posts():
-    blacklist = blacklist_collection.find_one({'username': session["id"]})
+    # blacklist = blacklist_collection.find_one({'username': session["id"]})
 
-    if blacklist:
-        return render_template('blacklist.html', blacklist=blacklist)
+    # if blacklist:
+    #     return render_template('blacklist.html', blacklist=blacklist)
 
-    if session.get('id') is None:
-        return redirect(url_for('login'))
+    # if session.get('id') is None:
+    #     return redirect(url_for('login'))
 
     posts = posts_collection.find()
 
     user_posts = []
 
-    for post in posts:
-        if post['anonymous']:
-            post['author'] = 'Anonymous'
-        if post['college_name'] == session['college_name']:
-            user_posts.append(post)
+    # for post in posts:
+    #     if post['anonymous']:
+    #         post['author'] = 'Anonymous'
+    #     if post['college_name'] == session['college_name']:
+    #         user_posts.append(post)
 
-    sorted_posts = sorted(user_posts, key=lambda x: x['_id'], reverse=True)
+    sorted_posts = sorted(posts, key=lambda x: x['_id'], reverse=True)
 
     return render_template('posts.html', posts=sorted_posts,
                            session=session,
                            user=user_collection.find_one(
-                               {'username': session['id']}),
+                               {'username': 'esvinjoshua'}),
                            builder_url=f"https://{s3_bucket_name}.s3.amazonaws.com/",
                            content_placeholder=random.choice(
                                content_placeholders),

@@ -14,9 +14,6 @@
 </head>
 
 <body>
-
-    {% if current_user.is_authenticated %}
-
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
@@ -301,13 +298,6 @@
         </div>
     </div>
 
-
-    {% else %}
-    <div class="container">
-        <p>You need to be logged in to view this page. Click <a href="{{ url_for('login') }}">here</a> to login.
-        </p>
-    </div>
-    {% endif %}
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -618,3 +608,406 @@
 </body>
 
 </html>
+
+
+<!-- 
+
+    To design this layout in a .dart file, so it shows up exactly like this, you can use the following code:
+
+    import 'package:flutter/material.dart';
+
+    class Posts extends StatelessWidget {
+      @override
+      Widget build(BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Posts'),
+          ),
+          body: ListView(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search Posts',
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.search),
+                            onPressed: () {
+                              // Search functionality
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    Text('Search by author, title, or content. Anonymous posts do not support searching.'),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Create Post functionality
+                        },
+                        child: Text('Create Post'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ListView.builder(
+                itemCount: posts.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    color: Colors.black,
+                    child: Column(
+                      children: [
+                        TabBar(
+                          tabs: [
+                            Tab(text: 'Post'),
+                            Tab(text: 'Comments'),
+                            Tab(text: 'Actions'),
+                            Tab(text: 'Information'),
+                          ],
+                        ),
+                        TabBarView(
+                          children: [
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text('Anonymous'),
+                                    CircleAvatar(
+                                      backgroundImage: NetworkImage('profile_picture_url'),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    children: [
+                                      if (posts[index].containsImage)
+                                        Image.network(posts[index].postImage),
+                                      if (posts[index].title != '')
+                                        Text(posts[index].title),
+                                      Text(posts[index].content),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                for (var comment in posts[index].comments)
+                                  if (comment.comment != '')
+                                    Column(
+                                      children: [
+                                        Text('${comment.author} said: ${comment.comment}'),
+                                        if (session.name == comment.author)
+                                          IconButton(
+                                            icon: Icon(Icons.delete),
+                                            onPressed: () {
+                                              // Delete comment functionality
+                                            },
+                                          ),
+                                        Divider(),
+                                      ],
+                                    ),
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    children: [
+                                      Text('Add a Comment'),
+                                        TextField(
+                                            decoration: InputDecoration(
+                                            hintText: 'Spill it',
+                                            ),
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () {
+                                                // Add comment functionality
+                                            },
+                                            child: Icon(Icons.share),
+                                            ),
+                                    ],
+                                    ),
+                                ),
+                                ],
+                            ),
+                            Column(
+                              children: [
+                                if (session.name == posts[index].author || session.id == posts[index].username)
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      // Delete post functionality
+                                    },
+                                    child: Text('Delete Post'),
+                                  ),
+                                if (session.name != posts[index].author && session.id != posts[index].username)
+                                  Text('No actions for this post'),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text('Posted on: ${posts[index].date}'),
+                                if (posts[index].containsImage)
+                                  Text('File size: ${posts[index].imageSize}'),
+                              ],
+                            ),
+                            ],
+                        ),
+                        ],
+                    ),
+                    );
+                },
+                ),
+            ],
+            ),
+        );
+        }
+    }
+
+    This code will create a layout that looks exactly like the one in the HTML file.
+
+
+    to fetch the posts from the server, you can use the following code:
+
+    import 'package:http/http.dart' as http;
+
+    Future<List<Post>> fetchPosts() async {
+      final response = await http.get('https://api.example.com/posts');
+
+      if (response.statusCode == 200) {
+        List<Post> posts = [];
+        for (var post in response.body) {
+          posts.add(Post.fromJson(post));
+        }
+        return posts;
+      } else {
+        throw Exception('Failed to load posts');
+      }
+    }
+
+    class Post {
+      final String author;
+      final String title;
+      final String content;
+      final String postImage;
+      final bool containsImage;
+      final List<Comment> comments;
+      final String date;
+      final String imageSize;
+
+      Post({
+        this.author,
+        this.title,
+        this.content,
+        this.postImage,
+        this.containsImage,
+        this.comments,
+        this.date,
+        this.imageSize,
+      });
+
+      factory Post.fromJson(Map<String, dynamic> json) {
+        return Post((json['author'] as String),
+                    (json['title'] as String),
+                    (json['content'] as String),
+                    (json['postImage'] as String),
+                    (json['containsImage'] as bool),
+                    (json['comments'] as List<Comment>),
+                    (json['date'] as String),
+                    (json['imageSize'] as String));
+        }
+    }
+
+    class Comment {
+      final String author;
+      final String comment;
+
+      Comment({this.author, this.comment});
+
+      factory Comment.fromJson(Map<String, dynamic> json) {
+        return Comment((json['author'] as String), (json['comment'] as String));
+      }
+    }
+
+    This code will fetch the posts from the server and convert them into a list of Post objects.
+    You can then use this list to populate the ListView in the Posts widget.
+
+    Here is an example of how you can use the fetchPosts function in the Posts widget:
+
+    class Posts extends StatelessWidget {
+      @override
+      Widget build(BuildContext context) {
+        return FutureBuilder<List<Post>>(
+          future: fetchPosts(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text('Posts'),
+                ),
+                body: ListView(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Search Posts',
+                                suffixIcon: IconButton(
+                                  icon: Icon(Icons.search),
+                                  onPressed: () {
+                                    // Search functionality
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          Text('Search by author, title, or content. Anonymous posts do not support searching.'),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Create Post functionality
+                              },
+                              child: Text('Create Post'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListView.builder(
+                      itemCount: snapshot.data.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          color: Colors.black,
+                          child: Column(
+                            children: [
+                              TabBar(
+                                tabs: [
+                                  Tab(text: 'Post'),
+                                  Tab(text: 'Comments'),
+                                  Tab(text: 'Actions'),
+                                  Tab(text: 'Information'),
+                                ],
+                              ),
+                              TabBarView(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text('Anonymous'),
+                                          CircleAvatar(
+                                            backgroundImage: NetworkImage('profile_picture_url'),
+                                          ),
+                                        ],
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.all(10),
+                                        child: Column(
+                                          children: [
+                                            if (snapshot.data[index].containsImage)
+                                              Image.network(snapshot.data[index].postImage),
+                                            if (snapshot.data[index].title != '')
+                                              Text(snapshot.data[index].title),
+                                            Text(snapshot.data[index].content),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      for (var comment in snapshot.data[index].comments)
+                                        if (comment.comment != '')
+                                          Column(
+                                            children: [
+                                              Text('${comment.author} said: ${comment.comment}'),
+                                              if (session.name == comment.author)
+                                                IconButton(
+                                                  icon: Icon(Icons.delete),
+                                                  onPressed: () {
+                                                    // Delete comment functionality
+                                                    },
+                                                    ),
+                                                Divider(),
+                                                ],
+                                                ),
+
+                                                Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Column(
+                                                    children: [
+                                                      Text('Add a Comment'),
+                                                      TextField(
+                                                        decoration: InputDecoration(
+                                                          hintText: 'Spill it',
+                                                        ),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          // Add comment functionality
+                                                        },
+                                                        child: Icon(Icons.share),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                ],
+                                                ),
+
+                                                Column(
+                                                  children: [
+                                                    if (session.name == snapshot.data[index].author || session.id == snapshot.data[index].username)
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          // Delete post functionality
+                                                        },
+                                                        child: Text('Delete Post'),
+                                                      ),
+                                                    if (session.name != snapshot.data[index].author && session.id != snapshot.data[index].username)
+                                                      Text('No actions for this post'),
+                                                  ],
+                                                ),
+                                            
+
+                                                Column(
+                                                  children: [
+                                                    Text('Posted on: ${snapshot.data[index].date}'),
+                                                    if (snapshot.data[index].containsImage)
+                                                      Text('File size: ${snapshot.data[index].imageSize}'),
+                                                  ],
+                                                ),
+                                                ],
+                                            ),
+                                            ],
+                                        ),
+                                        );
+                                    },
+                                    ),
+                                ],
+                                ),
+                            );
+                        },
+                        else if (snapshot.hasError) {
+                          return Text('${snapshot.error}');
+                        }
+
+                        return CircularProgressIndicator();
+                        },
+                    );
+                }
+            }
+
+    This code will display a loading spinner while the posts are being fetched, and then display the posts once they are loaded.
+
+
+
+ -->
