@@ -2,1012 +2,602 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Posts</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/momentum.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/lineWobble.js"></script>
-    <link rel="stylesheet" href="/static/styles.css">
-    <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Posts</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/5849743ccd.js" crossorigin="anonymous"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/momentum.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/lineWobble.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <div class="profile-picture-div-navbar"> <img src="{{ profile_picture_url }}"
-                                alt="Profile Picture" class="nav-profile-picture rounded-circle"
-                                style="width: 40px; height: 40px;">
-                        </div>
-                    </li>
-
-                    <li class="nav-item nav-username a-special-case">
-                        <a class="nav-username a-special-case" href="/view_profile/{{ session.id }}">{{ session.name }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
-                    </li>
-                    <!--  -->
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hives
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                    </li>
-
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                    </li>
-                    {% endif %}
-                </ul>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}">HiveMind</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <div class="profile-picture-div-navbar"> <img src="{{ profile_picture_url }}" alt="Profile Picture"
+                class="nav-profile-picture rounded-circle" style="width: 40px; height: 40px;">
             </div>
-        </div>
-    </nav>
+          </li>
 
-    <!-- Search bar -->
+          <li class="nav-item nav-username a-special-case">
+            <a class="nav-username a-special-case" href="/view_profile/{{ session.id }}">{{ session.name }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+          </li>
+          <!--  -->
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">Hives
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="{{ url_for('hives') }}">View Hives</a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('materials') }}">Study Materials</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+          </li>
+
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Search bar -->
+  <div class="container" style="padding: 10px;">
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" id="searchInput" placeholder="Search Posts">
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+    <span class="text-muted">Search by author, title, or content. Anonymous posts do not support searching.</span>
     <div class="container" style="padding: 10px;">
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" id="searchInput" placeholder="Search Posts">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" id="searchButton">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </div>
-        <span class="text-muted">Search by author, title, or content. Anonymous posts do not support searching.</span>
-        <div class="container" style="padding: 10px;">
-            {% if user.verified %}
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
-                Create Post
-            </button>
-            {% else %}
-            <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
-                    href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
-            {% endif %}
-        </div>
+      {% if user.verified %}
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPostModal">
+        Create Post
+      </button>
+      {% else %}
+      <span class="text-muted">You need to verify your account to create posts. <a class="btn btn-primary"
+          href="{{ url_for('verify_id_page') }}">Verify Now.</a> </span>
+      {% endif %}
     </div>
+  </div>
 
-    <section class="post-section">
-        <div id="post-container">
-            <div class="container col-sm-4" style="margin: auto;">
-                {% for post in posts %}
-                <div class="card text-light" id="post-card-{{ post['post_id'] }}" style="background-color: black;">
-                    <div class="mb-4">
-                        <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                    href="#postDetails-{{ post['post_id'] }}" role="tab"
-                                    aria-controls="postDetails-{{ post['post_id'] }}" aria-selected="true">Post</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                    href="#comments-{{ post['post_id'] }}" role="tab"
-                                    aria-controls="comments-{{ post['post_id'] }}" aria-selected="false">Comments</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                    href="#actions-{{ post['post_id'] }}" role="tab"
-                                    aria-controls="actions-{{ post['post_id'] }}" aria-selected="false">Actions</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="info-tab-{{ post['post_id'] }}" data-toggle="tab"
-                                    href="#info-{{ post['post_id'] }}" role="tab"
-                                    aria-controls="info-{{ post['post_id'] }}" aria-selected="false">Information</a>
-                            </li>
-                        </ul>
-                        <div class="tab-content" id="postTabsContent">
-                            <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}"
-                                role="tabpanel" aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
-                                <div class="card-header row text-center">
-                                    {% if post.anonymous %}
-                                    <span class="a-special-case-no-hover post-author">Anonymous</span>
-                                    <div class="post-pfp">
-                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                            class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
-                                    </div>
-                                    {% else %}
-                                    <a class="a-special-case post-author" href="/view_profile/{{ post['username'] }}">{{
-                                        post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
-                                        endif %}
-                                        </h5></a>
-                                    <div class="post-pfp">
-                                        <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
-                                            class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                <div class="card-body container">
-                                    {% if post['contains_image'] %}
-                                    <div class="image-loader" role="status">
-                                        <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
-                                            id="image-loader"></l-line-wobble>
-                                    </div>
-                                    <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid post-image"
-                                        onload="handleImageLoad(this)" style="border-radius: 5px;">
-                                    <hr>
-                                    <div class="container text-center">
-                                        {% if post['title'] != "" %}
-                                        <p class="card-title">{{ post['title'] }}</p>
-                                        {% endif %}
-                                        <p class="card-text">{{ post['content'] }}</p>
-                                    </div>
-                                    {% elif post['song_url'] == '' %}
-                                    <div class="container">
-                                        {% if post['title'] != "" %}
-                                        <p class="card-title">{{ post['title'] }}</p>
-                                        {% endif %}
-                                        <p class="card-text text-center">{{ post['content'] }}</p>
-                                    </div>
-                                    {% elif post['gif_url'] %}
-                                    <div class="container">
-                                        <div class="image-loader" role="status">
-                                            <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75"
-                                                color="white" id="image-loader"></l-line-wobble>
-                                        </div>
-                                        <img src="{{ post['gif_url'] }}"
-                                            class="img-fluid post-image post-image-container"
-                                            style="border-radius: 5px;" onload=" handleImageLoad(this)">
-                                        <img src="/static/imgs/powered-by-giphy.png" alt="Powered by Giphy"
-                                            style="justify-content: left; margin: 10px; width: 60px;">
-                                        {% if post['title'] %}
-                                        <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
-                                        {% endif %}
-                                        <p class="card-text text-center">{{ post['content'] }}</p>
-                                        <hr>
-                                    </div>
-                                    {% else %}
-                                    <div class="music-loader" role="status">
-                                        <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
-                                            id="music-loader"></l-line-wobble>
-                                    </div>
-                                    <iframe style="border-radius:12px" src="{{ post.song_url }}?utm_source=generator"
-                                        width="100%" height="150" frameBorder="0" allowfullscreen=""
-                                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                        loading="lazy" onload="handleMusicEmbedLoad(this)"></iframe>
-                                    {% if post['title'] %}
-                                    <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
-                                    {% endif %}
-                                    <p class="card-text text-center">{{ post['content'] }}</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
-                                aria-labelledby="comments-tab-{{ post['post_id'] }}">
-                                <ul class="list-unstyled">
-                                    {% for comment in post['comments'] %}
-                                    {% if comment.comment != "" %}
-                                    <li style="margin: 5px;">{{ comment['author'] }} said: {{
-                                        comment['comment'] }}
-                                        {% if session.name == comment['author'] %}
-                                        <span>
-                                            <form action="/delete_comment" method="POST">
-                                                <input type="hidden" name="comment" value="{{ comment['comment'] }}">
-                                                <input type="hidden" name="comment_author"
-                                                    value="{{ comment['author'] }}">
-                                                <button type="submit" class="btn fas fa-trash"
-                                                    style="color: white;"></button>
-                                            </form>
-                                        </span>
-                                        {% endif %}
-                                        <hr class="ruler">
-                                    </li>
-                                    {% endif %}
-                                    {% endfor %}
-                                </ul>
-                                <div class="add-comment-section">
-                                    <h5>Add a Comment</h5>
-                                    <form action="/comment" method="POST">
-                                        <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
-                                        <input type="text" name="comment" class="form-control" placeholder="Spill it">
-                                        <button type="submit" class="btn btn-primary mt-2"><i
-                                                class="fas fa-share"></i></button>
-                                    </form>
-                                </div>
-                            </div>
-                            <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
-                                aria-labelledby="actions-tab-{{ post['post_id'] }}">
-                                {% if session.name == post['author'] or session.id == post['username'] %}
-                                <button class="btn btn-danger" onclick="deletePost('{{ post.post_id }}')">Delete
-                                    Post</button>
-                                {% else %}
-                                <p>No actions for this post</p>
-                                {% endif %}
-                            </div>
-                            <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
-                                aria-labelledby="info-tab-{{ post['post_id'] }}">
-                                <p>Posted on: {{ post['date'] }}</p>
-                                {% if post['contains_image'] %}
-                                <p>File size: {{ post['image_size'] }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
+  <section class="post-section">
+    <div id="post-container">
+      <div class="container col-sm-4" style="margin: auto;">
+        {% for post in posts %}
+        <div class="card text-light" id="post-card-{{ post['post_id'] }}" style="background-color: black;">
+          <div class="mb-4">
+            <ul class="nav nav-tabs" id="postTabs-{{ post['post_id'] }}" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" id="postDetails-tab-{{ post['post_id'] }}" data-toggle="tab"
+                  href="#postDetails-{{ post['post_id'] }}" role="tab" aria-controls="postDetails-{{ post['post_id'] }}"
+                  aria-selected="true">Post</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="comments-tab-{{ post['post_id'] }}" data-toggle="tab"
+                  href="#comments-{{ post['post_id'] }}" role="tab" aria-controls="comments-{{ post['post_id'] }}"
+                  aria-selected="false">Comments</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="actions-tab-{{ post['post_id'] }}" data-toggle="tab"
+                  href="#actions-{{ post['post_id'] }}" role="tab" aria-controls="actions-{{ post['post_id'] }}"
+                  aria-selected="false">Actions</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="info-tab-{{ post['post_id'] }}" data-toggle="tab"
+                  href="#info-{{ post['post_id'] }}" role="tab" aria-controls="info-{{ post['post_id'] }}"
+                  aria-selected="false">Information</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="postTabsContent">
+              <div class="tab-pane fade show active" id="postDetails-{{ post['post_id'] }}" role="tabpanel"
+                aria-labelledby="postDetails-tab-{{ post['post_id'] }}">
+                <div class="card-header row text-center">
+                  {% if post.anonymous %}
+                  <span class="a-special-case-no-hover post-author">Anonymous</span>
+                  <div class="post-pfp">
+                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                      class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
+                  </div>
+                  {% else %}
+                  <a class="a-special-case post-author" href="/view_profile/{{ post['username'] }}">{{
+                    post['username'] }} {% if user.verified %}<i class="fas fa-circle-check"></i>{%
+                    endif %}
+                    </h5></a>
+                  <div class="post-pfp">
+                    <img src="{{ builder_url }}{{ post['profile_picture'] }}" alt="Profile Picture"
+                      class="nav-profile-picture rounded-circle ml-2 post-author-pfp">
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="card-body container">
+                  {% if post['contains_image'] %}
+                  <div class="image-loader" role="status">
+                    <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                      id="image-loader"></l-line-wobble>
+                  </div>
+                  <img src="{{ builder_url }}{{ post['post_image'] }}" class="img-fluid post-image"
+                    onload="handleImageLoad(this)" style="border-radius: 5px;">
+                  <hr>
+                  <div class="container text-center">
+                    {% if post['title'] != "" %}
+                    <p class="card-title">{{ post['title'] }}</p>
+                    {% endif %}
+                    <p class="card-text">{{ post['content'] }}</p>
+                  </div>
+                  {% elif post['song_url'] == '' %}
+                  <div class="container">
+                    {% if post['title'] != "" %}
+                    <p class="card-title">{{ post['title'] }}</p>
+                    {% endif %}
+                    <p class="card-text text-center">{{ post['content'] }}</p>
+                  </div>
+                  {% elif post['gif_url'] %}
+                  <div class="container">
+                    <div class="image-loader" role="status">
+                      <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                        id="image-loader"></l-line-wobble>
                     </div>
+                    <img src="{{ post['gif_url'] }}" class="img-fluid post-image post-image-container"
+                      style="border-radius: 5px;" onload=" handleImageLoad(this)">
+                    <img src="/static/imgs/powered-by-giphy.png" alt="Powered by Giphy"
+                      style="justify-content: left; margin: 10px; width: 60px;">
+                    {% if post['title'] %}
+                    <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
+                    {% endif %}
+                    <p class="card-text text-center">{{ post['content'] }}</p>
                     <hr>
-
+                  </div>
+                  {% else %}
+                  <div class="music-loader" role="status">
+                    <l-line-wobble size="80" stroke="5" bg-opacity="0.1" speed="1.75" color="white"
+                      id="music-loader"></l-line-wobble>
+                  </div>
+                  <iframe style="border-radius:12px" src="{{ post.song_url }}?utm_source=generator" width="100%"
+                    height="150" frameBorder="0" allowfullscreen=""
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"
+                    onload="handleMusicEmbedLoad(this)"></iframe>
+                  {% if post['title'] %}
+                  <p class="card-title" style="padding: 10px;">{{ post['title'] }}</p>
+                  {% endif %}
+                  <p class="card-text text-center">{{ post['content'] }}</p>
+                  {% endif %}
                 </div>
-                {% endfor %}
+              </div>
+              <div class="tab-pane fade" id="comments-{{ post['post_id'] }}" role="tabpanel"
+                aria-labelledby="comments-tab-{{ post['post_id'] }}">
+                <ul class="list-unstyled">
+                  {% for comment in post['comments'] %}
+                  {% if comment.comment != "" %}
+                  <li style="margin: 5px;">{{ comment['author'] }} said: {{
+                    comment['comment'] }}
+                    {% if session.name == comment['author'] %}
+                    <span>
+                      <form action="/delete_comment" method="POST">
+                        <input type="hidden" name="comment" value="{{ comment['comment'] }}">
+                        <input type="hidden" name="comment_author" value="{{ comment['author'] }}">
+                        <button type="submit" class="btn fas fa-trash" style="color: white;"></button>
+                      </form>
+                    </span>
+                    {% endif %}
+                    <hr class="ruler">
+                  </li>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+                <div class="add-comment-section">
+                  <h5>Add a Comment</h5>
+                  <form action="/comment" method="POST">
+                    <input type="hidden" name="post_id" value="{{ post['post_id'] }}">
+                    <input type="text" name="comment" class="form-control" placeholder="Spill it">
+                    <button type="submit" class="btn btn-primary mt-2"><i class="fas fa-share"></i></button>
+                  </form>
+                </div>
+              </div>
+              <div class=" tab-pane fade" id="actions-{{ post['post_id'] }}" role="tabpanel"
+                aria-labelledby="actions-tab-{{ post['post_id'] }}">
+                {% if session.name == post['author'] or session.id == post['username'] %}
+                <button class="btn btn-danger" onclick="deletePost('{{ post.post_id }}')">Delete
+                  Post</button>
+                {% else %}
+                <p>No actions for this post</p>
+                {% endif %}
+              </div>
+              <div class="tab-pane fade" id="info-{{ post['post_id'] }}" role="tabpanel"
+                aria-labelledby="info-tab-{{ post['post_id'] }}">
+                <p>Posted on: {{ post['date'] }}</p>
+                {% if post['contains_image'] %}
+                <p>File size: {{ post['image_size'] }}</p>
+                {% endif %}
+              </div>
             </div>
-        </div>
-    </section>
+          </div>
+          <hr>
 
-    <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
-        aria-hidden="true" style="color: black;">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="createPostForm" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="postTitle">Title</label>
-                            <input type="text" class="form-control" id="postTitle" name="post_title"
-                                placeholder="optional">
-                        </div>
-                        <div class="form-group">
-                            <label for="postContent">Content</label>
-                            <textarea class="form-control" id="postContent" name="post_text" rows="3" required
-                                placeholder="{{ content_placeholder }}"></textarea>
-                            <div id="searchResults" class="list-group"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="postImage">Got an image?</label>
-                            <input type="file" class="form-control-file" id="postImage" name="post_image"
-                                accept="image/*" max-size="20971520">
-                        </div>
-                        <input type="hidden" name="embed_url" id="embed_url">
-                </div>
-                <div class="form-check mb-2" style="margin-left: 5px;">
-                    <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
-                    <label class="form-check label anon-label" for="anonymousCheck">Post Anonymously</label>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button id="submitPostButton" class="btn btn-primary">Create
-                        Post</button>
-                    <l-momentum size="40" speed="1.1" color="white" class="loading-spinner"
-                        style="display: none;"></l-momentum>
-                </div>
-                </form>
-            </div>
         </div>
+        {% endfor %}
+      </div>
     </div>
+  </section>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <div class="modal fade" id="createPostModal" tabindex="-1" role="dialog" aria-labelledby="createPostModalLabel"
+    aria-hidden="true" style="color: black;">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="createPostForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="postTitle">Title</label>
+              <input type="text" class="form-control" id="postTitle" name="post_title" placeholder="optional">
+            </div>
+            <div class="form-group">
+              <label for="postContent">Content</label>
+              <textarea class="form-control" id="postContent" name="post_text" rows="3" required
+                placeholder="{{ content_placeholder }}"></textarea>
+              <div id="searchResults" class="list-group"></div>
+            </div>
+            <div class="form-group">
+              <label for="postImage">Got an image?</label>
+              <input type="file" class="form-control-file" id="postImage" name="post_image" accept="image/*"
+                max-size="20971520">
+            </div>
+            <input type="hidden" name="embed_url" id="embed_url">
+        </div>
+        <div class="form-check mb-2" style="margin-left: 5px;">
+          <input type="checkbox" class="form-check-input" id="anonymousCheck" name="anonymous">
+          <label class="form-check label anon-label" for="anonymousCheck">Post Anonymously</label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button id="submitPostButton" class="btn btn-primary">Create
+            Post</button>
+          <l-momentum size="40" speed="1.1" color="white" class="loading-spinner" style="display: none;"></l-momentum>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        document.getElementById('searchButton').addEventListener('click', filterPosts);
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-        document.getElementById('searchInput').addEventListener('input', filterPosts);
+  <script>
+    document.getElementById('searchButton').addEventListener('click', filterPosts);
+
+    document.getElementById('searchInput').addEventListener('input', filterPosts);
 
 
-        function filterPosts() {
-            var searchInput = document.getElementById('searchInput').value.toLowerCase();
-            var posts = document.getElementsByClassName('card');
-            for (var i = 0; i < posts.length; i++) {
-                var author = posts[i].getElementsByClassName('post-author')[0];
-                var title = posts[i].getElementsByClassName('card-title')[0];
-                var content = posts[i].getElementsByClassName('card-text')[0];
-                if (title && content && author) {
-                    var authorText = author.innerText.toLowerCase();
-                    var titleText = title.innerText.toLowerCase();
-                    var contentText = content.innerText.toLowerCase();
-                    if (titleText.includes(searchInput) || contentText.includes(searchInput) || authorText.includes(searchInput)) {
-                        posts[i].style.display = 'block';
-                    } else {
-                        posts[i].style.display = 'none';
-                    }
-                } else if (title && content) {
-                    var titleText = title.innerText.toLowerCase();
-                    var contentText = content.innerText.toLowerCase();
-                    if (titleText.includes(searchInput) || contentText.includes(searchInput)) {
-                        posts[i].style.display = 'block';
-                    } else {
-                        posts[i].style.display = 'none';
-                    }
-                } else if (title) {
-                    var titleText = title.innerText.toLowerCase();
-                    if (titleText.includes(searchInput)) {
-                        posts[i].style.display = 'block';
-                    } else {
-                        posts[i].style.display = 'none';
-                    }
-                } else if (content) {
-                    var contentText = content.innerText.toLowerCase();
-                    if (contentText.includes(searchInput)) {
-                        posts[i].style.display = 'block';
-                    } else {
-                        posts[i].style.display = 'none';
-                    }
-                }
+    function filterPosts() {
+      var searchInput = document.getElementById('searchInput').value.toLowerCase();
+      var posts = document.getElementsByClassName('card');
+      for (var i = 0; i < posts.length; i++) {
+        var author = posts[i].getElementsByClassName('post-author')[0];
+        var title = posts[i].getElementsByClassName('card-title')[0];
+        var content = posts[i].getElementsByClassName('card-text')[0];
+        if (title && content && author) {
+          var authorText = author.innerText.toLowerCase();
+          var titleText = title.innerText.toLowerCase();
+          var contentText = content.innerText.toLowerCase();
+          if (titleText.includes(searchInput) || contentText.includes(searchInput) || authorText.includes(searchInput)) {
+            posts[i].style.display = 'block';
+          } else {
+            posts[i].style.display = 'none';
+          }
+        } else if (title && content) {
+          var titleText = title.innerText.toLowerCase();
+          var contentText = content.innerText.toLowerCase();
+          if (titleText.includes(searchInput) || contentText.includes(searchInput)) {
+            posts[i].style.display = 'block';
+          } else {
+            posts[i].style.display = 'none';
+          }
+        } else if (title) {
+          var titleText = title.innerText.toLowerCase();
+          if (titleText.includes(searchInput)) {
+            posts[i].style.display = 'block';
+          } else {
+            posts[i].style.display = 'none';
+          }
+        } else if (content) {
+          var contentText = content.innerText.toLowerCase();
+          if (contentText.includes(searchInput)) {
+            posts[i].style.display = 'block';
+          } else {
+            posts[i].style.display = 'none';
+          }
+        }
+      }
+    }
+    var commentsContainers = document.getElementsByClassName('comments-container');
+    for (var i = 0; i < commentsContainers.length; i++) {
+      var comments = commentsContainers[i].getElementsByTagName('li');
+      if (comments.length > 3) {
+        commentsContainers[i].style.height = '100px';
+        commentsContainers[i].style.overflowY = 'scroll';
+      }
+    }
+
+    function deletePost(post_id) {
+      const postCard = document.getElementById('post-card-' + post_id);
+      if (confirm('Are you sure you want to delete this post?')) {
+        fetch('/delete_post', {
+          method: 'POST',
+          body: JSON.stringify({
+            'post_id': post_id
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              postCard.remove();
+            } else {
+              alert('An error occurred while deleting the post. Please try again.');
             }
-        }
-        var commentsContainers = document.getElementsByClassName('comments-container');
-        for (var i = 0; i < commentsContainers.length; i++) {
-            var comments = commentsContainers[i].getElementsByTagName('li');
-            if (comments.length > 3) {
-                commentsContainers[i].style.height = '100px';
-                commentsContainers[i].style.overflowY = 'scroll';
-            }
-        }
+          });
+      }
+    }
 
-        function deletePost(post_id) {
-            const postCard = document.getElementById('post-card-' + post_id);
-            if (confirm('Are you sure you want to delete this post?')) {
-                fetch('/delete_post', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        'post_id': post_id
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            postCard.remove();
-                        } else {
-                            alert('An error occurred while deleting the post. Please try again.');
-                        }
-                    });
-            }
-        }
+    var postImages = document.getElementsByClassName('post-image');
+    for (var i = 0; i < postImages.length; i++) {
+      if (postImages[i].complete) {
+        handleImageLoad(postImages[i]);
+      }
+    }
 
-        var postImages = document.getElementsByClassName('post-image');
-        for (var i = 0; i < postImages.length; i++) {
-            if (postImages[i].complete) {
-                handleImageLoad(postImages[i]);
-            }
-        }
+    function handleImageLoad(image) {
+      var loader = image.previousElementSibling;
+      loader.style.display = 'none';
+    }
 
-        function handleImageLoad(image) {
-            var loader = image.previousElementSibling;
-            loader.style.display = 'none';
-        }
+    function handleMusicEmbedLoad(embed) {
+      var loader = embed.previousElementSibling;
+      loader.style.display = 'none';
+    }
 
-        function handleMusicEmbedLoad(embed) {
-            var loader = embed.previousElementSibling;
-            loader.style.display = 'none';
-        }
+    if (window.innerWidth > 600) {
+      var postImages = document.getElementsByClassName('post-image');
+      for (var i = 0; i < postImages.length; i++) {
+        postImages[i].style.width = '400px';
+      }
+    }
 
-        if (window.innerWidth > 600) {
-            var postImages = document.getElementsByClassName('post-image');
-            for (var i = 0; i < postImages.length; i++) {
-                postImages[i].style.width = '400px';
-            }
-        }
+    var postContainer = document.getElementById('posts-container');
 
-        var postContainer = document.getElementById('posts-container');
+    $('#postContent').on('input', function () {
+      var content = $('#postContent').val();
+      if (content.startsWith('song: ')) {
+        var songName = content.substring(6);
+        const songLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
 
-        $('#postContent').on('input', function () {
-            var content = $('#postContent').val();
-            if (content.startsWith('song: ')) {
-                var songName = content.substring(6);
-                const songLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
+        $('#searchResults').empty();
+        $('#searchResults').append(songLoader);
 
-                $('#searchResults').empty();
-                $('#searchResults').append(songLoader);
-
-                fetch('/search_song', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        'search_query': songName
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        $('#searchResults').empty();
-                        const songs = data['songs'];
-                        songs.forEach(song => {
-                            $('#searchResults').append(`
+        fetch('/search_song', {
+          method: 'POST',
+          body: JSON.stringify({
+            'search_query': songName
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            $('#searchResults').empty();
+            const songs = data['songs'];
+            songs.forEach(song => {
+              $('#searchResults').append(`
                             <a href="#" class="list-group-item list-group-item-action" onclick="selectSong('${song.embed_url}', '${song.song_name.replace("'", "\\'")}', '${song.artist_name}')">
                                 <img src="${song.album_image}" alt="Song" class="gif-image" style="width: 70px; height: 70px;">
                                 ${song.song_name} <span class="text-muted">by </span>${song.artist_name}
                             </a>
                         `);
-                        });
-                    });
-            } else if (content.startsWith('gif: ')) {
-                var gifName = content.substring(5);
-                const gifLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
+            });
+          });
+      } else if (content.startsWith('gif: ')) {
+        var gifName = content.substring(5);
+        const gifLoader = "<l-line-wobble size='40' speed='2.5' color='black'></l-line-wobble>";
 
-                $('#searchResults').empty();
-                $('#searchResults').append(gifLoader);
+        $('#searchResults').empty();
+        $('#searchResults').append(gifLoader);
 
-                fetch('/search_gif', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        'search_query': gifName
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        $('#searchResults').empty();
-                        const gifs = data['gifs'];
-                        gifs.forEach(gif => {
-                            $('#searchResults').append(`
+        fetch('/search_gif', {
+          method: 'POST',
+          body: JSON.stringify({
+            'search_query': gifName
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            $('#searchResults').empty();
+            const gifs = data['gifs'];
+            gifs.forEach(gif => {
+              $('#searchResults').append(`
                             <a href="#" class="list-group-item list-group-item-action" onclick="selectGif('${gif.title}', '${gif.url}')">
                                 <img src="${gif.optimized_url}" alt="GIF" class="gif-image" style="width: 70px; height: 70px;">
                                 ${gif.title}
                             </a>
                         `);
-                            console.log(gif);
-                        });
-                    });
+              console.log(gif);
+            });
+          });
 
-            }
-        });
+      }
+    });
 
-        function selectGif(gif, url) {
-            document.getElementById('postImage').disabled = true;
-            document.getElementById('anonymousCheck').disabled = true;
+    function selectGif(gif, url) {
+      document.getElementById('postImage').disabled = true;
+      document.getElementById('anonymousCheck').disabled = true;
 
-            document.getElementsByClassName('anon-label').value = "Cannot post anonymously with GIFs";
+      document.getElementsByClassName('anon-label').value = "Cannot post anonymously with GIFs";
 
-            $('#searchResults').empty();
-            $('#postContent').val('gif: ' + gif);
-            $('#embed_url').val(url);
-            console.log("embed: " + url);
+      $('#searchResults').empty();
+      $('#postContent').val('gif: ' + gif);
+      $('#embed_url').val(url);
+      console.log("embed: " + url);
+    }
+
+    function selectSong(embed_url, song_name, artist_name) {
+      document.getElementById('postImage').disabled = true;
+      document.getElementById('anonymousCheck').disabled = true;
+
+      document.getElementsByClassName('anon-label').value = "Cannot post anonymously with songs";
+
+      $('#searchResults').empty();
+      $('#embed_url').val(embed_url);
+      $('#postContent').val('song: ' + song_name + ' by ' + artist_name);
+    }
+
+
+    document.getElementById('createPostForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var loadingSpinner = document.querySelector('.loading-spinner');
+
+      if (document.getElementById('postContent').value.startsWith('song: ')) {
+        console.log('song');
+        if (document.getElementById('embed_url').value == '') {
+          alert('Your post contains a song, but you have not selected a song to add.');
+          return;
         }
+        loadingSpinner.style.display = 'block';
+        document.getElementById('submitPostButton').innerText = 'Adding Song...';
 
-        function selectSong(embed_url, song_name, artist_name) {
-            document.getElementById('postImage').disabled = true;
-            document.getElementById('anonymousCheck').disabled = true;
+        const embedUrl = document.getElementById('embed_url').value;
 
-            document.getElementsByClassName('anon-label').value = "Cannot post anonymously with songs";
-
-            $('#searchResults').empty();
-            $('#embed_url').val(embed_url);
-            $('#postContent').val('song: ' + song_name + ' by ' + artist_name);
-        }
+        const embedUrlParts = embedUrl.split('/');
+        const embedUrlValue = embedUrlParts[embedUrlParts.length - 1];
 
 
-        document.getElementById('createPostForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            var loadingSpinner = document.querySelector('.loading-spinner');
-
-            if (document.getElementById('postContent').value.startsWith('song: ')) {
-                console.log('song');
-                if (document.getElementById('embed_url').value == '') {
-                    alert('Your post contains a song, but you have not selected a song to add.');
-                    return;
-                }
-                loadingSpinner.style.display = 'block';
-                document.getElementById('submitPostButton').innerText = 'Adding Song...';
-
-                const embedUrl = document.getElementById('embed_url').value;
-
-                const embedUrlParts = embedUrl.split('/');
-                const embedUrlValue = embedUrlParts[embedUrlParts.length - 1];
-
-
-                fetch('/add_song_to_post', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        'song_url': embedUrlValue,
-                        'title': document.getElementById('postTitle').value,
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        loadingSpinner.style.display = 'none';
-                        if (data.success === true) {
-                            $('#songModal').modal('hide');
-                            window.location.reload();
-                        } else {
-                            alert('Failed to add song');
-                        }
-                    });
-            } else if (document.getElementById('postContent').value.startsWith('gif: ')) {
-                if (document.getElementById('embed_url').value == '') {
-                    alert('Your post contains a GIF, but you have not selected a GIF to add.');
-                    return;
-                }
-                loadingSpinner.style.display = 'block';
-                document.getElementById('submitPostButton').innerText = 'Adding GIF...';
-
-                const embedUrl = document.getElementById('embed_url').value;
-                console.log(embedUrl);
-
-
-                fetch('/add_gif_to_post', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        'url': embedUrl,
-                        'title': document.getElementById('postTitle').value,
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then(response => response.text())
-                    .then(data => {
-                        loadingSpinner.style.display = 'none';
-                        alert(data.success);
-                        if (data.success) {
-                            $('#gifModal').modal('hide');
-                            window.location.reload();
-                        } else {
-                            alert('Failed to add GIF');
-                        }
-                    });
-
+        fetch('/add_song_to_post', {
+          method: 'POST',
+          body: JSON.stringify({
+            'song_url': embedUrlValue,
+            'title': document.getElementById('postTitle').value,
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            loadingSpinner.style.display = 'none';
+            if (data.success === true) {
+              $('#songModal').modal('hide');
+              window.location.reload();
             } else {
-                var form = document.getElementById('createPostForm');
-                var formData = new FormData(form);
-                var submitButton = document.getElementById('submitPostButton');
-                var anonymousCheck = document.getElementById('anonymousCheck');
-
-                submitButton.disabled = true;
-                submitButton.innerText = 'Creating Post...';
-                loadingSpinner.style.display = 'inline-block';
-
-                fetch('/create_post', {
-                    method: 'POST',
-                    body: formData
-                }).then(response => response.json())
-                    .then(data => {
-                        console.log(data);
-                        if (data.profanity) {
-                            submitButton.innerText = 'L :(';
-                            loadingSpinner.style.display = 'none';
-                            alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
-                            window.location.href = "{{ url_for('index') }}";
-                        } else if (data.warning) {
-                            submitButton.innerText = 'Create Post';
-                            loadingSpinner.style.display = 'none';
-                            alert('Your post contains a word that is not allowed on HiveMind. Please remove it and try again.');
-                            submitButton.disabled = false;
-                        } else if (data.success) {
-                            window.location.reload();
-                        } else {
-                            submitButton.innerText = 'Create Post';
-                            loadingSpinner.style.display = 'none';
-                            alert('An error occurred while creating the post. Please try again.');
-                        }
-                    });
+              alert('Failed to add song');
             }
-        });
-    </script>
+          });
+      } else if (document.getElementById('postContent').value.startsWith('gif: ')) {
+        if (document.getElementById('embed_url').value == '') {
+          alert('Your post contains a GIF, but you have not selected a GIF to add.');
+          return;
+        }
+        loadingSpinner.style.display = 'block';
+        document.getElementById('submitPostButton').innerText = 'Adding GIF...';
+
+        const embedUrl = document.getElementById('embed_url').value;
+        console.log(embedUrl);
+
+
+        fetch('/add_gif_to_post', {
+          method: 'POST',
+          body: JSON.stringify({
+            'url': embedUrl,
+            'title': document.getElementById('postTitle').value,
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then(response => response.text())
+          .then(data => {
+            loadingSpinner.style.display = 'none';
+            alert(data.success);
+            if (data.success) {
+              $('#gifModal').modal('hide');
+              window.location.reload();
+            } else {
+              alert('Failed to add GIF');
+            }
+          });
+
+      } else {
+        var form = document.getElementById('createPostForm');
+        var formData = new FormData(form);
+        var submitButton = document.getElementById('submitPostButton');
+        var anonymousCheck = document.getElementById('anonymousCheck');
+
+        submitButton.disabled = true;
+        submitButton.innerText = 'Creating Post...';
+        loadingSpinner.style.display = 'inline-block';
+
+        fetch('/create_post', {
+          method: 'POST',
+          body: formData
+        }).then(response => response.json())
+          .then(data => {
+            console.log(data);
+            if (data.profanity) {
+              submitButton.innerText = 'L :(';
+              loadingSpinner.style.display = 'none';
+              alert('Profanity detected in the post. You have been blacklisted, and will now be logged out of HiveMind.');
+              window.location.href = "{{ url_for('index') }}";
+            } else if (data.warning) {
+              submitButton.innerText = 'Create Post';
+              loadingSpinner.style.display = 'none';
+              alert('Your post contains a word that is not allowed on HiveMind. Please remove it and try again.');
+              submitButton.disabled = false;
+            } else if (data.success) {
+              window.location.reload();
+            } else {
+              submitButton.innerText = 'Create Post';
+              loadingSpinner.style.display = 'none';
+              alert('An error occurred while creating the post. Please try again.');
+            }
+          });
+      }
+    });
+  </script>
 </body>
 
 </html>
-
-
-<!-- 
-
-    To design this layout in a .dart file, so it shows up exactly like this, you can use the following code:
-
-    import 'package:flutter/material.dart';
-
-    class Posts extends StatelessWidget {
-      @override
-      Widget build(BuildContext context) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('Posts'),
-          ),
-          body: ListView(
-            children: [
-              Container(
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search Posts',
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.search),
-                            onPressed: () {
-                              // Search functionality
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    Text('Search by author, title, or content. Anonymous posts do not support searching.'),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Create Post functionality
-                        },
-                        child: Text('Create Post'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    color: Colors.black,
-                    child: Column(
-                      children: [
-                        TabBar(
-                          tabs: [
-                            Tab(text: 'Post'),
-                            Tab(text: 'Comments'),
-                            Tab(text: 'Actions'),
-                            Tab(text: 'Information'),
-                          ],
-                        ),
-                        TabBarView(
-                          children: [
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Text('Anonymous'),
-                                    CircleAvatar(
-                                      backgroundImage: NetworkImage('profile_picture_url'),
-                                    ),
-                                  ],
-                                ),
-                                Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    children: [
-                                      if (posts[index].containsImage)
-                                        Image.network(posts[index].postImage),
-                                      if (posts[index].title != '')
-                                        Text(posts[index].title),
-                                      Text(posts[index].content),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                for (var comment in posts[index].comments)
-                                  if (comment.comment != '')
-                                    Column(
-                                      children: [
-                                        Text('${comment.author} said: ${comment.comment}'),
-                                        if (session.name == comment.author)
-                                          IconButton(
-                                            icon: Icon(Icons.delete),
-                                            onPressed: () {
-                                              // Delete comment functionality
-                                            },
-                                          ),
-                                        Divider(),
-                                      ],
-                                    ),
-                                Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    children: [
-                                      Text('Add a Comment'),
-                                        TextField(
-                                            decoration: InputDecoration(
-                                            hintText: 'Spill it',
-                                            ),
-                                        ),
-                                        ElevatedButton(
-                                            onPressed: () {
-                                                // Add comment functionality
-                                            },
-                                            child: Icon(Icons.share),
-                                            ),
-                                    ],
-                                    ),
-                                ),
-                                ],
-                            ),
-                            Column(
-                              children: [
-                                if (session.name == posts[index].author || session.id == posts[index].username)
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      // Delete post functionality
-                                    },
-                                    child: Text('Delete Post'),
-                                  ),
-                                if (session.name != posts[index].author && session.id != posts[index].username)
-                                  Text('No actions for this post'),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Text('Posted on: ${posts[index].date}'),
-                                if (posts[index].containsImage)
-                                  Text('File size: ${posts[index].imageSize}'),
-                              ],
-                            ),
-                            ],
-                        ),
-                        ],
-                    ),
-                    );
-                },
-                ),
-            ],
-            ),
-        );
-        }
-    }
-
-    This code will create a layout that looks exactly like the one in the HTML file.
-
-
-    to fetch the posts from the server, you can use the following code:
-
-    import 'package:http/http.dart' as http;
-
-    Future<List<Post>> fetchPosts() async {
-      final response = await http.get('https://api.example.com/posts');
-
-      if (response.statusCode == 200) {
-        List<Post> posts = [];
-        for (var post in response.body) {
-          posts.add(Post.fromJson(post));
-        }
-        return posts;
-      } else {
-        throw Exception('Failed to load posts');
-      }
-    }
-
-    class Post {
-      final String author;
-      final String title;
-      final String content;
-      final String postImage;
-      final bool containsImage;
-      final List<Comment> comments;
-      final String date;
-      final String imageSize;
-
-      Post({
-        this.author,
-        this.title,
-        this.content,
-        this.postImage,
-        this.containsImage,
-        this.comments,
-        this.date,
-        this.imageSize,
-      });
-
-      factory Post.fromJson(Map<String, dynamic> json) {
-        return Post((json['author'] as String),
-                    (json['title'] as String),
-                    (json['content'] as String),
-                    (json['postImage'] as String),
-                    (json['containsImage'] as bool),
-                    (json['comments'] as List<Comment>),
-                    (json['date'] as String),
-                    (json['imageSize'] as String));
-        }
-    }
-
-    class Comment {
-      final String author;
-      final String comment;
-
-      Comment({this.author, this.comment});
-
-      factory Comment.fromJson(Map<String, dynamic> json) {
-        return Comment((json['author'] as String), (json['comment'] as String));
-      }
-    }
-
-    This code will fetch the posts from the server and convert them into a list of Post objects.
-    You can then use this list to populate the ListView in the Posts widget.
-
-    Here is an example of how you can use the fetchPosts function in the Posts widget:
-
-    class Posts extends StatelessWidget {
-      @override
-      Widget build(BuildContext context) {
-        return FutureBuilder<List<Post>>(
-          future: fetchPosts(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Scaffold(
-                appBar: AppBar(
-                  title: Text('Posts'),
-                ),
-                body: ListView(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Search Posts',
-                                suffixIcon: IconButton(
-                                  icon: Icon(Icons.search),
-                                  onPressed: () {
-                                    // Search functionality
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text('Search by author, title, or content. Anonymous posts do not support searching.'),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Create Post functionality
-                              },
-                              child: Text('Create Post'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ListView.builder(
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          color: Colors.black,
-                          child: Column(
-                            children: [
-                              TabBar(
-                                tabs: [
-                                  Tab(text: 'Post'),
-                                  Tab(text: 'Comments'),
-                                  Tab(text: 'Actions'),
-                                  Tab(text: 'Information'),
-                                ],
-                              ),
-                              TabBarView(
-                                children: [
-                                  Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text('Anonymous'),
-                                          CircleAvatar(
-                                            backgroundImage: NetworkImage('profile_picture_url'),
-                                          ),
-                                        ],
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: Column(
-                                          children: [
-                                            if (snapshot.data[index].containsImage)
-                                              Image.network(snapshot.data[index].postImage),
-                                            if (snapshot.data[index].title != '')
-                                              Text(snapshot.data[index].title),
-                                            Text(snapshot.data[index].content),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      for (var comment in snapshot.data[index].comments)
-                                        if (comment.comment != '')
-                                          Column(
-                                            children: [
-                                              Text('${comment.author} said: ${comment.comment}'),
-                                              if (session.name == comment.author)
-                                                IconButton(
-                                                  icon: Icon(Icons.delete),
-                                                  onPressed: () {
-                                                    // Delete comment functionality
-                                                    },
-                                                    ),
-                                                Divider(),
-                                                ],
-                                                ),
-
-                                                Container(
-                                                  padding: EdgeInsets.all(10),
-                                                  child: Column(
-                                                    children: [
-                                                      Text('Add a Comment'),
-                                                      TextField(
-                                                        decoration: InputDecoration(
-                                                          hintText: 'Spill it',
-                                                        ),
-                                                      ),
-                                                      ElevatedButton(
-                                                        onPressed: () {
-                                                          // Add comment functionality
-                                                        },
-                                                        child: Icon(Icons.share),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                ],
-                                                ),
-
-                                                Column(
-                                                  children: [
-                                                    if (session.name == snapshot.data[index].author || session.id == snapshot.data[index].username)
-                                                      ElevatedButton(
-                                                        onPressed: () {
-                                                          // Delete post functionality
-                                                        },
-                                                        child: Text('Delete Post'),
-                                                      ),
-                                                    if (session.name != snapshot.data[index].author && session.id != snapshot.data[index].username)
-                                                      Text('No actions for this post'),
-                                                  ],
-                                                ),
-                                            
-
-                                                Column(
-                                                  children: [
-                                                    Text('Posted on: ${snapshot.data[index].date}'),
-                                                    if (snapshot.data[index].containsImage)
-                                                      Text('File size: ${snapshot.data[index].imageSize}'),
-                                                  ],
-                                                ),
-                                                ],
-                                            ),
-                                            ],
-                                        ),
-                                        );
-                                    },
-                                    ),
-                                ],
-                                ),
-                            );
-                        },
-                        else if (snapshot.hasError) {
-                          return Text('${snapshot.error}');
-                        }
-
-                        return CircularProgressIndicator();
-                        },
-                    );
-                }
-            }
-
-    This code will display a loading spinner while the posts are being fetched, and then display the posts once they are loaded.
-
-
-
- -->

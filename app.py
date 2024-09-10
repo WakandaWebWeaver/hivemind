@@ -13,7 +13,6 @@ import platform
 import time
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from spotipy import Spotify
 import random
 from urllib import parse, request as urllib_request
 from cryptography.fernet import Fernet
@@ -173,7 +172,8 @@ def debug():
             }
             folders.append(folder_data)
 
-    return render_template('debug.html', user_info=user_info, s3_files=s3_files,
+    return render_template('debug.html', user_info=user_info,
+                           s3_files=s3_files,
                            session=session, os_info=os_info, release=release, version=version, currenttime=currenttime,
                            username=username,
                            current_dir=current_dir, bucket_name=s3_bucket_name,
@@ -274,7 +274,6 @@ def login():
                 return render_template('blacklist.html', blacklist=blacklist)
 
             if user:
-
                 if user['username'] == username and decrypt(user['password']).decode() == password:
                     user_obj = User()
                     user_obj.id = username
